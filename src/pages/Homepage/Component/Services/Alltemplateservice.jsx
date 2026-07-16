@@ -119,7 +119,7 @@ export const Alltemplateservice = async (
 
     return { templates, lastDoc: newLastDoc, hasMore };
   } catch (error) {
-    console.error("Template fetch error:", error);
+    
     return { templates: [], lastDoc: null, hasMore: false };
   }
 };

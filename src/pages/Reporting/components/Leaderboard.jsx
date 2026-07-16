@@ -180,7 +180,7 @@ export default function Leaderboard({ profile }) {
       const scored = await fetchScores(members, start, end);
       setRows(scored);
     } catch (e) {
-      console.error(e);
+      
       setRows([]);
     } finally {
       setLoading(false);

@@ -8,24 +8,15 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { fetchGeneralTemplates } from "./Homepage/Component/Services/GeneralTemplateService";
-import { useGeneralData } from "../Context/GeneralContext";
 import {
-  getSelectedCompanyFromStorage,
-  syncSelectedCompanyFromProfile,
-} from "../utils/companyStorage";
+  fetchGeneralTemplates,
+  clearTemplateCache,
+} from "./Homepage/Component/Services/GeneralTemplateService";
+import { useGeneralData } from "../Context/GeneralContext";
+import { useSelectedCompany } from "../Context/SelectedCompanyContext";
+import { PAGE_REFRESH_EVENT } from "../utils/pageRefresh";
 
 const TOTAL_GROUPS = 4;
-
-const getCompanyNameFromStorage = () => {
-  try {
-    const selectedCompany = getSelectedCompanyFromStorage();
-    const selectedProfile = JSON.parse(sessionStorage.getItem("mlmProfile"));
-    return selectedCompany?.id || selectedProfile?.companyId;
-  } catch {
-    return "";
-  }
-};
 
 function WhatsAppBadge() {
   const [visible, setVisible] = useState(true);
@@ -152,14 +143,18 @@ function SearchBar({ value, onChange }) {
 }
 
 function Home() {
+  const { selectedCompany, refreshCompany } = useSelectedCompany();
   const {
     cachedTemplates,
     setCachedTemplates,
     cachedGroupIndex,
     setCachedGroupIndex,
+    setCachedFestivalData,
+    setCachedTrending,
   } = useGeneralData();
 
   const [loading, setLoading] = useState(false);
+  const [homeDataVersion, setHomeDataVersion] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const loadingRef = useRef(false);
   const groupIndexRef = useRef(cachedGroupIndex);
@@ -172,7 +167,7 @@ function Home() {
     loadingRef.current = true;
     setLoading(true);
 
-    const companyName = getCompanyNameFromStorage();
+    const companyName = selectedCompany?.id || "";
     const data = await fetchGeneralTemplates(
       groupIndexRef.current,
       companyName,
@@ -188,7 +183,7 @@ function Home() {
 
     loadingRef.current = false;
     setLoading(false);
-  }, [setCachedTemplates, setCachedGroupIndex]);
+  }, [selectedCompany?.id, setCachedTemplates, setCachedGroupIndex]);
 
   useEffect(() => {
     loadTemplatesRef.current = loadTemplates;
@@ -197,15 +192,57 @@ function Home() {
   useEffect(() => {
     groupIndexRef.current = cachedGroupIndex;
 
-    const init = async () => {
-      await syncSelectedCompanyFromProfile();
-      if (cachedTemplates.length === 0) {
-        loadTemplates();
-      }
+    if (cachedTemplates.length === 0) loadTemplates();
+  }, [cachedGroupIndex, cachedTemplates.length, loadTemplates]);
+
+  const refreshHomeData = useCallback(async () => {
+    if (loadingRef.current) return;
+
+    loadingRef.current = true;
+    setLoading(true);
+    clearTemplateCache();
+    setCachedTemplates([]);
+    setCachedGroupIndex(0);
+    setCachedFestivalData({});
+    setCachedTrending(null);
+    groupIndexRef.current = 0;
+
+    // Remount the independently-loaded carousel and festival sections so they
+    // perform the same fresh reads they perform when Home first opens.
+    setHomeDataVersion((version) => version + 1);
+
+    try {
+      const company = await refreshCompany();
+      const companyName = company?.id || selectedCompany?.id || "";
+      const data = await fetchGeneralTemplates(0, companyName);
+      setCachedTemplates(data);
+      groupIndexRef.current = 1;
+      setCachedGroupIndex(1);
+    } finally {
+      loadingRef.current = false;
+      setLoading(false);
+    }
+  }, [
+    setCachedFestivalData,
+    setCachedGroupIndex,
+    setCachedTemplates,
+    setCachedTrending,
+    refreshCompany,
+    selectedCompany?.id,
+  ]);
+
+  useEffect(() => {
+    const handlePageRefresh = (event) => {
+      if (event.detail?.target !== "home") return;
+      event.detail.handled = true;
+      refreshHomeData()
+        .then(() => event.detail?.complete?.())
+        .catch((error) => event.detail?.complete?.(error));
     };
 
-    init();
-  }, []);
+    window.addEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
+    return () => window.removeEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
+  }, [refreshHomeData]);
 
   useEffect(() => {
     const scrollEl = document.querySelector(".layout-scroll-container");
@@ -252,11 +289,11 @@ function Home() {
         </section>
 
         <section className="w-full" data-guide="home-carousel">
-          <Carosel />
+          <Carosel key={`carousel-${homeDataVersion}`} />
         </section>
 
         <section className="w-full" data-guide="home-templates">
-          <Festival />
+          <Festival key={`festival-${homeDataVersion}`} />
         </section>
 
         <section className="w-full">

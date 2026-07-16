@@ -62,7 +62,7 @@ function ShareModal({ imageUri, onClose }) {
         alert("Native sharing not supported on this browser.");
       }
     } catch (err) {
-      console.error("Share failed:", err);
+      
     }
   };
 
@@ -345,7 +345,7 @@ function GeneralEditPage({
         setUserData({ id: userSnap.docs[0].id, ...userSnap.docs[0].data() });
       }
     } catch (err) {
-      console.error("Error fetching subscription/user:", err);
+      
     } finally {
       setSubLoading(false);
     }
@@ -518,7 +518,7 @@ function GeneralEditPage({
       // 7️⃣ Show share modal
       setExportedUri(uri);
     } catch (err) {
-      console.error("Export error:", err);
+      
       showToast("Export failed. Please try again.", "error");
     } finally {
       setExportLoading(false);

@@ -77,28 +77,17 @@ export default function Sidebar({
   const navigate = useNavigate();
   const { theme, theame_color } = useGeneralData();
 
-  // ✅ Parse the JSON string from localStorage safely (guard against invalid JSON)
-  let selectedCompany = null;
   let selectedProfile = null;
-  try {
-    selectedCompany = JSON.parse(
-      localStorage.getItem("selectedCompany") || "null",
-    );
-  } catch (e) {
-    selectedCompany = null;
-  }
   try {
     selectedProfile = JSON.parse(sessionStorage.getItem("mlmProfile") || "null");
   } catch (e) {
     selectedProfile = null;
   }
 
-  const comapnyName =
-    selectedCompany?.name || selectedProfile?.companyName || "";
+  const comapnyName = selectedProfile?.companyName || "";
 
   c;
   const companyLogo =
-    getLocalLogo(selectedCompany?.id) ||
     getLocalLogo(selectedProfile?.companyId) ||
     logo;
 

@@ -67,7 +67,7 @@ function MainEditor() {
           setCollectionData(data);
         }
       } catch (err) {
-        if (isMounted.current) setError(err.message);
+        if (isMounted.current) setError("Unable to load the editor. Please try again.");
       } finally {
         if (isMounted.current) setLoading(false);
       }

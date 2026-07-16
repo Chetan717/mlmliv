@@ -169,7 +169,7 @@ function CrashScreen({ error, onReset, compact }) {
   const goHome  = () => { window.location.href = "/"; };
   const reload  = () => window.location.reload();
 
-  const msg = error?.message || "An unexpected error occurred.";
+  const msg = "Please reload the page or try again.";
 
   if (compact) {
     return (
@@ -243,7 +243,7 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("[ErrorBoundary] Caught error:", error, info);
+    
   }
 
   handleReset() {

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useGeneralData } from "../../.././Context/GeneralContext";
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 import "./stylec.css";
 import { Alltemplateservice } from "./Services/Alltemplateservice";
 import { useNavigate } from "react-router";
@@ -62,24 +63,14 @@ const getSelType = (selType) => {
 
 export default function AllTemplates() {
   const navigate = useNavigate();
+  const { selectedCompany } = useSelectedCompany();
   const {
     selType: contextSelType,
     setSelType,
     allTemplatesCache,
     setAllTemplatesCache,
   } = useGeneralData();
-  const getCompanyNameFromStorage = () => {
-    try {
-      const selectedCompany = JSON.parse(
-        localStorage.getItem("selectedCompany"),
-      );
-      const selectedProfile = JSON.parse(sessionStorage.getItem("mlmProfile"));
-      return selectedCompany?.id || selectedProfile?.companyId;
-    } catch {
-      return "";
-    }
-  };
-  const companyName = getCompanyNameFromStorage();
+  const companyName = selectedCompany?.id || "";
 
   const selType = getSelType(contextSelType);
   const cacheKey = selType?.type || "";
@@ -135,7 +126,7 @@ export default function AllTemplates() {
           [type]: { templates, lastDoc: ld, hasMore: more },
         }));
       } catch (err) {
-        console.error(err);
+        
       } finally {
         setInitialLoad(false);
       }
@@ -164,7 +155,7 @@ export default function AllTemplates() {
       setLastDoc(ld);
       setHasMore(more);
     } catch (err) {
-      console.error(err);
+      
     } finally {
       setFetchingMore(false);
     }

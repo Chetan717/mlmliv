@@ -82,7 +82,7 @@ export default function ReportGraph({ managerProfile }) {
 
         if (!cancelled) { setChartData(result); setLoading(false); }
       } catch (e) {
-        console.error("ReportGraph fetch error:", e);
+        
         if (!cancelled) setLoading(false);
       }
     })();

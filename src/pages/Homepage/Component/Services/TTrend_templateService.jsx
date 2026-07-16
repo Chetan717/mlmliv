@@ -78,7 +78,7 @@ export const TTrend_templateService = async (companyName) => {
 
     return templates;
   } catch (error) {
-    console.error("Trending fetch error:", error);
+    
     return _cache || [];
   }
 };

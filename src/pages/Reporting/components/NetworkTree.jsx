@@ -102,7 +102,7 @@ function NodeReportModal({ node, onClose }) {
       setReportPayload({ memberProfile, dateFrom, dateTo, dayData });
       setReportReady(true);
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to generate report");
     } finally {
       setGenerating(false);

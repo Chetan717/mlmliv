@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
         setState({ user: firebaseUser, identity, loading: false });
       } catch (error) {
         // A token that cannot be verified must never unlock protected UI.
-        console.error("Unable to verify Firebase session:", error);
+        
         setVerifiedUser(null);
         setState({ user: null, identity: null, loading: false });
       }

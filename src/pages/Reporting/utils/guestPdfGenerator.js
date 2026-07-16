@@ -92,7 +92,7 @@ export function viewGuestPDF(opts) {
     if (!win) window.location.href = url;
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (e) {
-    console.error("viewGuestPDF error:", e);
+    
     throw e;
   }
 }
@@ -121,7 +121,7 @@ export function downloadGuestPDF(opts) {
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   } catch (e) {
-    console.error("downloadGuestPDF error:", e);
+    
     throw e;
   }
 }

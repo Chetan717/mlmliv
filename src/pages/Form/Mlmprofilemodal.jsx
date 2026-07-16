@@ -7,7 +7,6 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  getDoc,
   serverTimestamp,
   query,
   where,
@@ -28,6 +27,8 @@ import { useNavigate, useLocation } from "react-router";
 import photoupload from "./photoupload.png";
 import { COLLECTIONS } from "../../collections";
 import { saveMlmProfileToStorage } from "../../utils/companyStorage";
+import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
+import { PAGE_REFRESH_EVENT } from "../../utils/pageRefresh";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
@@ -443,6 +444,12 @@ function DisplaySettings({ accent = false }) {
 
 export default function MLMProfilePage() {
   const navigate = useNavigate();
+  const {
+    selectedCompany: companyData,
+    loading: loadingCompany,
+    refreshCompany,
+    clearCompanySelection,
+  } = useSelectedCompany();
   const userMlm = getUserMlm();
   const userMobile = (userMlm.mobileNo || "").trim();
 
@@ -503,9 +510,6 @@ export default function MLMProfilePage() {
   const isSettingsMode =
     new URLSearchParams(location.search).get("mode") === "settings";
 
-  const [companyData, setCompanyData] = useState({});
-  const [loadingCompany, setLoadingCompany] = useState(true);
-
   const logos = Array.isArray(companyData?.logos) ? companyData.logos : [];
   const topuplines = Array.isArray(companyData?.topuplines)
     ? companyData.topuplines
@@ -513,6 +517,15 @@ export default function MLMProfilePage() {
   const designations = Array.isArray(companyData?.profile)
     ? companyData.profile
     : [];
+  const selectedCompanyName =
+    companyData?.name || companyData?.companyName || "Selected Company";
+  const selectedCompanyLogo =
+    logos.find((logo) => typeof logo?.link === "string" && logo.link.trim())
+      ?.link ||
+    logos.find((logo) => typeof logo === "string" && logo.trim()) ||
+    companyData?.logoURL ||
+    companyData?.logoUrl ||
+    "";
   const currentFormSignature = getProfileFormSignature(form);
   const hasUnsavedProfileChanges =
     savedFormSignatureRef.current !== null &&
@@ -577,7 +590,7 @@ export default function MLMProfilePage() {
         setForm(initialForm(userMobile));
       }
     } catch (err) {
-      console.error("Failed to fetch profile:", err);
+      
       setForm(initialForm(userMobile));
     } finally {
       setLoadingProfile(false);
@@ -588,6 +601,27 @@ export default function MLMProfilePage() {
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  useEffect(() => {
+    const handlePageRefresh = (event) => {
+      if (event.detail?.target !== "mlm-profile") return;
+      event.detail.handled = true;
+
+      // Never overwrite form edits silently with a server refetch.
+      if (hasUnsavedProfileChanges) {
+        toast.warning("Please save or discard your profile changes before refreshing.");
+        event.detail?.complete?.();
+        return;
+      }
+
+      Promise.all([fetchProfile(), refreshCompany()])
+        .then(() => event.detail?.complete?.())
+        .catch((error) => event.detail?.complete?.(error));
+    };
+
+    window.addEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
+    return () => window.removeEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
+  }, [fetchProfile, hasUnsavedProfileChanges, refreshCompany]);
 
   useEffect(() => {
     if (!loadingProfile && savedFormSignatureRef.current === null) {
@@ -648,43 +682,6 @@ export default function MLMProfilePage() {
       window.removeEventListener("popstate", handleMobileHistoryBack, true);
     };
   }, [hasUnsavedProfileChanges, navigate, saving]);
-
-  // ── Fetch company data directly from Firestore (mlmcomp) ──
-  useEffect(() => {
-    const fetchCompany = async () => {
-      setLoadingCompany(true);
-      try {
-        // Get company ID from usermlm first, then fall back to selectedCompany key in localStorage
-        let companyId = userMlm.companyId || null;
-        if (!companyId) {
-          try {
-            const raw = localStorage.getItem("selectedCompany");
-            if (raw) companyId = JSON.parse(raw)?.id || null;
-          } catch {
-            companyId = null;
-          }
-        }
-        if (!companyId) {
-          setCompanyData({});
-          return;
-        }
-        const companyRef = doc(db, COLLECTIONS.MLMCOMP, companyId);
-        const companySnap = await getDoc(companyRef);
-        if (companySnap.exists()) {
-          setCompanyData({ id: companySnap.id, ...companySnap.data() });
-        } else {
-          setCompanyData({});
-        }
-      } catch (err) {
-        console.error("Failed to fetch company from Firestore:", err);
-        setCompanyData({});
-      } finally {
-        setLoadingCompany(false);
-      }
-    };
-    fetchCompany();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const setField = (key, val) => setForm((f) => ({ ...f, [key]: val }));
   const clearError = (key) =>
@@ -772,7 +769,7 @@ export default function MLMProfilePage() {
       toast("Adjust the final crop, then tap Done.");
     } catch (err) {
       if (err?.name === "AbortError" || controller.signal.aborted) return;
-      console.error(err);
+      
       toast.error("Image processing failed. Please try again.");
     } finally {
       abortTopupRef.current = null;
@@ -870,7 +867,7 @@ export default function MLMProfilePage() {
       toast("Adjust the final crop, then tap Done.");
     } catch (err) {
       if (err?.name === "AbortError" || controller.signal.aborted) return;
-      console.error(err);
+      
       toast.error("Image processing failed. Please try again.");
     } finally {
       abortProfileRef.current = null;
@@ -989,7 +986,7 @@ export default function MLMProfilePage() {
         setEditorStage("final");
         setStep("editor");
       } catch (err) {
-        console.error("Failed to load image for editing:", err);
+        
       } finally {
         setRemovingBg(false);
       }
@@ -1204,8 +1201,8 @@ export default function MLMProfilePage() {
         navigate("/");
       }
     } catch (err) {
-      console.error("Save error:", err);
-      setSaveError(err?.message || "Failed to save. Please try again.");
+      
+      setSaveError("Failed to save. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -1223,20 +1220,21 @@ export default function MLMProfilePage() {
       const snap = await getDocs(q);
 
       if (!snap.empty) {
-        await deleteDoc(doc(db, "mlmprofiles", snap.docs[0].id));
+        await deleteDoc(doc(db, COLLECTIONS.MLMPROFILES, snap.docs[0].id));
       }
+
+      // Releasing the server-side selection lets this user choose another
+      // company after intentionally deleting the current company profile.
+      await clearCompanySelection();
 
       localStorage.removeItem("mlmProfile");
       sessionStorage.removeItem("mlmProfile");
-      localStorage.removeItem("selectedCompany");
-      sessionStorage.removeItem("selectedCompany");
-
       toast.success("Profile deleted successfully.");
       setShowDeleteModal(false);
 
       setTimeout(() => navigate("/logout"), 800);
     } catch (err) {
-      console.error("Delete error:", err);
+      
       toast.danger("Failed to delete profile. Please try again.");
     } finally {
       setDeleting(false);
@@ -1494,6 +1492,32 @@ export default function MLMProfilePage() {
             {isEditMode ? "" : "Create Profile"}
           </h1>
         </div>
+
+        {companyData?.id && (
+          <div className="mb-3 flex items-center gap-3 rounded-2xl border border-border bg-background p-3 shadow-sm">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/50">
+              {selectedCompanyLogo ? (
+                <img
+                  src={selectedCompanyLogo}
+                  alt={`${selectedCompanyName} logo`}
+                  className="h-full w-full object-contain p-1"
+                />
+              ) : (
+                <span className="text-lg font-bold text-accent">
+                  {selectedCompanyName.trim().charAt(0).toUpperCase() || "C"}
+                </span>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold text-muted-foreground">
+                Your selected company
+              </p>
+              <p className="truncate text-[15px] font-bold text-foreground">
+                {selectedCompanyName}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           {/* Settings mode: Display Settings shown first (accent heading) */}

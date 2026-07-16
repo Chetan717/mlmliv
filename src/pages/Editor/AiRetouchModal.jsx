@@ -116,9 +116,9 @@ export default function AiRetouchModal({ imageUri, onClose, onToast }) {
       setStage("result");
     } catch (err) {
       if (err?.name === "AbortError") return;
-      setErrorMsg(err?.message || "Something went wrong. Please try again.");
+      setErrorMsg("Something went wrong. Please try again.");
       setStage("choose");
-      onToast?.(err?.message || "AI retouch failed.", "error");
+      onToast?.("AI retouch failed. Please try again.", "error");
     } finally {
       abortRef.current = null;
     }

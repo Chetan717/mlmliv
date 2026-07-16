@@ -110,7 +110,7 @@ export function viewTeamWeeklyPDF(opts) {
     if (!win) window.location.href = url;
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (e) {
-    console.error("viewTeamWeeklyPDF error:", e);
+    
     throw e;
   }
 }
@@ -139,7 +139,7 @@ export function downloadTeamWeeklyPDF(opts) {
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   } catch (e) {
-    console.error("downloadTeamWeeklyPDF error:", e);
+    
     throw e;
   }
 }

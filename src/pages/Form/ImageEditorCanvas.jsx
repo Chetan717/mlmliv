@@ -359,7 +359,7 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
     };
 
     img.onload = doLoad;
-    img.onerror = e => console.error("img load error", e);
+    img.onerror = e => undefined;
 
     if (src instanceof Blob) {
       url = URL.createObjectURL(src);

@@ -54,7 +54,7 @@ export const Festival_template = async (Selected_date) => {
     writeCache(Selected_date, templates);
     return templates;
   } catch (error) {
-    console.error("Festival fetch error:", error);
+    
     return [];
   }
 };

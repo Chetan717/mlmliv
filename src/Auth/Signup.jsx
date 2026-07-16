@@ -23,7 +23,6 @@ import { setAuthFlowPending, setUser } from "../utils/authStorage";
 import {
   clearCompanyProfileStorage,
   saveMlmProfileToStorage,
-  syncSelectedCompanyFromProfile,
 } from "../utils/companyStorage";
 
 export function Signup() {
@@ -93,7 +92,6 @@ export function Signup() {
 
       if (result.mlmProfile) {
         saveMlmProfileToStorage(result.mlmProfile);
-        await syncSelectedCompanyFromProfile({ force: true });
         toast.success("Account created! Welcome to MLM LIVE 🎉");
         navigate("/");
       } else {

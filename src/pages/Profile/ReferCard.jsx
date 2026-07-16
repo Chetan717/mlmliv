@@ -32,7 +32,7 @@ function ReferEarningsModal({ user, isOpen, onClose }) {
         const data = snap.docs.map((d) => d.data());
         setReferrals(data);
       } catch (e) {
-        console.error("Failed to load referrals:", e);
+        
       } finally {
         setLoading(false);
       }

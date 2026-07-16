@@ -140,7 +140,7 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
     _cache.set(cacheKey, { ts: Date.now(), data: results });
     return results;
   } catch (error) {
-    console.error("General fetch error:", error);
+    
     return [];
   }
 };

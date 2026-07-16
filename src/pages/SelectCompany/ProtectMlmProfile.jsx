@@ -7,17 +7,17 @@ import { COLLECTIONS } from "../../collections";
 import { getUser } from "../../utils/authStorage";
 import {
   hasMlmProfileInStorage,
-  hasSelectedCompanyInStorage,
   saveMlmProfileToStorage,
 } from "../../utils/companyStorage";
+import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 
 export default function ProtectMlmProfile({ children, requireProfile = false }) {
   const { user, loading } = useAuth();
+  const { selectedCompany, loading: companyLoading } = useSelectedCompany();
   const [serverProfileState, setServerProfileState] = useState(
     requireProfile ? "checking" : "not-required",
   );
   const hasMlmProfile = hasMlmProfileInStorage();
-  const hasSelectedCompany = hasSelectedCompanyInStorage();
 
   useEffect(() => {
     if (!requireProfile || loading || !user) return;
@@ -46,7 +46,7 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
         saveMlmProfileToStorage({ id: profileDoc.id, ...profileDoc.data() });
         setServerProfileState("verified");
       } catch (error) {
-        console.error("Unable to verify MLM profile:", error);
+        
         if (!cancelled) setServerProfileState("error");
       }
     };
@@ -55,7 +55,7 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
     return () => { cancelled = true; };
   }, [loading, requireProfile, user]);
 
-  if (loading) return null;
+  if (loading || companyLoading) return null;
   if (!user) return <Navigate to="/login" replace />;
   if (requireProfile && serverProfileState === "checking") return null;
   if (requireProfile && serverProfileState === "verified") return children;
@@ -63,13 +63,13 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
     return <Navigate to="/" replace />;
   }
   if (requireProfile && serverProfileState === "missing") {
-    return hasSelectedCompany
+    return selectedCompany
       ? <Navigate to="/mlmprofile" replace />
       : <Navigate to="/selectcomp" replace />;
   }
   if (hasMlmProfile) return children;
-  if (hasSelectedCompany && !requireProfile) return children;
-  if (hasSelectedCompany) return <Navigate to="/mlmprofile" replace />;
+  if (selectedCompany && !requireProfile) return children;
+  if (selectedCompany) return <Navigate to="/mlmprofile" replace />;
 
   return <Navigate to="/selectcomp" replace />;
 }

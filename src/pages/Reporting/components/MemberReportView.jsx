@@ -81,7 +81,7 @@ export default function MemberReportView({ memberProfile }) {
       setReportData({ dayData, dateFrom, dateTo });
       setShowReport(true);
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to generate report");
     } finally {
       setLoading(false);

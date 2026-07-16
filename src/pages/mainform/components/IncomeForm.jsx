@@ -29,7 +29,7 @@ const IncomeForm = ({ onSaved }) => {
       try {
         setFormData(JSON.parse(savedData));
       } catch (error) {
-        console.error("Error loading form data:", error);
+        
       }
     }
   }, []);
@@ -89,7 +89,7 @@ const IncomeForm = ({ onSaved }) => {
       onSaved?.();
     } catch (error) {
       toast.danger("Error saving form data");
-      console.error("Error:", error);
+      
     }
   };
 

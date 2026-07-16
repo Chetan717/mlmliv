@@ -82,7 +82,7 @@ export default function MemberGraph({ memberProfile }) {
 
         if (!cancelled) { setChartData(result); setLoading(false); }
       } catch (e) {
-        console.error("MemberGraph fetch error:", e);
+        
         if (!cancelled) setLoading(false);
       }
     })();

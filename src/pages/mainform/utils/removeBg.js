@@ -35,7 +35,7 @@ async function removeBgViaApi(file, onProgress, signal) {
   try {
     webpBlob = await convertToWebP(file);
   } catch (err) {
-    throw new Error(`Image conversion failed: ${err.message}`);
+    throw new Error("Image conversion failed. Please try another image.");
   }
 
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
@@ -54,9 +54,7 @@ async function removeBgViaApi(file, onProgress, signal) {
     });
   } catch (err) {
     if (err?.name === "AbortError") throw err;
-    throw new Error(
-      `Network error reaching background removal API: ${err.message}`,
-    );
+    throw new Error("Unable to process the image. Please check your connection.");
   }
 
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
@@ -116,10 +114,7 @@ export async function removeBg(file, onProgress, signal) {
 
     if (err?.name === "AbortError") throw err;
     
-    console.error(
-      "[removeBg] API removal failed — returning original image:",
-      err.message,
-    );
+    
     if (onProgress)
       onProgress("Could not remove background — showing original", 100);
 

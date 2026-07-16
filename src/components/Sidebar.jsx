@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from "react-router";
 import { useGeneralData } from "../Context/GeneralContext";
 import { getLocalLogo } from "@/utils/getCompanyLogo";
 import { runProfileNavigationGuard } from "../utils/profileNavigation";
+import { useSelectedCompany } from "../Context/SelectedCompanyContext";
 const NAV_ITEMS = [
   // {
   //   icon: Sparkles,
@@ -70,14 +71,9 @@ export default function Sidebar({
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useGeneralData();
+  const { selectedCompany } = useSelectedCompany();
 
-  let selectedCompany = null;
   let selectedProfile = null;
-  try {
-    selectedCompany = JSON.parse(
-      localStorage.getItem("selectedCompany") || "null",
-    );
-  } catch {}
   try {
     selectedProfile = JSON.parse(sessionStorage.getItem("mlmProfile") || "null");
   } catch {}

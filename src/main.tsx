@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { GeneralContext } from "./Context/GeneralContext.jsx";
 import { ErrorBoundary, OnlineProvider } from "./components/ErrorBoundary.jsx";
 import { AuthProvider } from "./Auth/AuthContext.jsx";
+import { SelectedCompanyProvider } from "./Context/SelectedCompanyContext.jsx";
 // import ScrollToTop from "./Pages/ScrollToTop.js";
 function GlobalToastController() {
   useEffect(() => {
@@ -65,10 +66,12 @@ createRoot(document.getElementById("root")!).render(
           />
           <BrowserRouter>
             <AuthProvider>
-              {/* <ScrollToTop /> */}
-              <Routes>
-                <Route path="/*" element={<App />} />
-              </Routes>
+              <SelectedCompanyProvider>
+                {/* <ScrollToTop /> */}
+                <Routes>
+                  <Route path="/*" element={<App />} />
+                </Routes>
+              </SelectedCompanyProvider>
             </AuthProvider>
           </BrowserRouter>
         </GeneralContext>

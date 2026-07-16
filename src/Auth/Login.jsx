@@ -17,16 +17,16 @@ import { setAuthFlowPending, setUser } from "../utils/authStorage";
 import { db } from "@firebase-config";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { COLLECTIONS } from "../collections";
+import { useSelectedCompany } from "../Context/SelectedCompanyContext";
 import {
   clearCompanyProfileStorage,
   clearMlmProfileStorage,
-  hasSelectedCompanyInStorage,
   saveMlmProfileToStorage,
-  syncSelectedCompanyFromProfile,
 } from "../utils/companyStorage";
 
 export function Login() {
   const navigate = useNavigate();
+  const { refreshCompany } = useSelectedCompany();
 
   const [loading, setLoading]       = useState(false);
   const [formError, setFormError]   = useState("");
@@ -105,20 +105,20 @@ export function Login() {
           mlmProfile = { id: profileDoc.id, ...profileDoc.data() };
         }
       } catch (profileLookupError) {
-        console.error("Unable to verify MLM profile during login:", profileLookupError);
+        
         throw new Error("Profile verification failed. Please try login again.");
       }
 
       if (mlmProfile) {
         clearCompanyProfileStorage();
         saveMlmProfileToStorage(mlmProfile);
-        await syncSelectedCompanyFromProfile({ force: true });
         toast.success("Login Successful!");
         navigate("/");
       } else {
         clearMlmProfileStorage();
         toast.success("Login Successful!");
-        navigate(hasSelectedCompanyInStorage() ? "/" : "/selectcomp");
+        const company = await refreshCompany();
+        navigate(company ? "/" : "/selectcomp");
       }
     } catch (error) {
       const msg = getAuthErrorMessage(error);
@@ -249,9 +249,16 @@ export function Login() {
                 boxShadow: "0 8px 24px rgba(14,36,92,0.35), 0 2px 6px rgba(0,0,0,0.12)",
               }}
               type="submit"
-              isLoading={loading}
+              isDisabled={loading}
             >
-              {loading ? "Logging in..." : "Login करें — Sign In"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2.5">
+                  <span className="w-5 h-5 rounded-full border-2 border-white/35 border-t-white animate-spin" />
+                  <span>Logging in...</span>
+                </span>
+              ) : (
+                "Login करें — Sign In"
+              )}
             </Button>
 
             <div className="flex items-center gap-3 my-1">

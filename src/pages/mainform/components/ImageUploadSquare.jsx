@@ -48,7 +48,7 @@ const ImageUploadSquare = ({ onImageSelect, previewImage, label = "Upload Proof 
       const dataUrl = await fileToDataUrl(blob);
       onImageSelect(dataUrl);
     } catch (uploadError) {
-      console.error(uploadError);
+      
       setError('Failed to process the image. Please try again.');
     } finally {
       setIsSaving(false);

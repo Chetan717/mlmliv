@@ -5,6 +5,7 @@ import { addDoc, serverTimestamp, query, where, getDocs } from "firebase/firesto
 import { collection } from "firebase/firestore";
 import { COLLECTIONS } from "../../collections";
 import { getUser } from "../../utils/authStorage";
+import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 
 const RAZORPAY_KEY_ID  = import.meta.env.VITE_RAZORPAY_KEY_ID  || "";
 const PSERVER_API_KEY  = import.meta.env.VITE_PSERVER_API_KEY  || "";
@@ -26,11 +27,6 @@ const getUserFromStorage = () => {
   catch { return {}; }
 };
 
-const getCompanyFromStorage = () => {
-  try { return JSON.parse(localStorage.getItem("selectedCompany") || "{}"); }
-  catch { return {}; }
-};
-
 const fmtDisplay = (date) =>
   date.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -40,6 +36,7 @@ const pserverHeaders = () => ({
 });
 
 export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSuccess }) {
+  const { selectedCompany: company } = useSelectedCompany();
 
 
   const [coupon,          setCoupon]          = useState(["", "", "", "", "", ""]);
@@ -102,8 +99,6 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
     setPaymentLoading(true);
 
     const user    = getUserFromStorage();
-    const company = getCompanyFromStorage();
-
     try {
       const sdkLoaded = await loadRazorpayScript();
       if (!sdkLoaded) {
@@ -133,7 +128,7 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
 
       if (!orderRes.ok) {
         const errData = await orderRes.json().catch(() => ({}));
-        setPaymentError(errData.error || "Order creation failed. Please try again.");
+        setPaymentError("Order creation failed. Please try again.");
         setPaymentLoading(false);
         return;
       }
@@ -211,7 +206,7 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
 
             if (!verifyRes.ok) {
               const errData = await verifyRes.json().catch(() => ({}));
-              console.error("Payment verification failed:", errData.error);
+              
               setPaymentError(
                 "Payment verified but record save failed. Contact support with order ID: " + orderId
               );
@@ -221,7 +216,7 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
 
             // Subscription is now written by the server — nothing to do here.
           } catch (e) {
-            console.error("Verification call error:", e);
+            
           } finally {
             setPaymentLoading(false);
             if (onPaymentSuccess) onPaymentSuccess();
@@ -263,12 +258,12 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
 
       rzp.open();
     } catch (err) {
-      console.error("Payment error:", err);
+      
       setPaymentError("Something went wrong. Please try again.");
       setIsOpen(true);
       setPaymentLoading(false);
     }
-  }, [plan, discountPercent, couponStatus, coupon, paymentLoading, onPaymentSuccess]);
+  }, [company, plan, discountPercent, couponStatus, coupon, paymentLoading, onPaymentSuccess]);
 
   if (!plan) return null;
 
@@ -326,7 +321,7 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        setPaymentError(errData.error || "Coupon check failed. Try again.");
+        setPaymentError("Coupon check failed. Please try again.");
         setCouponStatus(null);
         setDiscountPercent(0);
         return;
@@ -340,7 +335,7 @@ export function CheckoutModal({ plan, isOpen, setIsOpen, onBack, onPaymentSucces
       setCouponStatus("valid");
       setDiscountPercent(Number(data.discountPercent ?? 0));
     } catch (err) {
-      console.error("Coupon validation error:", err);
+      
       setPaymentError("Could not validate coupon. Check your connection.");
       setCouponStatus(null);
       setDiscountPercent(0);

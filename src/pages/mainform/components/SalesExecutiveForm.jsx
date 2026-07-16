@@ -59,6 +59,7 @@ import AchievementForm from "./AchievementForm";
 import { useNavigate } from "react-router";
 import IncomeForm from "./IncomeForm";
 import MeetingForm from "./MeetingForm";
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 
 import Bike from "../formshow/BIKE.webp";
 import CarPurchase from "../formshow/CAR PURCHASE.webp";
@@ -243,6 +244,7 @@ function IconTextField({
 }
 
 export default function SalesExecutiveForm() {
+  const { selectedCompany: company } = useSelectedCompany();
   const [tab, setTab] = useState("team");
 
   useEffect(() => {
@@ -250,7 +252,6 @@ export default function SalesExecutiveForm() {
     window.scrollTo(0, 0);
   }, []); // Empty array means it runs exactly once on load
 
-  const [company, setCompany] = useState(null);
   const [open, setOpen] = useState(false);
   const [bonanzaDays, setBonanzaDays] = useState("None");
   const [bonanzaForWhom, setBonanzaForWhom] = useState("SELF");
@@ -373,9 +374,6 @@ export default function SalesExecutiveForm() {
     // 1. Company
     const da = JSON.parse(localStorage.getItem("selType")) || {};
     setSelectedType(da.type || "");
-    const companyData = JSON.parse(localStorage.getItem("selectedCompany"));
-    if (companyData) setCompany(companyData);
-
     // 2. mlmProfile (top-upline URLs set externally, e.g. from profile page)
     const mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile"));
 
@@ -510,7 +508,7 @@ export default function SalesExecutiveForm() {
       clearError("topupline");
       toast.success("Top upline photo saved to MLM Profile!");
     } catch (error) {
-      console.error("Unable to save top upline to MLM Profile:", error);
+      
       // Keep the processed photo usable in the current form if permanent
       // storage fails, so the user's crop work is not lost.
       setCustomFiles((prev) => [...prev, ...files]);
@@ -573,7 +571,7 @@ export default function SalesExecutiveForm() {
       setSelectedLinks((prev) => withoutLink(prev));
       toast.success("Top upline photo removed from MLM Profile.");
     } catch (error) {
-      console.error("Unable to remove top upline from MLM Profile:", error);
+      
       toast.error("Could not remove the top upline photo. Please try again.");
     }
   };

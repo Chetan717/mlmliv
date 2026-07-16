@@ -76,7 +76,7 @@ export default function CreateProfile({ userMobile, userName, onProfileCreated }
 
       setTimeout(() => onProfileCreated(newProfile), 1800);
     } catch (err) {
-      console.error(err);
+      
       toast.danger("Failed to create profile");
       setSubmitting(false);
     }

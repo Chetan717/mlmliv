@@ -5,9 +5,8 @@ import { getUser } from "../utils/authStorage";
 function getStoredHeaderData() {
   const mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile") || "{}");
   const userMlm = getUser() || {};
-  const selectedCompany = JSON.parse(localStorage.getItem("selectedCompany") || "null");
   return {
-    companyLogo: selectedCompany?.logos?.[0]?.link || (mlmProfile?.logoURLs || [])[0] || null,
+    companyLogo: (mlmProfile?.logoURLs || [])[0] || null,
     userName: mlmProfile?.name || userMlm?.name || "",
   };
 }

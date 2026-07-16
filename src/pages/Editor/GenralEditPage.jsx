@@ -690,21 +690,21 @@ function GeneralEditPage({
       setShowSocial("no");
       if (savedAchieve) setAchievementForm(JSON.parse(savedAchieve));
     } catch (err) {
-      console.error("Failed to load achieve_form:", err);
+      
     }
 
     try {
       const savedIncome = localStorage.getItem("income_form");
       if (savedIncome) setIncomeFormData(JSON.parse(savedIncome));
     } catch (err) {
-      console.error("Failed to load income_form:", err);
+      
     }
 
     try {
       const savedMeeting = localStorage.getItem("Meeting");
       if (savedMeeting) setMeetingData(JSON.parse(savedMeeting));
     } catch (err) {
-      console.error("Failed to load Meeting data:", err);
+      
     }
 
     try {
@@ -1255,7 +1255,7 @@ function GeneralEditPage({
       if (!userSnap.empty)
         setUserData({ id: userSnap.docs[0].id, ...userSnap.docs[0].data() });
     } catch (err) {
-      console.error("Error fetching subscription/user:", err);
+      
     } finally {
       setSubLoading(false);
     }
@@ -1727,7 +1727,7 @@ function GeneralEditPage({
       // await deductCredits(IMAGE_CREDIT_COST, "Downloaded!"); {change for free}
       setExportedUri(uri);
     } catch (err) {
-      console.error("Export error:", err);
+      
       showToast("Export failed. Please try again.", "error");
     } finally {
       setExportLoading(false);
@@ -1883,7 +1883,7 @@ function GeneralEditPage({
       setProgressLabel("Done!");
       // await deductCredits(VIDEO_CREDIT_COST, "Video downloaded!"); {change for free}
     } catch (err) {
-      console.error("Video export error:", err);
+      
       showToast("Video download failed. Please try again.", "error");
     } finally {
       if (progressTicker) clearInterval(progressTicker);
@@ -2031,12 +2031,9 @@ function GeneralEditPage({
           );
           setAudioLastDoc(snap.docs[snap.docs.length - 1] || null);
           setAudioHasMore(snap.docs.length === MUSIC_PAGE_SIZE);
-          showToast(
-            "Firestore index missing for music ordering. Showing fallback results.",
-            "warning",
-          );
+          showToast("Music is loading in compatibility mode.", "warning");
         } else {
-          console.error("Failed to load music:", err);
+          
         }
       } finally {
         setAudioLoading(false);
@@ -2368,8 +2365,8 @@ function GeneralEditPage({
       setProgressLabel("Done!");
       // await deductCredits(VIDEO_CREDIT_COST, "Video downloaded!"); {change for free}
     } catch (err) {
-      console.error("Music export error:", err);
-      showToast(err?.message || "Video export failed", "error", 5000);
+      
+      showToast("Video export failed. Please try again.", "error", 5000);
     } finally {
       setMusicExporting(false);
       exportInProgressRef.current = false;

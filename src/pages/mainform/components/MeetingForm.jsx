@@ -4,6 +4,7 @@ import ImageUploadWithBgRemove from "./ImageUploadWithBgRemove";
 import ImageEditorCanvas from "./ImageEditorCanvas";
 import { Modal } from "@heroui/react";
 import { useNavigate } from "react-router";
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 import {
   sanitizeAmount,
   sanitizeFormValue,
@@ -70,6 +71,7 @@ const platformButtons = [
 ];
 
 export default function MeetingForm() {
+  const { selectedCompany } = useSelectedCompany();
   const navigate = useNavigate();
   // default to today's date and current time
   const getTodayDate = () => {
@@ -160,12 +162,10 @@ export default function MeetingForm() {
 
   useEffect(() => {
     try {
-      const selectedCompany =
-        JSON.parse(localStorage.getItem("selectedCompany") || "{}") || {};
       const mlmprofile =
         JSON.parse(sessionStorage.getItem("mlmProfile") || "{}") || {};
 
-      const companyUrls = Array.isArray(selectedCompany.topuplines)
+      const companyUrls = Array.isArray(selectedCompany?.topuplines)
         ? selectedCompany.topuplines
         : Array.isArray(mlmprofile.topuplineURLs)
           ? mlmprofile.topuplineURLs
@@ -173,7 +173,7 @@ export default function MeetingForm() {
 
       setCompanyImages(companyUrls);
       setCompanyDesignations(
-        Array.isArray(selectedCompany.profile)
+        Array.isArray(selectedCompany?.profile)
           ? selectedCompany.profile.map((item) => item.profilename)
           : [],
       );
@@ -208,9 +208,9 @@ export default function MeetingForm() {
         );
       }
     } catch (err) {
-      console.error("Failed to load meeting data:", err);
+      
     }
-  }, []);
+  }, [selectedCompany]);
 
   useEffect(() => {
     if (!savedMessage) return;
@@ -285,7 +285,7 @@ export default function MeetingForm() {
       navigate("/editor");
       setIsSaved(true);
     } catch (err) {
-      console.error(err);
+      
       setSavedMessage("Unable to save data. Please try again.");
     }
   };

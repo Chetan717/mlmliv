@@ -33,7 +33,7 @@ export default defineConfig({
         manualChunks: {
           "vendor-react": ["react", "react-dom"],
           "vendor-konva": ["konva", "react-konva"],
-          "vendor-firebase": ["firebase/app", "firebase/auth", "firebase/firestore", "firebase/storage", "firebase/functions"],
+          "vendor-data": ["firebase/app", "firebase/auth", "firebase/firestore", "firebase/storage", "firebase/functions"],
           "vendor-ui": ["@heroui/react", "framer-motion"],
         },
       },

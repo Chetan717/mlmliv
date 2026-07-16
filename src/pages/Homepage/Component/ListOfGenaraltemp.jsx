@@ -9,10 +9,8 @@ import {
   isNewTemplate,
 } from "./templateCacheUtils";
 import profileCreate from "../../../../public/prcrete.png";
-import {
-  hasMlmProfileInStorage,
-  syncSelectedCompanyFromProfile,
-} from "../../../utils/companyStorage";
+import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 
 const ImageWithSkeleton = React.memo(({ src, alt, className }) => {
   const alreadySeen = seenImages.has(src);
@@ -244,6 +242,7 @@ const NewBadge = () => (
 );
 
 function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
+  const { selectedCompany, refreshCompany } = useSelectedCompany();
   const [selectedTemp, setSelectedTemp] = useState(null);
   const [profileModalPending, setProfileModalPending] = useState(null);
   const [designationModalPending, setDesignationModalPending] = useState(null);
@@ -383,48 +382,33 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     [handleReset, proceedWithTemplateSelection, setSelType],
   );
 
-  const readDesignationsFromStorage = useCallback(() => {
-    try {
-      const selectedCompany = JSON.parse(
-        localStorage.getItem("selectedCompany") || "{}",
-      );
-      return Array.isArray(selectedCompany?.profile)
-        ? selectedCompany.profile
-        : [];
-    } catch {
-      return [];
-    }
-  }, []);
+  const readDesignations = useCallback(
+    (company = selectedCompany) =>
+      Array.isArray(company?.profile) ? company.profile : [],
+    [selectedCompany],
+  );
 
-  // Whenever the designation modal is opened, make sure "selectedCompany" in
-  // storage reflects the user's actual company profile (mlmcomp collection),
-  // not just whatever was cached from a previous visit to the "select
-  // company" page. This keeps designations available even if the user
-  // already has a company profile and never went through that page.
-  // syncSelectedCompanyFromProfile itself uses the cached copy when the
-  // companyId hasn't changed and useful data is already present, so this
-  // doesn't force a network round-trip on every open.
+  // Refresh the authenticated user's company document when the designation
+  // picker opens so backend changes are reflected immediately.
   useEffect(() => {
     if (!designationModalPending) return;
 
     let cancelled = false;
-    setDesignationOptions(readDesignationsFromStorage());
+    setDesignationOptions(readDesignations());
     setDesignationLoading(true);
 
-    // Force a fresh fetch from the "mlmcomp" collection so designation
-    // updates made on the backend are reflected immediately. If the fetch
-    // fails (offline, etc.) syncSelectedCompanyFromProfile leaves the
-    // existing cached copy untouched, so we still fall back to it.
-    syncSelectedCompanyFromProfile({ force: true }).finally(() => {
+    refreshCompany().then((company) => {
       if (cancelled) return;
-      setDesignationOptions(readDesignationsFromStorage());
+      setDesignationOptions(readDesignations(company));
+    }).finally(() => {
+      if (cancelled) return;
       setDesignationLoading(false);
     });
 
     return () => {
       cancelled = true;
     };
-  }, [designationModalPending, readDesignationsFromStorage]);
+  }, [designationModalPending, readDesignations, refreshCompany]);
 
   if (loading && (!templates || templates.length === 0)) {
     return (

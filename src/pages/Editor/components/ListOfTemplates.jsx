@@ -3,6 +3,8 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@firebase-config";
 import { COLLECTIONS } from "../../../collections";
 import genaral_template_json from "../../Homepage/Component/Services/genaral_template_firestore_data.json";
+import { PAGE_REFRESH_EVENT } from "../../../utils/pageRefresh";
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 
 const BATCH_SIZE = 20;
 
@@ -28,14 +30,6 @@ function getSelType() {
     return {};
   }
 }
-function getCompany() {
-  try {
-    return JSON.parse(localStorage.getItem("selectedCompany")) || {};
-  } catch {
-    return {};
-  }
-}
-
 function getMeetingHostMode() {
   try {
     const savedMeeting = localStorage.getItem("Meeting");
@@ -354,8 +348,9 @@ export default function ListOfTemplates({
   setSelected,
   onTabChange,
 }) {
+  const { selectedCompany } = useSelectedCompany();
   const selType = getSelType();
-  const filterCompany = getCompany()?.id || "";
+  const filterCompany = selectedCompany?.id || "";
   const filterType = selType?.type || "";
   const filterSubType = selType?.Subtype || "";
   const filterCompanyId = `${filterCompany}` || "";
@@ -366,6 +361,7 @@ export default function ListOfTemplates({
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("image");
+  const [refreshRequestId, setRefreshRequestId] = useState(0);
 
   const [pendingSelectedId, setPendingSelectedId] = useState(null);
   const [meetingHostMode, setMeetingHostMode] = useState(() => getMeetingHostMode());
@@ -373,6 +369,28 @@ export default function ListOfTemplates({
 
   const sentinelRef = useRef(null);
   const renderedCount = useRef(0);
+  const refreshSequenceRef = useRef(0);
+  const pendingRefreshRef = useRef(null);
+
+  useEffect(() => {
+    const handlePageRefresh = (event) => {
+      if (event.detail?.target !== "editor-templates") return;
+      event.detail.handled = true;
+
+      _editorTemplateCache.clear();
+      refreshSequenceRef.current += 1;
+      const id = refreshSequenceRef.current;
+      pendingRefreshRef.current = {
+        id,
+        complete: event.detail?.complete,
+      };
+      setLoading(true);
+      setRefreshRequestId(id);
+    };
+
+    window.addEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
+    return () => window.removeEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
+  }, []);
 
   useEffect(() => {
     const handleStorage = (e) => {
@@ -388,8 +406,16 @@ export default function ListOfTemplates({
   }, []);
 
   useEffect(() => {
+    const finishRequestedRefresh = (error) => {
+      if (pendingRefreshRef.current?.id !== refreshRequestId) return;
+      const complete = pendingRefreshRef.current.complete;
+      pendingRefreshRef.current = null;
+      complete?.(error);
+    };
+
     if (!filterType) {
       setLoading(false);
+      finishRequestedRefresh();
       return;
     }
 
@@ -426,6 +452,7 @@ export default function ListOfTemplates({
         setVisibleItems(firstBatch);
         renderedCount.current = firstBatch.length;
         setLoading(false);
+        finishRequestedRefresh();
         return;
       }
 
@@ -525,15 +552,24 @@ export default function ListOfTemplates({
         setVisibleItems(firstBatch);
         renderedCount.current = firstBatch.length;
       } catch (err) {
-        console.error("Fetch error:", err);
-        setError(err.message || "Failed to load templates");
+        
+        setError("Failed to load templates. Please try again.");
+        finishRequestedRefresh(err);
       } finally {
         setLoading(false);
+        finishRequestedRefresh();
       }
     }
 
     fetchTemplates();
-  }, [filterType, filterSubType, filterCompanyId, meetingHostMode, closeFilter]);
+  }, [
+    filterType,
+    filterSubType,
+    filterCompanyId,
+    meetingHostMode,
+    closeFilter,
+    refreshRequestId,
+  ]);
 
   const imageItems = useMemo(
     () => allItems.filter((item) => !item.backgroundVideoUrl),

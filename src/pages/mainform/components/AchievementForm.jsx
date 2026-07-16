@@ -38,7 +38,7 @@ export default function AchievementForm({ onSaved }) {
         if (data.price) setPrice(data.price);
       }
     } catch (err) {
-      console.error("Failed to load saved achievement form:", err);
+      
     }
   }, []);
 
@@ -85,7 +85,7 @@ export default function AchievementForm({ onSaved }) {
       onSaved?.();
     } catch (err) {
       toast.danger("Error saving achievement data");
-      console.error(err);
+      
     }
   };
 

@@ -14,7 +14,7 @@ export async function sendOtpServer({ userId, mobile }) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.success) {
-    throw new Error(data.error || "Failed to send OTP. Check your connection.");
+    throw new Error("Failed to send OTP. Please try again.");
   }
   return data;
 }
@@ -27,7 +27,7 @@ export async function verifyOtpServer({ userId, otp }) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.success) {
-    throw new Error(data.error || "Incorrect OTP. Please try again.");
+    throw new Error("Incorrect OTP. Please try again.");
   }
   return data;
 }

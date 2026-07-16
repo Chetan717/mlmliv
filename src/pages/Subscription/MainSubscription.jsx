@@ -26,6 +26,7 @@ import { PlanModal } from "./PlanModal";
 import "swiper/css";
 import "swiper/css/pagination";
 import { COLLECTIONS } from "../../collections";
+import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 import {
   CreditCard,
   History,
@@ -366,6 +367,7 @@ function SubscriptionTabs({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function MainSubscription() {
+  const { selectedCompany } = useSelectedCompany();
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -438,7 +440,7 @@ export default function MainSubscription() {
           updateDoc(doc(db, "subscription", d.id), {
             Active: false,
             Expire: true,
-          }).catch((e) => console.error("Failed to mark expired:", e));
+          }).catch((e) => undefined);
         } else {
           nowActive.push(data);
         }
@@ -458,7 +460,7 @@ export default function MainSubscription() {
         setActiveTab("expired");
       }
     } catch (err) {
-      console.error("Error fetching subscriptions:", err);
+      
     } finally {
       setSubLoading(false);
     }
@@ -469,9 +471,8 @@ export default function MainSubscription() {
     try {
       setLoading(true);
       setError(null);
-      const raw = localStorage.getItem("selectedCompany");
-      if (!raw) throw new Error("No company data found.");
-      const company = JSON.parse(raw);
+      const company = selectedCompany;
+      if (!company) throw new Error("No company data found.");
       if (!company?.id) throw new Error("Company ID not found.");
       const docRef = doc(db, "mlmcomp", company.id);
       const docSnap = await getDoc(docRef);
@@ -484,12 +485,12 @@ export default function MainSubscription() {
 
       setPlans(fetchedPlans);
     } catch (err) {
-      console.error("Error fetching plans:", err);
-      setError(err.message || "Failed to load plans.");
+      
+      setError("Failed to load plans. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedCompany]);
 
   useEffect(() => {
     fetchSubscriptions();
@@ -1238,7 +1239,7 @@ export default function MainSubscription() {
 //           updateDoc(doc(db, "subscription", d.id), {
 //             Active: false,
 //             Expire: true,
-//           }).catch((e) => console.error("Failed to mark expired:", e));
+//           }).catch(() => undefined);
 //         } else {
 //           nowActive.push(data);
 //         }
@@ -1258,7 +1259,6 @@ export default function MainSubscription() {
 //         setActiveTab("expired");
 //       }
 //     } catch (err) {
-//       console.error("Error fetching subscriptions:", err);
 //     } finally {
 //       setSubLoading(false);
 //     }
@@ -1269,7 +1269,7 @@ export default function MainSubscription() {
 //     try {
 //       setLoading(true);
 //       setError(null);
-//       const raw = localStorage.getItem("selectedCompany");
+//       const raw = null; // legacy browser company cache removed
 //       if (!raw) throw new Error("No company data found.");
 //       const company = JSON.parse(raw);
 //       if (!company?.id) throw new Error("Company ID not found.");
@@ -1284,8 +1284,7 @@ export default function MainSubscription() {
 
 //       setPlans(fetchedPlans);
 //     } catch (err) {
-//       console.error("Error fetching plans:", err);
-//       setError(err.message || "Failed to load plans.");
+//       setError("Failed to load plans. Please try again.");
 //     } finally {
 //       setLoading(false);
 //     }

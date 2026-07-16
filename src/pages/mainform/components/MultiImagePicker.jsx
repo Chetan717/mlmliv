@@ -123,7 +123,7 @@ export default function MultiImagePicker({
         toast("Adjust the final crop, then tap Done.");
       } catch (err) {
         if (err?.name === "AbortError" || controller.signal.aborted) return;
-        console.error(err);
+        
         toast.danger("Background removal failed. You can still finish the crop.");
         setEditingImage(URL.createObjectURL(blob));
         setCropStage("final");

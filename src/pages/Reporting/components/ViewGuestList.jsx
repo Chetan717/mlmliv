@@ -39,7 +39,7 @@ function EditModal({ guest, onClose, onSaved }) {
       toast.success("Guest updated!");
       onSaved({ ...form, name: form.name.trim(), mobile: form.mobile.trim() });
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to update guest");
     } finally {
       setSaving(false);
@@ -137,7 +137,7 @@ function DeleteModal({ guest, onClose, onDeleted }) {
       toast.success("Guest deleted");
       onDeleted(guest.id);
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to delete guest");
       setDeleting(false);
     }
@@ -201,7 +201,7 @@ export default function ViewGuestList({ memberProfile }) {
       filtered.sort((a, b) => a.date.localeCompare(b.date));
       setGuests(filtered);
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to load guests");
       setGuests([]);
     } finally {

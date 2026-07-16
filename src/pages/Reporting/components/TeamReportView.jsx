@@ -224,7 +224,7 @@ export default function TeamReportView({ managerProfile }) {
       setReportData({ member: selectedMember, dayData, dateFrom, dateTo });
       setShowReport(true);
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to generate report");
     } finally {
       setLoading(false);

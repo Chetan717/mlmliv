@@ -6,16 +6,18 @@ import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router";
 import { Search, MessageCircle } from "lucide-react";
 import { COLLECTIONS } from "../../collections";
-import { saveSelectedCompanyToStorage } from "../../utils/companyStorage";
+import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 
 export default function SelectComp() {
   const navigate = useNavigate();
   const { theme, theame_color } = useGeneralData();
+  const { selectCompany } = useSelectedCompany();
 
   const [companies, setCompanies] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [savingSelection, setSavingSelection] = useState(false);
 
   const normalizeCompany = (doc) => {
     const data = doc.data();
@@ -48,7 +50,7 @@ export default function SelectComp() {
           setCompanies(data);
         }
       } catch (error) {
-        console.error("Error fetching companies:", error);
+        
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -75,18 +77,21 @@ export default function SelectComp() {
     );
   }, []);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     if (!selectedCompany) {
       alert("Please select a company");
       return;
     }
-    if (!saveSelectedCompanyToStorage(selectedCompany)) {
-      alert("Session expired. Please login again.");
-      navigate("/login", { replace: true });
-      return;
+    try {
+      setSavingSelection(true);
+      await selectCompany(selectedCompany);
+      navigate("/");
+    } catch (error) {
+      alert("Unable to save your company. Please try again.");
+    } finally {
+      setSavingSelection(false);
     }
-    navigate("/");
-  }, [selectedCompany, navigate]);
+  }, [navigate, selectCompany, selectedCompany]);
 
   const getLogo = (company) => {
     return (
@@ -215,14 +220,18 @@ export default function SelectComp() {
           <div className="max-w-md mx-auto pointer-events-auto">
             <Button
               onClick={handleContinue}
-              disabled={!selectedCompany}
+              disabled={!selectedCompany || savingSelection}
               className={`w-full h-14 rounded-2xl font-bold text-lg shadow-xl transition-all duration-300 ${
                 selectedCompany
                   ? "bg-accent text-white shadow-accent/30 hover:bg-accent/90 transform translate-y-0"
                   : "bg-muted text-muted-foreground opacity-90 translate-y-2 pointer-events-none"
               }`}
             >
-              {selectedCompany ? `Continue` : "Select a Company"}
+              {savingSelection
+                ? "Saving securely..."
+                : selectedCompany
+                  ? "Continue"
+                  : "Select a Company"}
             </Button>
           </div>
         </div>

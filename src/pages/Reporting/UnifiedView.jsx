@@ -253,7 +253,7 @@ function TeamGraph({ myId }) {
 
         if (!cancelled) { setChartData(result); setLoading(false); }
       } catch (e) {
-        console.error("TeamGraph error:", e);
+        
         if (!cancelled) setLoading(false);
       }
     })();
@@ -484,7 +484,7 @@ function TeamMembersList({ myId, onUnassigned }) {
       );
       setMembers(snap.docs.map((d) => ({ docId: d.id, ...d.data() })));
     } catch (e) {
-      console.error(e);
+      
     } finally {
       setLoading(false);
     }
@@ -504,7 +504,7 @@ function TeamMembersList({ myId, onUnassigned }) {
       toast.success(`${member.name} has been removed from your team`);
       onUnassigned && onUnassigned();
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to unassign member");
     } finally {
       setRemoving(false);
@@ -703,7 +703,7 @@ function AddToTeamSection({ profile, onRequestSent }) {
         }
       }
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Could not find profile. Please try again.");
     } finally {
       setFetching(false);
@@ -726,7 +726,7 @@ function AddToTeamSection({ profile, onRequestSent }) {
       toast.success(`Request sent to ${memberInfo.name}!`);
       onRequestSent && onRequestSent();
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to send request");
     } finally {
       setSending(false);
@@ -854,7 +854,7 @@ function usePendingRequests(myId, myDocId) {
       );
       setPendingRequests(snap.docs.map((d) => ({ reqDocId: d.id, ...d.data() })));
     } catch (e) {
-      console.error("Failed to load pending requests", e);
+      
     }
   }, [myId]);
 
@@ -882,7 +882,7 @@ function usePendingRequests(myId, myDocId) {
       setPendingRequests([]);
       return true;
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to approve");
       return false;
     }
@@ -895,7 +895,7 @@ function usePendingRequests(myId, myDocId) {
       toast.success("Request denied");
       return true;
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to deny");
       return false;
     }

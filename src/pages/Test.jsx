@@ -339,8 +339,8 @@ export default function ImageAudioToVideo() {
       try { await ffmpeg.deleteFile("output.mp4"); } catch (_) {}
 
     } catch (err) {
-      console.error(err);
-      setErrorMsg(err.message || "Something went wrong. Check browser console for details.");
+      
+      setErrorMsg("Something went wrong. Please try again.");
       setStatus("error");
     }
   };

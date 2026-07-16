@@ -11,11 +11,7 @@ import Onboarding from "./Onboarding";
 import SplashScreen from "./SplashScreen";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { useAuth } from "./Auth/AuthContext";
-import {
-  hasMlmProfileInStorage,
-  hasSelectedCompanyInStorage,
-  syncSelectedCompanyFromProfile,
-} from "./utils/companyStorage";
+import { useSelectedCompany } from "./Context/SelectedCompanyContext";
 import { getEditorBackTarget } from "./utils/editorNavigation";
 import { runProfileNavigationGuard } from "./utils/profileNavigation";
 
@@ -174,6 +170,10 @@ function PersistentPages({ pathname, authenticated }) {
 
 function App() {
   const { user: firebaseUser, loading: authLoading } = useAuth();
+  const {
+    selectedCompany,
+    loading: companyLoading,
+  } = useSelectedCompany();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [splashDone, setSplashDone] = useState(false);
@@ -194,11 +194,6 @@ function App() {
     return () =>
       window.removeEventListener("webviewBackPressed", handleBackPressed);
   }, [navigate, pathname]);
-
-  useEffect(() => {
-    if (!firebaseUser) return;
-    syncSelectedCompanyFromProfile().catch(() => {});
-  }, [firebaseUser]);
 
   if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
 
@@ -363,7 +358,12 @@ function App() {
       </Suspense>
 
       {/* ── Keep-alive pages: Home + AllTemplates always stay in DOM ── */}
-      <PersistentPages pathname={pathname} authenticated={!!firebaseUser} />
+      <PersistentPages
+        pathname={pathname}
+        authenticated={
+          !!firebaseUser && !companyLoading && !!selectedCompany
+        }
+      />
     </>
   );
 }

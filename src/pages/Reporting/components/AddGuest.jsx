@@ -38,7 +38,7 @@ export default function AddGuest({ memberProfile }) {
       setForm({ ...EMPTY, date: form.date });
       toast.success("Guest added successfully!");
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to add guest");
     } finally {
       setSaving(false);

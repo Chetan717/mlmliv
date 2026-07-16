@@ -29,25 +29,25 @@ import { getLocalLogo } from "../utils/getCompanyLogo";
 import { getUser } from "../utils/authStorage";
 import { getEditorBackTarget } from "../utils/editorNavigation";
 import { runProfileNavigationGuard } from "../utils/profileNavigation";
-function getStoredHeaderData() {
+import { auth } from "../Firebase";
+import { toast } from "@heroui/react";
+import { useSelectedCompany } from "../Context/SelectedCompanyContext";
+import {
+  PAGE_REFRESH_EVENT,
+  consumeRefreshAttempt,
+  refreshLimitMessage,
+} from "../utils/pageRefresh";
+
+const REFRESH_TARGETS = {
+  "/": "home",
+  "/editor": "editor-templates",
+  "/mlmprofile": "mlm-profile",
+};
+function getStoredUserName() {
   const mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile") || "{}");
   const userMlm = getUser() || {};
-  const selectedCompany = JSON.parse(
-    localStorage.getItem("selectedCompany") || "null",
-  );
-  return {
-    ID: selectedCompany?.id || mlmProfile?.companyId || "",
-    name: selectedCompany?.name || mlmProfile?.companyName || "",
-    companyLogo:
-      selectedCompany?.logos?.[1]?.link ||
-      (mlmProfile?.logoURLs || [])[0] ||
-      "",
-    userName: mlmProfile?.name || userMlm?.name || "",
-  };
+  return mlmProfile?.name || userMlm?.name || "";
 }
-
-const companyLogoft = getLocalLogo(getStoredHeaderData().ID) || "";
-const companyName = getStoredHeaderData().name || "";
 const PAGE_TITLES = {
   "/subscription": "My Subscription",
   "/mlmprofile": "Company Profile",
@@ -71,22 +71,26 @@ const REPORTING_TAB_LABELS = {
 };
 
 export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
+  const { selectedCompany } = useSelectedCompany();
   const { theme, toggleTheme, selType } = useGeneralData();
   const isDark = theme === "dark";
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [companyLogo, setCompanyLogo] = useState(companyLogoft);
-  const [userName, setUserName] = useState(
-    () => getStoredHeaderData().userName,
-  );
+  const [userName, setUserName] = useState(() => getStoredUserName());
+  const companyName = selectedCompany?.name || "";
+  const companyLogo =
+    getLocalLogo(selectedCompany?.id) ||
+    selectedCompany?.logos?.find((logo) => logo?.link?.trim())?.link ||
+    "";
   const [refreshing, setRefreshing] = useState(false);
   const [showReportingMenu, setShowReportingMenu] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
   const [pendingInviteCount, setPendingInviteCount] = useState(0);
   const menuRef = useRef(null);
   const backBusyRef = useRef(false);
+  const refreshTimeoutRef = useRef(null);
 
   const isReporting = location.pathname === "/reporting";
   const activeTab = searchParams.get("tab") || "dashboard";
@@ -115,8 +119,7 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
   }, [isReporting]);
 
   useEffect(() => {
-    const { userName: name } = getStoredHeaderData();
-    setUserName(name);
+    setUserName(getStoredUserName());
   }, []);
 
   useEffect(() => {
@@ -141,10 +144,51 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
   }, [showReportingMenu]);
 
   const handleRefresh = useCallback(() => {
+    if (refreshing) return;
+
+    const target = REFRESH_TARGETS[location.pathname];
+    if (!target) return;
+
+    const limit = consumeRefreshAttempt(auth.currentUser?.uid);
+    if (!limit.allowed) {
+      toast.warning(refreshLimitMessage(limit.retryAfterMs));
+      return;
+    }
+
     setRefreshing(true);
-    setTimeout(() => {
-      window.location.reload();
-    }, 250);
+    let completed = false;
+    const detail = {
+      target,
+      handled: false,
+      rateLimitConsumed: true,
+      complete: (error) => {
+        if (completed) return;
+        completed = true;
+        if (refreshTimeoutRef.current) {
+          window.clearTimeout(refreshTimeoutRef.current);
+          refreshTimeoutRef.current = null;
+        }
+        setRefreshing(false);
+        if (error) toast.danger("Refresh failed. Please try again.");
+      },
+    };
+
+    window.dispatchEvent(new CustomEvent(PAGE_REFRESH_EVENT, { detail }));
+
+    if (!detail.handled) {
+      detail.complete(new Error("No refresh handler for this page"));
+      return;
+    }
+
+    refreshTimeoutRef.current = window.setTimeout(() => {
+      detail.complete(new Error("Refresh timed out"));
+    }, 20_000);
+  }, [location.pathname, refreshing]);
+
+  useEffect(() => () => {
+    if (refreshTimeoutRef.current) {
+      window.clearTimeout(refreshTimeoutRef.current);
+    }
   }, []);
 
   // Keep every hook above the route-specific early return. Header stays mounted
@@ -166,6 +210,7 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
   const pageTitle = PAGE_TITLES[location.pathname];
   const isHome = location.pathname === "/";
   const isEditor = location.pathname === "/editor";
+  const canRefresh = Boolean(REFRESH_TARGETS[location.pathname]);
   const isSubPage = !!pageTitle;
   const isForm = location.pathname === "/mlmform";
 
@@ -330,19 +375,8 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
                 </p>
               )}
             </div>
-          ) : isHome && (companyLogo || userName) ? (
+          ) : isHome && ( userName) ? (
             <div className="flex items-center gap-2">
-              {companyLogo && (
-                <img
-                  src={
-                    companyName === "AWPL"
-                      ? companyLogo[0]?.link || ""
-                      : companyLogo[1]?.link || ""
-                  }
-                  alt="Company Logo"
-                  className="w-7 h-7 rounded-full border border-border object-contain bg-background shadow-sm flex-shrink-0"
-                />
-              )}
               {userName && (
                 <span className="text-[14px] font-bold text-foreground capitalize truncate font-display">
                   {userName}
@@ -357,15 +391,18 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button
-            onClick={handleRefresh}
-            aria-label="Refresh"
-            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-foreground/8 active:scale-95 transition-all"
-          >
-            <ArrowRotateLeft
-              className={`size-[17px] text-accent dark:text-white transition-transform duration-500 ${refreshing ? "animate-spin" : ""}`}
-            />
-          </button>
+          {canRefresh && (
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              aria-label="Refresh page data"
+              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-foreground/8 active:scale-95 transition-all disabled:opacity-60"
+            >
+              <ArrowRotateLeft
+                className={`size-[17px] text-accent dark:text-white transition-transform duration-500 ${refreshing ? "animate-spin" : ""}`}
+              />
+            </button>
+          )}
 
           <button
             onClick={toggleTheme}

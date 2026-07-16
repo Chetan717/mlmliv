@@ -85,7 +85,7 @@ export default function ImageUploadWithBgRemove({
         toast("Adjust the final crop, then tap Done.");
       } catch (err) {
         if (err?.name === "AbortError" || controller.signal.aborted) return;
-        console.error(err);
+        
         toast.error("Background removal failed. You can still finish the crop.");
         openFinalCrop(croppedBlob);
       } finally {

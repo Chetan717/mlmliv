@@ -558,7 +558,7 @@ export default function ImageEditorCanvas({
     };
 
     img.onload = doLoad;
-    img.onerror = (e) => console.error("load error", e);
+    img.onerror = (e) => undefined;
     if (currentSrc instanceof Blob) {
       url = URL.createObjectURL(currentSrc);
       img.src = url;

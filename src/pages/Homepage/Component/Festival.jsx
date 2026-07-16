@@ -38,7 +38,6 @@
 //           setFestivalTempData(data);
 //         }
 //       } catch (error) {
-//         console.error("Failed to fetch festival templates", error);
 //       } finally {
 //         if (isMounted) setLoading(false);
 //       }
@@ -252,7 +251,7 @@ export default function Festival() {
             setCachedFestivalData((prev) => ({ ...prev, [date]: data }));
             setAllFestivalData((prev) => ({ ...prev, [date]: data }));
           } catch (err) {
-            console.error("Failed to fetch", date, err);
+            
           } finally {
             if (isMounted) {
               setLoadingDates((prev) => ({ ...prev, [date]: false }));

@@ -9,6 +9,7 @@ const CACHED_PII_KEYS = [
   "achieve_form",
   "income_form",
   "Meeting",
+  "selectedCompany",
 ];
 let verifiedUser = null;
 let authFlowPending = false;

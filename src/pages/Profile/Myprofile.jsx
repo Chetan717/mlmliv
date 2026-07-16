@@ -49,7 +49,7 @@ function Myprofile() {
       setEditOpen(false);
       toast.success("Name updated successfully");
     } catch (err) {
-      console.error("Error updating name:", err);
+      
       toast.danger("Failed to update name");
     } finally {
       setLoading(false);

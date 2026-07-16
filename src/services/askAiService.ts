@@ -36,7 +36,7 @@ export async function readPrescription(blob: Blob): Promise<PrescriptionReading>
 
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new Error(payload?.error || "The prescription could not be processed. Please try again.");
+      throw new Error("The prescription could not be processed. Please try again.");
     }
     if (!payload?.result) throw new Error("The AI returned an incomplete response. Please try again.");
     return payload.result as PrescriptionReading;
@@ -45,7 +45,7 @@ export async function readPrescription(blob: Blob): Promise<PrescriptionReading>
       throw new Error("The request took too long. Please check your connection and try again.");
     }
     if (error instanceof TypeError) {
-      throw new Error("Unable to reach Ask AI. Please check your connection and Worker URL.");
+      throw new Error("Unable to reach Ask AI. Please check your connection.");
     }
     throw error;
   } finally {

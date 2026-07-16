@@ -11,18 +11,11 @@ import { useGeneralData } from "../../.././Context/GeneralContext";
 import { Skeleton } from "@heroui/react";
 import defaultImage from "../../../../public/carasol.webp";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
-
-function getUserCompanyName() {
-  try {
-    const c = JSON.parse(localStorage.getItem("selectedCompany") || "{}");
-    return c?.name || "";
-  } catch {
-    return "";
-  }
-}
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 
 export default function Carosel() {
   const { setSelType } = useGeneralData();
+  const { selectedCompany } = useSelectedCompany();
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -33,12 +26,12 @@ export default function Carosel() {
     const loadTrending = async () => {
       try {
         setLoading(true);
-        const companyName = getUserCompanyName();
+        const companyName = selectedCompany?.name || "";
         const data = await TTrend_templateService(companyName);
         if (!isMounted) return;
         setSlides(data);
       } catch (error) {
-        console.error("Failed to load carousel:", error);
+        
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -48,7 +41,7 @@ export default function Carosel() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [selectedCompany?.name]);
 
   const handleImagePress = (item) => {
     const selttype = {

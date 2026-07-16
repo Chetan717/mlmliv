@@ -92,7 +92,7 @@ export default function TeamWeeklyReport({ managerProfile }) {
       result.sort((a, b) => a.name.localeCompare(b.name));
       setRows(result);
     } catch (e) {
-      console.error(e);
+      
       toast.danger("Failed to load team report");
       setRows([]);
     } finally {

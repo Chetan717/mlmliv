@@ -181,7 +181,7 @@ export function viewPDF(opts) {
     // Clean up after a short delay
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (e) {
-    console.error("viewPDF error:", e);
+    
     throw e;
   }
 }
@@ -202,7 +202,6 @@ export function viewPDF(opts) {
 //     document.body.removeChild(a);
 //     setTimeout(() => URL.revokeObjectURL(url), 10000);
 //   } catch (e) {
-//     console.error("downloadPDF error:", e);
 //     throw e;
 //   }
 // }
@@ -236,7 +235,7 @@ export function downloadPDF(opts) {
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   } catch (e) {
-    console.error("downloadPDF error:", e);
+    
     throw e;
   }
 }

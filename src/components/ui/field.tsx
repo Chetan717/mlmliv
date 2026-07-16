@@ -6,6 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { safeUserMessage } from "@/utils/safeUserMessage"
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
@@ -201,14 +202,18 @@ function FieldError({
     }
 
     if (errors?.length === 1 && errors[0]?.message) {
-      return errors[0].message
+      return safeUserMessage(errors[0].message, "Please check this field.")
     }
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
         {errors.map(
           (error, index) =>
-            error?.message && <li key={index}>{error.message}</li>
+            error?.message && (
+              <li key={index}>
+                {safeUserMessage(error.message, "Please check this field.")}
+              </li>
+            )
         )}
       </ul>
     )

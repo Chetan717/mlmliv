@@ -128,11 +128,7 @@ export default function AskAi() {
       if (prepared?.previewUrl) URL.revokeObjectURL(prepared.previewUrl);
       setPrepared(next);
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Unable to prepare this image.",
-      );
+      setError("Unable to prepare this image. Please try again.");
       event.target.value = "";
     } finally {
       setOptimizing(false);
@@ -163,11 +159,7 @@ export default function AskAi() {
           setCredit(await ensureAskAiCredits(mobileNo));
         } catch {}
       }
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Unable to read this prescription.",
-      );
+      setError("Unable to read this prescription. Please try again.");
     } finally {
       setAnalyzing(false);
     }

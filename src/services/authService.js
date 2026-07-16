@@ -134,16 +134,17 @@ export async function deleteAccount(mobile, pin) {
   return result.data;
 }
 
-/**
- * Normalise Firebase Functions error messages into user-friendly strings.
- */
+/** Convert internal authentication failures into safe user-facing text. */
 export function getAuthErrorMessage(error) {
   const code = error?.code || "";
   const msg  = error?.message || "";
 
-  // Rate-limit errors carry the retry time in the message itself
-  if (code.includes("resource-exhausted") || msg.includes("resource-exhausted"))
-    return msg.replace(/.*?:\s*/, ""); // e.g. "Too many attempts. Please try again in 42 seconds."
+  if (code.includes("resource-exhausted") || msg.includes("resource-exhausted")) {
+    const seconds = msg.match(/(\d+)\s*seconds?/i)?.[1];
+    return seconds
+      ? `Too many attempts. Please try again in ${seconds} seconds.`
+      : "Too many attempts. Please try again later.";
+  }
 
   if (code.includes("not-found")        || msg.includes("not-found"))
     return "No account found with this mobile number";
@@ -156,7 +157,7 @@ export function getAuthErrorMessage(error) {
   if (code.includes("permission-denied")|| msg.includes("permission-denied"))
     return "Please complete OTP verification first.";
   if (code.includes("invalid-argument") || msg.includes("invalid-argument"))
-    return msg.replace(/.*?:\s*/, "");
+    return "Please check the entered details and try again.";
 
   return "Something went wrong. Please try again.";
 }
