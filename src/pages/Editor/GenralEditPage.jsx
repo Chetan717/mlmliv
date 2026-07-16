@@ -4070,7 +4070,7 @@ function GeneralEditPage({
               ) : null}
 
               {/* Watermark */}
-              <Text
+              {/* <Text
                 text="Design By : 9229885383"
                 x={isRight ? 313 : 2}
                 y={100}
@@ -4080,7 +4080,7 @@ function GeneralEditPage({
                 fill="#fff"
                 rotation={-90}
                 listening={false}
-              />
+              /> */}
 
               <Transformer
                 ref={transformerRef}
