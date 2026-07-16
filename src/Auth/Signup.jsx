@@ -1,0 +1,356 @@
+"use client";
+import { useState } from "react";
+import {
+  Button,
+  FieldError,
+  Form,
+  Input,
+  Label,
+  TextField,
+} from "@heroui/react";
+import { InputOTP } from "@heroui/react";
+import { useNavigate, useLocation } from "react-router";
+import logo from "/mlmboo2.ico";
+import { toast } from "@heroui/react";
+import {
+  signupInit,
+  signupVerify,
+  verifyUser,
+  resendOtp,
+  getAuthErrorMessage,
+} from "../services/authService";
+import { setAuthFlowPending, setUser } from "../utils/authStorage";
+import {
+  clearCompanyProfileStorage,
+  saveMlmProfileToStorage,
+  syncSelectedCompanyFromProfile,
+} from "../utils/companyStorage";
+
+export function Signup() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const verifyState = location.state?.verifyMode ? location.state : null;
+
+  const [step, setStep]             = useState(verifyState ? 2 : 1);
+  const [loading, setLoading]       = useState(false);
+  const [formError, setFormError]   = useState("");
+  const [enteredOtp, setEnteredOtp] = useState("");
+  const [otpError, setOtpError]     = useState("");
+  const [referInput, setReferInput] = useState("");
+
+  // sessionId returned by Cloud Function after OTP is sent
+  const [sessionId, setSessionId]   = useState(verifyState?.sessionId || "");
+  const [userMobile, setUserMobile] = useState(verifyState?.mobile    || "");
+
+  // ── STEP 1: Send OTP ───────────────────────────────────────────────────────
+  const onSignupSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data     = {};
+    formData.forEach((value, key) => { data[key] = value.toString().trim(); });
+
+    try {
+      setLoading(true);
+      setFormError("");
+
+      const result = await signupInit(data.name, data.mobile, data.pin, referInput);
+
+      setSessionId(result.sessionId);
+      setUserMobile(data.mobile);
+      setStep(2);
+    } catch (error) {
+      setFormError(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── STEP 2: Verify OTP ────────────────────────────────────────────────────
+  const onVerifyOtp = async () => {
+    if (enteredOtp.length < 4) {
+      setOtpError("Please enter the 4-digit OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setOtpError("");
+      setAuthFlowPending(true);
+
+      let result;
+
+      if (verifyState) {
+        // Re-verify an existing unverified account (came from login)
+        result = await verifyUser(sessionId, enteredOtp);
+      } else {
+        // Normal signup verification
+        result = await signupVerify(sessionId, enteredOtp);
+      }
+
+      setUser(result.user, true);
+      clearCompanyProfileStorage();
+
+      if (result.mlmProfile) {
+        saveMlmProfileToStorage(result.mlmProfile);
+        await syncSelectedCompanyFromProfile({ force: true });
+        toast.success("Account created! Welcome to MLM LIVE 🎉");
+        navigate("/");
+      } else {
+        toast.success("Account created! Welcome to MLM LIVE 🎉");
+        navigate("/selectcomp");
+      }
+    } catch (error) {
+      setOtpError(getAuthErrorMessage(error));
+      setEnteredOtp("");
+    } finally {
+      setAuthFlowPending(false);
+      setLoading(false);
+    }
+  };
+
+  // ── Resend OTP ─────────────────────────────────────────────────────────────
+  const onResendOtp = async () => {
+    try {
+      setLoading(true);
+      setOtpError("");
+      const type = verifyState ? "login_verify" : "signup";
+      await resendOtp(sessionId, type);
+      alert("OTP resent successfully!");
+    } catch (error) {
+      setOtpError(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stepTitles = ["", "Create Account", "Verify OTP"];
+  const stepSubs   = ["", "Join MLM LIVE today", `OTP sent to +91 ${userMobile}`];
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background overflow-hidden">
+      <div className="relative h-[240px] md:h-[280px] bg-accent overflow-hidden shrink-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent via-[#1a3a8f] to-[#0a1744]" />
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-white/5" />
+
+        <div className="relative z-10 flex flex-col items-center justify-center h-full gap-3 px-6">
+          <div className="w-16 h-16 bg-white rounded-[18px] shadow-2xl flex items-center justify-center border-2 border-white/20 p-2">
+            <img src={logo} alt="MLM LIVE" className="w-full h-full object-contain" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-white font-display font-bold text-2xl leading-tight">
+              {stepTitles[step]}
+            </h1>
+            <p className="text-white/70 text-sm mt-1 font-medium">
+              {stepSubs[step]}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 mt-1">
+            {[1, 2].map((s) => (
+              <div
+                key={s}
+                className={`rounded-full transition-all duration-300 ${
+                  step === s ? "w-6 h-2 bg-white" : "w-2 h-2 bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-background rounded-t-[32px]" />
+      </div>
+
+      <div className="flex-1 flex flex-col items-center px-6 pt-2 pb-8 bg-background -mt-1">
+        <div className="w-full max-w-sm">
+
+          {/* ── STEP 1: Registration Form ── */}
+          {step === 1 && (
+            <Form className="flex w-full flex-col gap-5" onSubmit={onSignupSubmit}>
+
+              <TextField name="name" type="text" className="w-full">
+                <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
+                  Full Name
+                </Label>
+                <Input
+                  className="w-full"
+                  classNames={{
+                    inputWrapper:
+                      "h-13 bg-white dark:bg-black/20 border border-border hover:border-accent focus-within:!border-accent focus-within:!ring-accent shadow-sm rounded-xl",
+                    input: "text-base font-medium",
+                  }}
+                  placeholder="Enter your full name"
+                />
+                <FieldError className="text-danger mt-1 text-xs" />
+              </TextField>
+
+              <TextField name="mobile" type="tel" className="w-full">
+                <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
+                  Mobile Number
+                </Label>
+                <Input
+                  className="w-full"
+                  classNames={{
+                    inputWrapper:
+                      "h-13 bg-white dark:bg-black/20 border border-border hover:border-accent focus-within:!border-accent focus-within:!ring-accent shadow-sm rounded-xl",
+                    input: "text-base font-medium tracking-wide",
+                  }}
+                  placeholder="10-digit number"
+                  maxLength={10}
+                  autoComplete="username"
+                  inputMode="numeric"
+                  autoCapitalize="none"
+                />
+                <FieldError className="text-danger mt-1 text-xs" />
+              </TextField>
+
+              <div className="flex flex-col gap-1 w-full">
+                <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
+                  Create 4-Digit PIN
+                </Label>
+                <InputOTP
+                  name="pin"
+                  maxLength={4}
+                  type="password"
+                  autoComplete="new-password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  pushPasswordManagerStrategy="increase-width"
+                >
+                  <InputOTP.Group className="gap-3 w-full justify-between">
+                    {[0, 1, 2, 3].map((i) => (
+                      <InputOTP.Slot
+                        key={i}
+                        index={i}
+                        className="flex-1 h-14 text-2xl font-bold bg-white dark:bg-black/20 border border-border data-[focus=true]:border-accent data-[focus=true]:ring-accent shadow-sm rounded-xl"
+                      />
+                    ))}
+                  </InputOTP.Group>
+                </InputOTP>
+              </div>
+
+              <div className="flex flex-col gap-1 w-full">
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label className="font-semibold text-sm text-foreground/80">
+                    Refer Code
+                  </Label>
+                  <span className="text-muted-foreground font-medium text-[10px] bg-muted px-2 py-0.5 rounded-full uppercase tracking-wide">
+                    Optional
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="User or Marketing refer code"
+                  maxLength={8}
+                  value={referInput}
+                  onChange={(e) => {
+                    setReferInput(e.target.value.toUpperCase());
+                    setFormError("");
+                  }}
+                  className="h-13 px-4 border border-border bg-white dark:bg-black/20 rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all shadow-sm"
+                />
+              </div>
+
+              {formError && (
+                <div className="bg-danger/10 border border-danger/20 text-danger text-sm text-center py-3 px-4 rounded-xl font-medium">
+                  {formError}
+                </div>
+              )}
+
+              <Button
+                className="w-full h-13 bg-accent hover:bg-accent/90 text-white font-bold text-base shadow-lg shadow-accent/25 rounded-xl mt-2"
+                type="submit"
+                isLoading={loading}
+              >
+                {loading ? "Sending OTP..." : "Continue"}
+              </Button>
+
+              <p className="text-center text-sm font-medium text-muted-foreground">
+                Already have an account?
+                <span
+                  onClick={() => navigate("/login")}
+                  className="ml-1.5 text-accent font-bold cursor-pointer hover:underline"
+                >
+                  Login
+                </span>
+              </p>
+            </Form>
+          )}
+
+          {/* ── STEP 2: OTP Verification ── */}
+          {step === 2 && (
+            <div className="flex w-full flex-col gap-6 pt-2">
+              {verifyState && (
+                <div className="bg-accent/10 border border-accent/20 rounded-xl p-3 text-center">
+                  <p className="text-sm font-semibold text-accent">
+                    आपका अकाउंट verify नहीं हुआ था।
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    +91 {userMobile} पर नया OTP भेजा गया है।
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1 w-full">
+                <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block text-center">
+                  Enter 4-Digit OTP
+                </Label>
+                <InputOTP
+                  maxLength={4}
+                  value={enteredOtp}
+                  onChange={(val) => setEnteredOtp(val)}
+                  autoComplete="one-time-code"
+                  inputMode="numeric"
+                >
+                  <InputOTP.Group className="gap-3 w-full justify-between">
+                    {[0, 1, 2, 3].map((i) => (
+                      <InputOTP.Slot
+                        key={i}
+                        index={i}
+                        className="flex-1 h-14 text-2xl font-bold bg-white dark:bg-black/20 border border-border data-[focus=true]:border-accent data-[focus=true]:ring-accent shadow-sm rounded-xl"
+                      />
+                    ))}
+                  </InputOTP.Group>
+                </InputOTP>
+              </div>
+
+              {otpError && (
+                <div className="bg-danger/10 border border-danger/20 text-danger text-sm text-center py-3 px-4 rounded-xl font-medium">
+                  {otpError}
+                </div>
+              )}
+
+              <Button
+                className="w-full h-13 bg-accent hover:bg-accent/90 text-white font-bold text-base shadow-lg shadow-accent/25 rounded-xl"
+                onClick={onVerifyOtp}
+                isLoading={loading}
+              >
+                {loading ? "Verifying..." : "Verify & Create Account"}
+              </Button>
+
+              <div className="flex justify-between items-center px-2">
+                <span
+                  onClick={() => {
+                    if (verifyState) navigate("/login");
+                    else setStep(1);
+                  }}
+                  className="text-sm text-muted-foreground font-semibold cursor-pointer hover:text-foreground transition-colors"
+                >
+                  Back
+                </span>
+                <span
+                  onClick={onResendOtp}
+                  className="text-sm text-accent font-bold cursor-pointer hover:underline"
+                >
+                  Resend OTP
+                </span>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}

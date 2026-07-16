@@ -1,0 +1,509 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap');
+@import "tailwindcss";
+@import "@heroui/styles";
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+:root,
+.light,
+[data-theme="light"],
+[data-theme="default"] {
+  --accent: #0088DA;
+  --accent-foreground: #ffffff;
+  --background: #f4f6fb;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --card-foreground: #0f1117;
+  --danger: oklch(65.32% 0.2335 27.01);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(94.00% 0.0015 264.39);
+  --default-foreground: oklch(21.03% 0.0059 264.39);
+  --field-background: #ffffff;
+  --field-foreground: #0f1117;
+  --field-placeholder: #94a3b8;
+  --focus: #0088DA;
+  --foreground: #0f1117;
+  --muted: #64748b;
+  --muted-foreground: #64748b;
+  --overlay: #ffffff;
+  --overlay-foreground: #0f1117;
+  --scrollbar: #cbd5e1;
+  --segment: #ffffff;
+  --segment-foreground: #0f1117;
+  --separator: #f1f5f9;
+  --success: oklch(73.29% 0.1941 152.08);
+  --success-foreground: oklch(21.03% 0.0059 152.08);
+  --surface: #ffffff;
+  --surface-foreground: #0f1117;
+  --surface-secondary: #f8fafc;
+  --surface-secondary-foreground: #0f1117;
+  --surface-tertiary: #f1f5f9;
+  --surface-tertiary-foreground: #0f1117;
+  --warning: oklch(78.19% 0.1590 73.60);
+  --warning-foreground: oklch(21.03% 0.0059 73.60);
+
+  --radius: 0.75rem;
+  --field-radius: 0.75rem;
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Syne', sans-serif;
+
+  /* Card shadow */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06), 0 2px 12px rgba(0, 0, 0, 0.04);
+  --shadow-elevated: 0 4px 24px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes shimmerSlide {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes marquee-smooth {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-smooth {
+  display: inline-flex;
+  animation: marquee-smooth 5s linear infinite;
+  width: max-content;
+}
+.dark,
+.default,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --accent: #0088DA;
+  --accent-foreground: #ffffff;
+  --background: #0b0f19;
+  --border: #1e2736;
+  --card: #141824;
+  --card-foreground: #f8fafc;
+  --danger: oklch(59.40% 0.1973 25.90);
+  --danger-foreground: oklch(99.11% 0 0);
+  --default: oklch(27.40% 0.0015 264.39);
+  --default-foreground: oklch(99.11% 0 0);
+  --field-background: #1a2236;
+  --field-foreground: #f8fafc;
+  --field-placeholder: #64748b;
+  --focus: #0088DA;
+  --foreground: #f8fafc;
+  --muted: #8899aa;
+  --muted-foreground: #8899aa;
+  --overlay: #141824;
+  --overlay-foreground: #f8fafc;
+  --scrollbar: #2d3748;
+  --segment: #1e2736;
+  --segment-foreground: #f8fafc;
+  --separator: #1e2736;
+  --success: oklch(73.29% 0.1941 152.08);
+  --success-foreground: oklch(21.03% 0.0059 152.08);
+  --surface: #141824;
+  --surface-foreground: #f8fafc;
+  --surface-secondary: #1a2236;
+  --surface-secondary-foreground: #f8fafc;
+  --surface-tertiary: #1e2a3e;
+  --surface-tertiary-foreground: #f8fafc;
+  --warning: oklch(82.03% 0.1392 77.61);
+  --warning-foreground: oklch(21.03% 0.0059 77.61);
+
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.30), 0 2px 12px rgba(0, 0, 0, 0.20);
+  --shadow-elevated: 0 4px 24px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(0, 0, 0, 0.30);
+}
+
+html {
+  font-size: 14px;
+}
+
+/* ── WebView / React Native WebView performance ────────────────────────── */
+
+/* Eliminate 300ms tap delay on all tappable elements */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+/* Instant touch response — no delay, no ghost highlight */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea,
+.cursor-pointer {
+  touch-action: manipulation;
+}
+
+/* Prevent accidental text selection on interactive cards */
+button,
+[role="button"],
+.cursor-pointer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* GPU-accelerated horizontal scroll containers */
+.scroll-gpu {
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent elastic overscroll showing white gap in WebView */
+  overscroll-behavior: none;
+}
+
+/* Dark mode contrast booster — ensure inherited text is crisp white */
+.dark,
+[data-theme="dark"] {
+  color: #f8fafc;
+}
+
+.dark body,
+[data-theme="dark"] body {
+  color: #f8fafc;
+}
+
+.dark .text-foreground,
+[data-theme="dark"] .text-foreground {
+  color: #ffffff !important;
+}
+
+.dark .text-muted-foreground,
+[data-theme="dark"] .text-muted-foreground {
+  color: #cbd5e1 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+.layout-scroll-container {
+  scrollbar-gutter: stable;
+}
+
+/* Hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Animations ─────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes shimmerSlide {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Reusable shimmer skeleton bar — used in template cards */
+.shimmer-bar {
+  background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 37%, #e8e8e8 63%);
+  background-size: 400% 100%;
+  animation: shimmerSlide 1.2s ease infinite;
+}
+
+.dark .shimmer-bar,
+[data-theme="dark"] .shimmer-bar {
+  background: linear-gradient(90deg, #1e2736 25%, #252f42 37%, #1e2736 63%);
+  background-size: 400% 100%;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-toast-in {
+  animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-toast-out {
+  animation: toastOut 0.25s ease-in forwards;
+}
+
+/* ── Safe area ──────────────────────────────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Utilities ──────────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, #0088DA, #0088DA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-press:active {
+  transform: scale(0.97);
+}
+
+/* ── Toast container ────────────────────────────────── */
+#toast-root {
+  position: fixed;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+  width: min(90vw, 380px);
+}
+
+@media (min-width: 768px) {
+  #toast-root {
+    bottom: 24px;
+    right: 24px;
+    left: auto;
+    transform: none;
+    align-items: flex-end;
+  }
+}
+
+.toast-item {
+  pointer-events: all;
+  width: 100%;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(16px);
+  animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.toast-success {
+  background: #16a34a;
+  color: #fff;
+}
+
+.toast-error {
+  background: #dc2626;
+  color: #fff;
+}
+
+.toast-info {
+  background: #0088DA;
+  color: #fff;
+}
+
+.toast-warning {
+  background: #d97706;
+  color: #fff;
+}
+
+/* ── Font Lock — prevent HeroUI/Tailwind from overriding fonts ─────────── */
+/* Must be at the bottom of the file to win the cascade */
+:root {
+  --font-sans: 'Inter', sans-serif !important;
+  --font-display: 'Syne', sans-serif !important;
+}
+
+body,
+body * {
+  font-family: 'Inter', sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+  font-family: 'Syne', sans-serif !important;
+}
+
+/* ── Global toast appearance ─────────────────────────────── */
+
+[data-slot="toast-region"] {
+ 
+}
+
+[data-slot="toast"] {
+  background-color: #fff;
+
+  color: var(--foreground) !important;
+
+  border: 1px solid color-mix(in srgb,
+      var(--accent) 80%,
+      transparent) !important;
+
+  border-radius: 14px !important;
+  box-shadow: 0 8px 10px #0088DA !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  pointer-events: auto;
+}
+
+[data-slot="toast-title"] {
+  color: var(--foreground) !important;
+  font-weight: 600 !important;
+}
+
+[data-slot="toast-description"] {
+  color: var(--muted-foreground) !important;
+}
+
+[data-slot="toast-content"] {
+  color: var(--foreground) !important;
+}
