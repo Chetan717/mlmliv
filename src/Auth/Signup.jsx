@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   Button,
@@ -7,11 +8,12 @@ import {
   Input,
   Label,
   TextField,
+  InputOTP,
+  toast,
 } from "@heroui/react";
-import { InputOTP } from "@heroui/react";
 import { useNavigate, useLocation } from "react-router";
 import logo from "/mlmboo2.ico";
-import { toast } from "@heroui/react";
+
 import {
   signupInit,
   signupVerify,
@@ -19,11 +21,14 @@ import {
   resendOtp,
   getAuthErrorMessage,
 } from "../services/authService";
+
 import { setAuthFlowPending, setUser } from "../utils/authStorage";
+
 import {
   clearCompanyProfileStorage,
   saveMlmProfileToStorage,
 } from "../utils/companyStorage";
+
 import {
   clearPendingReferralCode,
   getPendingReferralCode,
@@ -34,69 +39,135 @@ import {
   savePendingReferralCode,
 } from "../utils/referralCode";
 
+const REFERRAL_SOURCE_STORAGE_KEY = "mlmlive.referralCodeSource";
+
+const getStoredReferralSource = () => {
+  try {
+    return window.localStorage.getItem(REFERRAL_SOURCE_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+};
+
+const storeReferralSource = (source) => {
+  try {
+    if (source) {
+      window.localStorage.setItem(REFERRAL_SOURCE_STORAGE_KEY, source);
+    } else {
+      window.localStorage.removeItem(REFERRAL_SOURCE_STORAGE_KEY);
+    }
+  } catch {
+    // Local storage may be unavailable in private mode.
+  }
+};
+
 export function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const verifyState = location.state?.verifyMode ? location.state : null;
 
-  const [step, setStep]             = useState(verifyState ? 2 : 1);
-  const [loading, setLoading]       = useState(false);
-  const [formError, setFormError]   = useState("");
+  const [step, setStep] = useState(verifyState ? 2 : 1);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
-  const [otpError, setOtpError]     = useState("");
+  const [otpError, setOtpError] = useState("");
+
   const [referInput, setReferInput] = useState(() => {
     const queryCode = getReferralCodeFromSearch(window.location.search);
     return queryCode || getPendingReferralCode();
   });
 
-  // sessionId returned by Cloud Function after OTP is sent
-  const [sessionId, setSessionId]   = useState(verifyState?.sessionId || "");
-  const [userMobile, setUserMobile] = useState(verifyState?.mobile    || "");
+  const [isReferralLocked, setIsReferralLocked] = useState(() => {
+    const queryCode = getReferralCodeFromSearch(window.location.search);
+    const pendingCode = queryCode || getPendingReferralCode();
+    const storedSource = getStoredReferralSource();
 
-  // Referral codes can arrive from a normal web/deep-link query or from the
-  // Expo React Native WebView after Google Play returns its install referrer.
+    /*
+     * If the pending code has no source, it probably came from the native
+     * WebView before the signup screen opened. Therefore, it will be treated
+     * as an automatically applied referral code.
+     *
+     * Codes entered manually are marked as "manual" and remain editable.
+     */
+    return Boolean(pendingCode && (queryCode || storedSource !== "manual"));
+  });
+
+  const [sessionId, setSessionId] = useState(verifyState?.sessionId || "");
+
+  const [userMobile, setUserMobile] = useState(verifyState?.mobile || "");
+
+  /*
+   * Referral code can arrive from:
+   * 1. Website/deep-link query
+   * 2. Expo React Native WebView
+   * 3. Google Play Install Referrer
+   */
   useEffect(() => {
     const queryCode = getReferralCodeFromSearch(location.search);
+
     if (queryCode) {
       setReferInput(savePendingReferralCode(queryCode));
+      setIsReferralLocked(true);
+      storeReferralSource("automatic");
     }
 
     const acceptReferralCode = (rawMessage) => {
       const code = getReferralCodeFromBridgeMessage(rawMessage);
+
       if (!code) return;
 
       setReferInput(savePendingReferralCode(code));
+      setIsReferralLocked(true);
+      storeReferralSource("automatic");
       setFormError("");
     };
 
-    const handleWindowMessage = (event) => acceptReferralCode(event.data);
-    const handleReferralEvent = (event) => acceptReferralCode(event.detail);
+    const handleWindowMessage = (event) => {
+      acceptReferralCode(event.data);
+    };
+
+    const handleReferralEvent = (event) => {
+      acceptReferralCode(event.detail);
+    };
 
     window.addEventListener("message", handleWindowMessage);
+
     // Some Android WebView versions dispatch messages on document.
     document.addEventListener("message", handleWindowMessage);
+
     window.addEventListener("mlmlive:referral-code", handleReferralEvent);
 
     return () => {
       window.removeEventListener("message", handleWindowMessage);
+
       document.removeEventListener("message", handleWindowMessage);
+
       window.removeEventListener("mlmlive:referral-code", handleReferralEvent);
     };
   }, [location.search]);
 
-  // ── STEP 1: Send OTP ───────────────────────────────────────────────────────
-  const onSignupSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data     = {};
-    formData.forEach((value, key) => { data[key] = value.toString().trim(); });
+  // STEP 1: Send signup OTP
+  const onSignupSubmit = async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const data = {};
+
+    formData.forEach((value, key) => {
+      data[key] = value.toString().trim();
+    });
 
     try {
       setLoading(true);
       setFormError("");
 
-      const result = await signupInit(data.name, data.mobile, data.pin, referInput);
+      const result = await signupInit(
+        data.name,
+        data.mobile,
+        data.pin,
+        referInput,
+      );
 
       setSessionId(result.sessionId);
       setUserMobile(data.mobile);
@@ -108,7 +179,7 @@ export function Signup() {
     }
   };
 
-  // ── STEP 2: Verify OTP ────────────────────────────────────────────────────
+  // STEP 2: Verify OTP
   const onVerifyOtp = async () => {
     if (enteredOtp.length < 4) {
       setOtpError("Please enter the 4-digit OTP");
@@ -123,24 +194,30 @@ export function Signup() {
       let result;
 
       if (verifyState) {
-        // Re-verify an existing unverified account (came from login)
         result = await verifyUser(sessionId, enteredOtp);
       } else {
-        // Normal signup verification
         result = await signupVerify(sessionId, enteredOtp);
       }
 
       setUser(result.user, true);
+
+      // Clear referral only after successful signup.
       clearPendingReferralCode();
+      storeReferralSource("");
+
       notifyNativeReferralCleared("REFERRAL_CODE_CONSUMED");
+
       clearCompanyProfileStorage();
 
       if (result.mlmProfile) {
         saveMlmProfileToStorage(result.mlmProfile);
+
         toast.success("Account created! Welcome to MLM LIVE 🎉");
+
         navigate("/");
       } else {
         toast.success("Account created! Welcome to MLM LIVE 🎉");
+
         navigate("/selectcomp");
       }
     } catch (error) {
@@ -152,13 +229,16 @@ export function Signup() {
     }
   };
 
-  // ── Resend OTP ─────────────────────────────────────────────────────────────
+  // Resend OTP
   const onResendOtp = async () => {
     try {
       setLoading(true);
       setOtpError("");
+
       const type = verifyState ? "login_verify" : "signup";
+
       await resendOtp(sessionId, type);
+
       alert("OTP resent successfully!");
     } catch (error) {
       setOtpError(getAuthErrorMessage(error));
@@ -168,34 +248,45 @@ export function Signup() {
   };
 
   const stepTitles = ["", "Create Account", "Verify OTP"];
-  const stepSubs   = ["", "Join MLM LIVE today", `OTP sent to +91 ${userMobile}`];
+
+  const stepSubs = ["", "Join MLM LIVE today", `OTP sent to +91 ${userMobile}`];
 
   return (
     <div className="flex flex-col min-h-screen bg-background overflow-hidden">
       <div className="relative h-[240px] md:h-[280px] bg-accent overflow-hidden shrink-0">
         <div className="absolute inset-0 bg-gradient-to-br from-accent via-[#1a3a8f] to-[#0a1744]" />
+
         <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5" />
+
         <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-white/5" />
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full gap-3 px-6">
           <div className="w-16 h-16 bg-white rounded-[18px] shadow-2xl flex items-center justify-center border-2 border-white/20 p-2">
-            <img src={logo} alt="MLM LIVE" className="w-full h-full object-contain" />
+            <img
+              src={logo}
+              alt="MLM LIVE"
+              className="w-full h-full object-contain"
+            />
           </div>
+
           <div className="text-center">
             <h1 className="text-white font-display font-bold text-2xl leading-tight">
               {stepTitles[step]}
             </h1>
+
             <p className="text-white/70 text-sm mt-1 font-medium">
               {stepSubs[step]}
             </p>
           </div>
 
           <div className="flex items-center gap-2 mt-1">
-            {[1, 2].map((s) => (
+            {[1, 2].map((currentStep) => (
               <div
-                key={s}
+                key={currentStep}
                 className={`rounded-full transition-all duration-300 ${
-                  step === s ? "w-6 h-2 bg-white" : "w-2 h-2 bg-white/40"
+                  step === currentStep
+                    ? "w-6 h-2 bg-white"
+                    : "w-2 h-2 bg-white/40"
                 }`}
               />
             ))}
@@ -207,15 +298,17 @@ export function Signup() {
 
       <div className="flex-1 flex flex-col items-center px-6 pt-2 pb-8 bg-background -mt-1">
         <div className="w-full max-w-sm">
-
-          {/* ── STEP 1: Registration Form ── */}
+          {/* STEP 1: Registration form */}
           {step === 1 && (
-            <Form className="flex w-full flex-col gap-5" onSubmit={onSignupSubmit}>
-
+            <Form
+              className="flex w-full flex-col gap-5"
+              onSubmit={onSignupSubmit}
+            >
               <TextField name="name" type="text" className="w-full">
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
                   Full Name
                 </Label>
+
                 <Input
                   className="w-full"
                   classNames={{
@@ -225,6 +318,7 @@ export function Signup() {
                   }}
                   placeholder="Enter your full name"
                 />
+
                 <FieldError className="text-danger mt-1 text-xs" />
               </TextField>
 
@@ -232,6 +326,7 @@ export function Signup() {
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
                   Mobile Number
                 </Label>
+
                 <Input
                   className="w-full"
                   classNames={{
@@ -245,6 +340,7 @@ export function Signup() {
                   inputMode="numeric"
                   autoCapitalize="none"
                 />
+
                 <FieldError className="text-danger mt-1 text-xs" />
               </TextField>
 
@@ -252,6 +348,7 @@ export function Signup() {
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
                   Create 4-Digit PIN
                 </Label>
+
                 <InputOTP
                   name="pin"
                   maxLength={4}
@@ -262,10 +359,10 @@ export function Signup() {
                   pushPasswordManagerStrategy="increase-width"
                 >
                   <InputOTP.Group className="gap-3 w-full justify-between">
-                    {[0, 1, 2, 3].map((i) => (
+                    {[0, 1, 2, 3].map((index) => (
                       <InputOTP.Slot
-                        key={i}
-                        index={i}
+                        key={index}
+                        index={index}
                         className="flex-1 h-14 text-2xl font-bold bg-white dark:bg-black/20 border border-border data-[focus=true]:border-accent data-[focus=true]:ring-accent shadow-sm rounded-xl"
                       />
                     ))}
@@ -273,33 +370,63 @@ export function Signup() {
                 </InputOTP>
               </div>
 
+              {/* Referral code field */}
               <div className="flex flex-col gap-1 w-full">
                 <div className="flex items-center justify-between mb-1.5">
                   <Label className="font-semibold text-sm text-foreground/80">
                     Refer Code
                   </Label>
-                  <span className="text-muted-foreground font-medium text-[10px] bg-muted px-2 py-0.5 rounded-full uppercase tracking-wide">
-                    Optional
+
+                  <span
+                    className={`font-semibold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide ${
+                      isReferralLocked
+                        ? "text-accent bg-accent/10"
+                        : "text-muted-foreground bg-muted"
+                    }`}
+                  >
+                    {isReferralLocked ? "Auto Applied" : "Optional"}
                   </span>
                 </div>
+
                 <input
                   type="text"
                   placeholder="User or Marketing refer code"
                   maxLength={8}
                   value={referInput}
-                  onChange={(e) => {
-                    const code = normalizeReferralCode(e.target.value);
+                  disabled={isReferralLocked}
+                  readOnly={isReferralLocked}
+                  aria-readonly={isReferralLocked}
+                  onChange={(event) => {
+                    if (isReferralLocked) return;
+
+                    const code = normalizeReferralCode(event.target.value);
+
                     setReferInput(code);
+
                     if (code) {
                       savePendingReferralCode(code);
+                      storeReferralSource("manual");
                     } else {
                       clearPendingReferralCode();
+                      storeReferralSource("");
+
                       notifyNativeReferralCleared();
                     }
+
                     setFormError("");
                   }}
-                  className="h-13 px-4 border border-border bg-white dark:bg-black/20 rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all shadow-sm"
+                  className={`h-13 px-4 border rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none transition-all shadow-sm disabled:opacity-100 ${
+                    isReferralLocked
+                      ? "border-accent/30 bg-accent/10 text-accent cursor-not-allowed"
+                      : "border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  }`}
                 />
+
+                {isReferralLocked && (
+                  <p className="text-[11px] font-medium text-accent mt-1">
+                    Referral code applied automatically from your install link.
+                  </p>
+                )}
               </div>
 
               {formError && (
@@ -328,7 +455,7 @@ export function Signup() {
             </Form>
           )}
 
-          {/* ── STEP 2: OTP Verification ── */}
+          {/* STEP 2: OTP verification */}
           {step === 2 && (
             <div className="flex w-full flex-col gap-6 pt-2">
               {verifyState && (
@@ -336,6 +463,7 @@ export function Signup() {
                   <p className="text-sm font-semibold text-accent">
                     आपका अकाउंट verify नहीं हुआ था।
                   </p>
+
                   <p className="text-xs text-muted-foreground mt-0.5">
                     +91 {userMobile} पर नया OTP भेजा गया है।
                   </p>
@@ -346,18 +474,21 @@ export function Signup() {
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block text-center">
                   Enter 4-Digit OTP
                 </Label>
+
                 <InputOTP
                   maxLength={4}
                   value={enteredOtp}
-                  onChange={(val) => setEnteredOtp(val)}
+                  onChange={(value) => {
+                    setEnteredOtp(value);
+                  }}
                   autoComplete="one-time-code"
                   inputMode="numeric"
                 >
                   <InputOTP.Group className="gap-3 w-full justify-between">
-                    {[0, 1, 2, 3].map((i) => (
+                    {[0, 1, 2, 3].map((index) => (
                       <InputOTP.Slot
-                        key={i}
-                        index={i}
+                        key={index}
+                        index={index}
                         className="flex-1 h-14 text-2xl font-bold bg-white dark:bg-black/20 border border-border data-[focus=true]:border-accent data-[focus=true]:ring-accent shadow-sm rounded-xl"
                       />
                     ))}
@@ -382,13 +513,17 @@ export function Signup() {
               <div className="flex justify-between items-center px-2">
                 <span
                   onClick={() => {
-                    if (verifyState) navigate("/login");
-                    else setStep(1);
+                    if (verifyState) {
+                      navigate("/login");
+                    } else {
+                      setStep(1);
+                    }
                   }}
                   className="text-sm text-muted-foreground font-semibold cursor-pointer hover:text-foreground transition-colors"
                 >
                   Back
                 </span>
+
                 <span
                   onClick={onResendOtp}
                   className="text-sm text-accent font-bold cursor-pointer hover:underline"
@@ -398,7 +533,6 @@ export function Signup() {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>
