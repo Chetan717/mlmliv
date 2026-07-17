@@ -2,11 +2,11 @@
   "meta": {
     "format": "JSON",
     "version": "1.1.0",
-    "projectId": "",
-    "resourcePath": ["template"],
+    "projectId": "hj",
+    "resourcePath": ["temp"],
     "recursive": false,
-    "creationTime": 898,
-    "app": ""
+    "creationTime": 1784289835,
+    "app": "hj"
   },
   "data": {
     "02bDbqWi3AUrOWvKAxlv": {
@@ -2913,6 +2913,83 @@
       "createdAt": { "__time__": "2026-06-26T04:45:38.778Z" },
       "serial": 0,
       "updatedAt": { "__time__": "2026-06-28T10:00:06.483Z" },
+      "__collections__": {}
+    },
+    "2XYmIf1waDt4ceUGpTyl": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-22",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578285,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283555751_3zqw0c.webp?alt=media&token=fefedea9-eaf9-49c3-9d1d-ca2fec99354b",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283555751_3zqw0c.webp?alt=media&token=fefedea9-eaf9-49c3-9d1d-ca2fec99354b"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578887,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283568095_fm26ma.webp?alt=media&token=41e8cf3d-08b2-469d-9a70-fe5b7626a17a",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283568095_fm26ma.webp?alt=media&token=41e8cf3d-08b2-469d-9a70-fe5b7626a17a"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578888,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283578576_5kach8.webp?alt=media&token=1934a0c1-908f-4668-bbae-309950ad6f70",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283578576_5kach8.webp?alt=media&token=1934a0c1-908f-4668-bbae-309950ad6f70"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578889,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283592325_ipjrib.webp?alt=media&token=b22ae364-7ee4-4897-9947-3f3622627774",
+          "url": ""
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784283545810_ft3mot.webp?alt=media&token=bd19f679-5cbe-43a9-956d-c41a150276ca",
+      "Subtype": "WORLD BRAIN DAY",
+      "createdAt": { "__time__": "2026-07-17T10:20:00.973Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T10:20:00.973Z" },
       "__collections__": {}
     },
     "2cZ9M4BlP5gTlwY9KTRy": {
@@ -8803,6 +8880,113 @@
       "updatedAt": { "__time__": "2026-07-12T18:22:59.656Z" },
       "__collections__": {}
     },
+    "9zAHQIRVyXSwfK8MF0K5": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-20",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278176106_u65yki.webp?alt=media&token=1705e4ae-4abe-409f-af61-2c21d442fefa",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278176106_u65yki.webp?alt=media&token=1705e4ae-4abe-409f-af61-2c21d442fefa"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041344,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278194337_aqnas2.webp?alt=media&token=235dcdfa-e9e2-4e50-ac13-d1c5535744db",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278194337_aqnas2.webp?alt=media&token=235dcdfa-e9e2-4e50-ac13-d1c5535744db"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041345,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278206843_es9nam.webp?alt=media&token=4407f5aa-15a9-4302-9c7e-3fc9980cd11c",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278206843_es9nam.webp?alt=media&token=4407f5aa-15a9-4302-9c7e-3fc9980cd11c"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041346,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278219362_1f6w4a.webp?alt=media&token=f504033d-47c6-4d73-b2ce-47a7cd97c902",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278219362_1f6w4a.webp?alt=media&token=f504033d-47c6-4d73-b2ce-47a7cd97c902"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041347,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278244538_4cl84s.webp?alt=media&token=f58c147b-d771-4609-931d-dea1d7e1dd51",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278244538_4cl84s.webp?alt=media&token=f58c147b-d771-4609-931d-dea1d7e1dd51"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041348,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278267714_irg9rj.webp?alt=media&token=abe79c00-03cc-44cc-9a24-d592b1e5532b",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278267714_irg9rj.webp?alt=media&token=abe79c00-03cc-44cc-9a24-d592b1e5532b"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784278149195_edlifp.webp?alt=media&token=f032203c-6111-4a29-9ba3-0e7264bddebf",
+      "Subtype": "international chess day",
+      "createdAt": { "__time__": "2026-07-17T08:51:17.690Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:51:17.690Z" },
+      "__collections__": {}
+    },
     "A1lTPe3j1cPNh4rUCdRL": {
       "Active": true,
       "Company": "",
@@ -9745,6 +9929,98 @@
       "createdAt": { "__time__": "2026-04-26T07:40:18.578Z" },
       "serial": 0,
       "updatedAt": { "__time__": "2026-05-05T07:05:07.019Z" },
+      "__collections__": {}
+    },
+    "Aw7um3be8c7AaEPILj3Z": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-19",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277692478_avuejc.webp?alt=media&token=bdad4ac9-744b-4e93-889d-166683df7c89",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277692478_avuejc.webp?alt=media&token=bdad4ac9-744b-4e93-889d-166683df7c89"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041332,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277712467_zt27wi.webp?alt=media&token=06e5810d-61c9-486b-9815-aef804a86c2b",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277712467_zt27wi.webp?alt=media&token=06e5810d-61c9-486b-9815-aef804a86c2b"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041333,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277727044_fnn7o4.webp?alt=media&token=62651521-77ec-461a-a190-534c76bda631",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277727044_fnn7o4.webp?alt=media&token=62651521-77ec-461a-a190-534c76bda631"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041334,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277739247_vx6o40.webp?alt=media&token=01d9fa7d-84ae-41e8-8097-edbe0c86efde",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277739247_vx6o40.webp?alt=media&token=01d9fa7d-84ae-41e8-8097-edbe0c86efde"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041335,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277752952_t16oo2.webp?alt=media&token=c72b3582-db2b-4ac4-b707-dd5d9f40280c",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277752952_t16oo2.webp?alt=media&token=c72b3582-db2b-4ac4-b707-dd5d9f40280c"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784277669872_n35yz7.webp?alt=media&token=b3aaf024-32c6-4e7c-8900-a526b22256ee",
+      "Subtype": "shri mangal pandey ji",
+      "createdAt": { "__time__": "2026-07-17T08:42:55.338Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:42:55.338Z" },
       "__collections__": {}
     },
     "BNxisgqK3F55ZBUovpTx": {
@@ -12716,6 +12992,98 @@
       "updatedAt": { "__time__": "2026-07-04T08:51:42.273Z" },
       "__collections__": {}
     },
+    "DQD0GF7KahYG67lKbIat": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-19",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278019938_3rwvlv.webp?alt=media&token=594d2077-9735-46b5-a3ff-3eeb0ae5e3a9",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278019938_3rwvlv.webp?alt=media&token=594d2077-9735-46b5-a3ff-3eeb0ae5e3a9"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041340,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278043656_9krtzu.webp?alt=media&token=f9667d14-f5e0-4eaf-ae00-c434d7602c40",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278043656_9krtzu.webp?alt=media&token=f9667d14-f5e0-4eaf-ae00-c434d7602c40"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041341,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278059108_u0egnb.webp?alt=media&token=58d95e29-3606-4ef8-b380-cdc5087cebeb",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278059108_u0egnb.webp?alt=media&token=58d95e29-3606-4ef8-b380-cdc5087cebeb"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041342,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278072695_qe9lp8.webp?alt=media&token=d3fc7da7-f2f7-48c5-9bf9-cd7284c7f60f",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278072695_qe9lp8.webp?alt=media&token=d3fc7da7-f2f7-48c5-9bf9-cd7284c7f60f"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041343,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278091610_w7cqmf.webp?alt=media&token=5914fb9e-e73b-487f-8886-03c4ae534bda",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278091610_w7cqmf.webp?alt=media&token=5914fb9e-e73b-487f-8886-03c4ae534bda"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784277986353_f6f59v.webp?alt=media&token=6f7bd8db-d454-4ffe-83a4-7fcbd33d4d19",
+      "Subtype": "skanda sashti",
+      "createdAt": { "__time__": "2026-07-17T08:48:17.738Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:48:17.738Z" },
+      "__collections__": {}
+    },
     "DmJzSzz5hrtEx117WVhe": {
       "Active": true,
       "Company": "",
@@ -15377,7 +15745,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031965731_x9bige.webp?alt=media&token=657b547b-f74a-4812-9cdd-f9e17dd7e7b3",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031965731_x9bige.webp?alt=media&token=657b547b-f74a-4812-9cdd-f9e17dd7e7b3"
@@ -15392,7 +15760,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031979111_6gobqq.webp?alt=media&token=65cc754c-71c2-4fb2-983c-79287f400737",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031979111_6gobqq.webp?alt=media&token=65cc754c-71c2-4fb2-983c-79287f400737"
@@ -15407,7 +15775,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031987473_ncxn24.webp?alt=media&token=aff7d615-e10f-4532-ade3-aeca22136bed",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031987473_ncxn24.webp?alt=media&token=aff7d615-e10f-4532-ade3-aeca22136bed"
@@ -15422,7 +15790,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031997762_74c2w4.webp?alt=media&token=8afd0b5d-cde1-4804-a026-5f39de364f57",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031997762_74c2w4.webp?alt=media&token=8afd0b5d-cde1-4804-a026-5f39de364f57"
@@ -15437,7 +15805,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032007074_67q5hy.webp?alt=media&token=4f823e5b-a52e-4da3-bdc3-33dac99c9828",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032007074_67q5hy.webp?alt=media&token=4f823e5b-a52e-4da3-bdc3-33dac99c9828"
@@ -15452,7 +15820,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032021224_lgrohf.webp?alt=media&token=8dbb56ad-c19c-48e9-a48f-8d7bc4aa81c2",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032021224_lgrohf.webp?alt=media&token=8dbb56ad-c19c-48e9-a48f-8d7bc4aa81c2"
@@ -15467,7 +15835,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032033549_s33s85.webp?alt=media&token=00e5793f-9690-4df9-8c72-caf9e995a53d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032033549_s33s85.webp?alt=media&token=00e5793f-9690-4df9-8c72-caf9e995a53d"
@@ -15482,7 +15850,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032039804_uqucrm.webp?alt=media&token=85bb3ae7-3087-4318-a753-bcff95851c48",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032039804_uqucrm.webp?alt=media&token=85bb3ae7-3087-4318-a753-bcff95851c48"
@@ -15497,7 +15865,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032047270_c91enf.webp?alt=media&token=0b9c57f1-f378-449f-ad59-a832935322e4",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032047270_c91enf.webp?alt=media&token=0b9c57f1-f378-449f-ad59-a832935322e4"
@@ -15512,7 +15880,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032055387_f6ahv7.webp?alt=media&token=62d55734-616d-4a1f-9eb2-dbeddc069c9d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032055387_f6ahv7.webp?alt=media&token=62d55734-616d-4a1f-9eb2-dbeddc069c9d"
@@ -15527,7 +15895,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032065358_zy7e1o.webp?alt=media&token=afcfb98a-cc61-4b61-8c25-ef374fb23a20",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032065358_zy7e1o.webp?alt=media&token=afcfb98a-cc61-4b61-8c25-ef374fb23a20"
@@ -15542,7 +15910,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032072245_va4sxl.webp?alt=media&token=53ec0313-999e-4b88-8572-6e9e7fe6c2af",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032072245_va4sxl.webp?alt=media&token=53ec0313-999e-4b88-8572-6e9e7fe6c2af"
@@ -15557,7 +15925,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032079614_0tllg3.webp?alt=media&token=0c6ce637-1c0c-4690-906a-10b0678814a1",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032079614_0tllg3.webp?alt=media&token=0c6ce637-1c0c-4690-906a-10b0678814a1"
@@ -15572,7 +15940,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032086932_heecry.webp?alt=media&token=c8b56405-347c-4fd3-913a-3da07fbcf729",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032086932_heecry.webp?alt=media&token=c8b56405-347c-4fd3-913a-3da07fbcf729"
@@ -15587,7 +15955,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032094904_9dec3u.webp?alt=media&token=5e051814-b120-4fa0-baea-38a0b9303fc5",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032094904_9dec3u.webp?alt=media&token=5e051814-b120-4fa0-baea-38a0b9303fc5"
@@ -15602,7 +15970,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032109800_75ts9j.webp?alt=media&token=fe235632-ff76-4aef-9536-8827ff9656aa",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032109800_75ts9j.webp?alt=media&token=fe235632-ff76-4aef-9536-8827ff9656aa"
@@ -15617,7 +15985,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032116445_7eth8o.webp?alt=media&token=e8aa4f48-e602-4115-a579-3ef35e3bfed0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032116445_7eth8o.webp?alt=media&token=e8aa4f48-e602-4115-a579-3ef35e3bfed0"
@@ -15632,7 +16000,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032125293_b0278s.webp?alt=media&token=4c1b6903-fde4-45d9-9885-f862db0df0fd",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032125293_b0278s.webp?alt=media&token=4c1b6903-fde4-45d9-9885-f862db0df0fd"
@@ -15677,7 +16045,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032151236_z7lo7a.webp?alt=media&token=6238c094-07d4-4d54-907a-7d40030b5cfa",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032151236_z7lo7a.webp?alt=media&token=6238c094-07d4-4d54-907a-7d40030b5cfa"
@@ -15692,7 +16060,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032159123_vqwx2m.webp?alt=media&token=469f347c-3d32-49ac-a757-8b28a8bd9181",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032159123_vqwx2m.webp?alt=media&token=469f347c-3d32-49ac-a757-8b28a8bd9181"
@@ -15707,7 +16075,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032165951_o6vmrh.webp?alt=media&token=9ac0484c-566b-4f08-9149-420bf66095c8",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032165951_o6vmrh.webp?alt=media&token=9ac0484c-566b-4f08-9149-420bf66095c8"
@@ -15722,7 +16090,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032173284_2ibobc.webp?alt=media&token=122420af-3855-42ad-a275-221fcb4e0af2",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032173284_2ibobc.webp?alt=media&token=122420af-3855-42ad-a275-221fcb4e0af2"
@@ -15737,7 +16105,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032181961_c8r01f.webp?alt=media&token=11042272-73f9-4a9c-9d59-36c0756a77d9",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032181961_c8r01f.webp?alt=media&token=11042272-73f9-4a9c-9d59-36c0756a77d9"
@@ -15752,7 +16120,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032190354_bir2yn.webp?alt=media&token=cf409f70-e2d9-411c-944d-db32e122da0d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032190354_bir2yn.webp?alt=media&token=cf409f70-e2d9-411c-944d-db32e122da0d"
@@ -15767,7 +16135,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032198755_zrqye4.webp?alt=media&token=ffd1c7c1-f3ca-4ea6-b7c7-cf829aafef5b",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032198755_zrqye4.webp?alt=media&token=ffd1c7c1-f3ca-4ea6-b7c7-cf829aafef5b"
@@ -15782,7 +16150,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032207902_cpprdd.webp?alt=media&token=bae8b817-e58d-4422-aa49-74c4c0b92915",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032207902_cpprdd.webp?alt=media&token=bae8b817-e58d-4422-aa49-74c4c0b92915"
@@ -15797,7 +16165,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032216293_u8xzqy.webp?alt=media&token=6fa50393-2aeb-4d23-a0a0-79fb09239779",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032216293_u8xzqy.webp?alt=media&token=6fa50393-2aeb-4d23-a0a0-79fb09239779"
@@ -15812,7 +16180,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032225840_5wwd1q.webp?alt=media&token=4f27f38d-e1ed-4709-83fe-5ab364f35e31",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032225840_5wwd1q.webp?alt=media&token=4f27f38d-e1ed-4709-83fe-5ab364f35e31"
@@ -15827,7 +16195,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032235049_8lwabx.webp?alt=media&token=4bd8f34d-86b2-4b43-af03-1fd8d2f7d1a0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032235049_8lwabx.webp?alt=media&token=4bd8f34d-86b2-4b43-af03-1fd8d2f7d1a0"
@@ -15842,7 +16210,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032244560_lnhqib.webp?alt=media&token=2daa6904-4c37-4515-bb98-29b2b8bc5eaf",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032244560_lnhqib.webp?alt=media&token=2daa6904-4c37-4515-bb98-29b2b8bc5eaf"
@@ -15857,7 +16225,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032252600_9w50x2.webp?alt=media&token=3fcd9c8c-97af-4bf5-8348-ac6d97dcb934",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032252600_9w50x2.webp?alt=media&token=3fcd9c8c-97af-4bf5-8348-ac6d97dcb934"
@@ -15872,7 +16240,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032263674_poai6y.webp?alt=media&token=64591242-33d0-49f3-85c8-0752858a5f0a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032263674_poai6y.webp?alt=media&token=64591242-33d0-49f3-85c8-0752858a5f0a"
@@ -15887,7 +16255,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032273299_rfbwcs.webp?alt=media&token=bafefc2d-1b2a-413a-aa71-3f1c186d6406",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032273299_rfbwcs.webp?alt=media&token=bafefc2d-1b2a-413a-aa71-3f1c186d6406"
@@ -15902,7 +16270,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032281173_ewuk46.webp?alt=media&token=0552dd42-0513-4326-a454-0e0032fcb3f0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032281173_ewuk46.webp?alt=media&token=0552dd42-0513-4326-a454-0e0032fcb3f0"
@@ -15917,7 +16285,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032288735_95augq.webp?alt=media&token=1f8c56f6-3109-43cc-8736-d49ea5f7962f",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032288735_95augq.webp?alt=media&token=1f8c56f6-3109-43cc-8736-d49ea5f7962f"
@@ -15932,7 +16300,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032298279_fkiuvb.webp?alt=media&token=0b3a11cb-ced3-4616-a454-4674de74a7cc",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032298279_fkiuvb.webp?alt=media&token=0b3a11cb-ced3-4616-a454-4674de74a7cc"
@@ -15947,7 +16315,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032305701_4zx36l.webp?alt=media&token=49cbd468-f558-491c-88a6-59be4f890f96",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032305701_4zx36l.webp?alt=media&token=49cbd468-f558-491c-88a6-59be4f890f96"
@@ -15962,7 +16330,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032313930_cqz7nr.webp?alt=media&token=18127555-f470-4ec2-b29e-3eb2c24d5c20",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032313930_cqz7nr.webp?alt=media&token=18127555-f470-4ec2-b29e-3eb2c24d5c20"
@@ -15976,7 +16344,7 @@
       "Subtype": "MOTIVATIONAL ATTITUDE",
       "createdAt": { "__time__": "2026-06-18T10:26:56.177Z" },
       "serial": 4,
-      "updatedAt": { "__time__": "2026-07-14T12:32:00.623Z" },
+      "updatedAt": { "__time__": "2026-07-17T09:51:15.874Z" },
       "__collections__": {}
     },
     "ICI8E8kJYU5cTrfvO9i6": {
@@ -16968,7 +17336,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782541980751_6rzeod.webp?alt=media&token=5556ec52-6bfa-43b2-8c53-49b92daacb42",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542005711_vqz1m3.webp?alt=media&token=d5df72d9-3f2f-4a6c-8e0a-36329a9c2eac"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285294234_hmj8gd.webp?alt=media&token=89886f7e-1d48-44b6-99cf-ea7bf830b21b"
         },
         {
           "Date": "",
@@ -16983,7 +17351,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542093669_iwwfhj.webp?alt=media&token=985902d1-c960-4fff-91b0-f6f51bd1415a",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542072564_3yhsmj.webp?alt=media&token=ccb4155f-2032-4d31-b30b-e08154376391"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285303613_pzuszt.webp?alt=media&token=bf64e870-c24f-4b30-b8b4-6128527e2369"
         },
         {
           "Date": "",
@@ -16998,7 +17366,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542115957_cc2yvf.webp?alt=media&token=ce2d7355-9d80-4292-92b1-dc355561c0b7",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542130961_l7t3mu.webp?alt=media&token=a866e156-b676-49c8-8d0e-fd805cf753fc"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285312406_x99xdu.webp?alt=media&token=bd440769-2b44-4a56-8c37-bd87307c0a3f"
         },
         {
           "Date": "",
@@ -17013,7 +17381,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542166156_bnvzqq.webp?alt=media&token=12719dd2-7ee1-449e-9e71-97a8bb699046",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542231401_ufjmzg.webp?alt=media&token=3f34e082-6c1a-4659-ace6-25bf9f938d70"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285325156_l2smaa.webp?alt=media&token=d0b4012d-2df3-4b59-b761-931827c312c0"
         },
         {
           "Date": "",
@@ -17028,7 +17396,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542257890_d5bijm.webp?alt=media&token=c8115418-bcd3-40f7-8f2a-2a55cd02e5e2",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542320233_9hi0xl.webp?alt=media&token=73aa8ff5-2253-4303-bcc5-238c111b8900"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285340292_q2q6ql.webp?alt=media&token=e17b4e02-8d19-4f32-93cf-726d2f47bee3"
         },
         {
           "Date": "",
@@ -17043,7 +17411,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542394891_8wqeha.webp?alt=media&token=326d98f2-f5fd-48ff-a452-18bb31e40d76",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542488485_sxvxsd.webp?alt=media&token=60be8a7d-2066-4543-8e61-e2417d8d73cd"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285352892_rehqv5.webp?alt=media&token=3607ae2d-8d03-44dc-8d8f-2e2f2d7d2efa"
         },
         {
           "Date": "",
@@ -17058,7 +17426,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542527889_hbzodc.webp?alt=media&token=36ea5d12-0759-41e6-a348-b068c5dbae0e",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542555344_adojto.webp?alt=media&token=25318849-1cea-4fff-b3fd-669c7eb07fc6"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285378587_x6u9f4.webp?alt=media&token=ac0ab35f-409c-4809-bc19-d63141086d0b"
         },
         {
           "Date": "",
@@ -17073,7 +17441,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542601053_flvp9c.webp?alt=media&token=73539144-b89c-47f8-a0e7-1c9b8ff72d64",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542623644_n1y46i.webp?alt=media&token=2be8c501-6212-4c26-82d1-c124c7da36a8"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285396103_vpy67a.webp?alt=media&token=a096771a-0bf3-41da-a834-40a172355e64"
         },
         {
           "Date": "",
@@ -17088,7 +17456,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542820449_4alsxg.webp?alt=media&token=f5797071-f81f-4fc4-8b07-aa1163ab14fe",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542864188_2ot63l.webp?alt=media&token=2914736d-595e-4b05-b499-9ee3c24a1bb7"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285408168_9shamv.webp?alt=media&token=b33c7c06-7f52-40f3-9e14-340337a39b8c"
         },
         {
           "Date": "",
@@ -17103,7 +17471,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542934147_ksfc6y.webp?alt=media&token=7b6a576d-b10c-4ab1-b3e1-e166438ce7cc",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782542953723_rrcucw.webp?alt=media&token=ec55e85a-2402-4306-9f45-1f9c97ad1d6a"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285425164_h997l2.webp?alt=media&token=e7302403-823a-4f95-89ce-5f2d9d2bfc3c"
         },
         {
           "Date": "",
@@ -17118,7 +17486,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782542992747_0daevm.webp?alt=media&token=686cf7b6-f2bc-4443-9cc4-9ccf50c2a5eb",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543013866_6pp5qf.webp?alt=media&token=e23b39d1-3948-4422-ad5e-9c41c174591f"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285443548_8eie4u.webp?alt=media&token=c5b42876-a8f8-4ae9-b33b-0baf9ee5f066"
         },
         {
           "Date": "",
@@ -17133,7 +17501,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543047647_gzxymt.webp?alt=media&token=c2bf5542-b9c7-488b-82f6-0bdb4f72607f",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543062965_u0zxjt.webp?alt=media&token=6e75db7f-fb81-407d-8bd8-ec5712db6a6d"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285459674_vm602l.webp?alt=media&token=e62f16d7-5e0f-4f65-83e6-316900336807"
         },
         {
           "Date": "",
@@ -17148,7 +17516,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543095212_8urxxi.webp?alt=media&token=c19d3958-0113-4491-9594-d265f42ad36d",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543106474_2yxn9c.webp?alt=media&token=66532f5e-f9cb-4d51-8a65-8bdd32aaaa06"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285483008_x3zai5.webp?alt=media&token=69c827ce-1236-426f-a079-b24d669b6fea"
         },
         {
           "Date": "",
@@ -17163,7 +17531,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543165838_6d9pr2.webp?alt=media&token=c1912569-595b-446b-aef8-10ef6f40bc50",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543184007_hxq4yu.webp?alt=media&token=c06229ec-19b2-483d-bd83-e377c916d1f5"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285498053_vzd0x2.webp?alt=media&token=358ecf05-fb96-405f-ba73-8dfeb30a408f"
         },
         {
           "Date": "",
@@ -17178,7 +17546,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543216004_fua0bq.webp?alt=media&token=e3c6dc96-d87f-43f4-893d-f3b413caf4cb",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543228603_5j6wd8.webp?alt=media&token=66a20cac-2c00-415d-ac69-160ec1f1276e"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285519711_8h6in0.webp?alt=media&token=d2e48a26-5224-4eed-be02-d64027bf5edf"
         },
         {
           "Date": "",
@@ -17193,7 +17561,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543264910_ygzc1z.webp?alt=media&token=6c6df300-2f2a-4d76-8b23-ed73108e3ea2",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543279780_rrtz81.webp?alt=media&token=eb94c313-d9a8-46ae-b827-ddc5554f4e8a"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285534747_41upv6.webp?alt=media&token=a89fd689-7215-47ac-bc08-fa10d4d22485"
         },
         {
           "Date": "",
@@ -17208,7 +17576,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543311665_or3hk0.webp?alt=media&token=940b192c-cbba-427c-90bf-f4250f3de121",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543332660_gz1clv.webp?alt=media&token=ed3401e1-03ab-4883-bce9-d1cf96995a54"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285550128_45jo1w.webp?alt=media&token=e59ac309-d0e2-4df5-8cf7-9aa8252a2530"
         },
         {
           "Date": "",
@@ -17223,7 +17591,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1782543373163_mpu43s.webp?alt=media&token=76999b79-9b2a-4a00-a0d3-0b64f6cf6719",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1782543396372_v06pqe.webp?alt=media&token=525d4f3f-fcc0-43ed-b777-ab1b8f004589"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784285570685_wnlt2h.webp?alt=media&token=d11cddf5-9980-40b0-a756-9aca7da3eadf"
         }
       ],
       "Launched": true,
@@ -17234,7 +17602,7 @@
       "Subtype": "Thailand Bonanza Achiever",
       "createdAt": { "__time__": "2026-06-27T06:57:45.989Z" },
       "serial": 0,
-      "updatedAt": { "__time__": "2026-07-09T07:48:14.748Z" },
+      "updatedAt": { "__time__": "2026-07-17T10:52:57.604Z" },
       "__collections__": {}
     },
     "In82TAW0CdScPYz8EOoX": {
@@ -17843,7 +18211,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031552498_giysxd.webp?alt=media&token=fc5cae32-a34b-4c62-a602-8c282003cf3d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031552498_giysxd.webp?alt=media&token=fc5cae32-a34b-4c62-a602-8c282003cf3d"
@@ -17858,7 +18226,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031563738_e31zva.webp?alt=media&token=58f9ac0e-a35e-462b-9ea1-27f643653580",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031563738_e31zva.webp?alt=media&token=58f9ac0e-a35e-462b-9ea1-27f643653580"
@@ -17873,7 +18241,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031571899_c92zbx.webp?alt=media&token=ab01f8dd-89ed-4a54-ae7c-85fe8571365c",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031571899_c92zbx.webp?alt=media&token=ab01f8dd-89ed-4a54-ae7c-85fe8571365c"
@@ -17888,7 +18256,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031579696_nkjh1i.webp?alt=media&token=cc29193c-4608-4688-80ff-b36dc2e14635",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031579696_nkjh1i.webp?alt=media&token=cc29193c-4608-4688-80ff-b36dc2e14635"
@@ -17903,7 +18271,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031591210_md50cp.webp?alt=media&token=4d90c020-e62b-4d29-aa96-c8a6d4a15912",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031591210_md50cp.webp?alt=media&token=4d90c020-e62b-4d29-aa96-c8a6d4a15912"
@@ -17918,7 +18286,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031601031_xqo5jf.webp?alt=media&token=735bcc1b-5c9d-4f8d-a0d7-4215f5bd5738",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031601031_xqo5jf.webp?alt=media&token=735bcc1b-5c9d-4f8d-a0d7-4215f5bd5738"
@@ -17963,7 +18331,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031632578_j0bc1r.webp?alt=media&token=d344bec1-0934-4148-af4c-1f327ebeed4e",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031632578_j0bc1r.webp?alt=media&token=d344bec1-0934-4148-af4c-1f327ebeed4e"
@@ -17978,7 +18346,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031640789_y95hg9.webp?alt=media&token=22c46157-945d-479b-9056-4d31807b8dcf",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031640789_y95hg9.webp?alt=media&token=22c46157-945d-479b-9056-4d31807b8dcf"
@@ -17993,7 +18361,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031648697_yt4y6l.webp?alt=media&token=d6df829c-d9dd-4be3-be85-cd653c19862e",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031648697_yt4y6l.webp?alt=media&token=d6df829c-d9dd-4be3-be85-cd653c19862e"
@@ -18008,7 +18376,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031656304_x51eea.webp?alt=media&token=d2b10ebe-1cf0-4547-ae78-95f03152a59a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031656304_x51eea.webp?alt=media&token=d2b10ebe-1cf0-4547-ae78-95f03152a59a"
@@ -18023,7 +18391,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031664183_vcnons.webp?alt=media&token=aa74a8ff-5ebd-4197-a5ea-73f92d61d325",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031664183_vcnons.webp?alt=media&token=aa74a8ff-5ebd-4197-a5ea-73f92d61d325"
@@ -18038,7 +18406,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031672564_69itx7.webp?alt=media&token=b43aa784-d47e-4a3b-b8f5-cd16ba54c1a0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031672564_69itx7.webp?alt=media&token=b43aa784-d47e-4a3b-b8f5-cd16ba54c1a0"
@@ -18053,7 +18421,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031681225_963ghc.webp?alt=media&token=5915e307-a616-48c7-9783-fe95027d5cd4",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031681225_963ghc.webp?alt=media&token=5915e307-a616-48c7-9783-fe95027d5cd4"
@@ -18068,7 +18436,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031690706_2wu8in.webp?alt=media&token=5d20ad70-a224-4b0a-9957-49c56c0da020",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031690706_2wu8in.webp?alt=media&token=5d20ad70-a224-4b0a-9957-49c56c0da020"
@@ -18083,7 +18451,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031700003_wxjvyk.webp?alt=media&token=e4fc6a7c-d376-4352-a4a5-6bcac89e7e04",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031700003_wxjvyk.webp?alt=media&token=e4fc6a7c-d376-4352-a4a5-6bcac89e7e04"
@@ -18098,7 +18466,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031707797_dvdumb.webp?alt=media&token=d3c245b3-6fdc-4ea2-9d24-879c9fb9d228",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031707797_dvdumb.webp?alt=media&token=d3c245b3-6fdc-4ea2-9d24-879c9fb9d228"
@@ -18143,7 +18511,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031738054_ymlmwn.webp?alt=media&token=469e8eb7-1dce-4c4e-8a48-86f55cae0800",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031738054_ymlmwn.webp?alt=media&token=469e8eb7-1dce-4c4e-8a48-86f55cae0800"
@@ -18158,7 +18526,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031748165_1fwqr6.webp?alt=media&token=0df889b2-af78-493a-956e-97f67e65fa27",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031748165_1fwqr6.webp?alt=media&token=0df889b2-af78-493a-956e-97f67e65fa27"
@@ -18173,7 +18541,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031758304_4sbro9.webp?alt=media&token=ffc28649-940d-4123-a77c-e09abe8b1b84",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031758304_4sbro9.webp?alt=media&token=ffc28649-940d-4123-a77c-e09abe8b1b84"
@@ -18188,7 +18556,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031767796_kddfks.webp?alt=media&token=f327d801-4862-432f-8faf-27863e520fd5",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031767796_kddfks.webp?alt=media&token=f327d801-4862-432f-8faf-27863e520fd5"
@@ -18203,7 +18571,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031779346_6p5a3m.webp?alt=media&token=f3bb9094-337f-4e87-8f0d-f6905c499f79",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031779346_6p5a3m.webp?alt=media&token=f3bb9094-337f-4e87-8f0d-f6905c499f79"
@@ -18218,7 +18586,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031789975_so12kn.webp?alt=media&token=f3656b39-d1a0-4b01-8136-5bd35ac39e62",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031789975_so12kn.webp?alt=media&token=f3656b39-d1a0-4b01-8136-5bd35ac39e62"
@@ -18233,7 +18601,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031802346_st2ysa.webp?alt=media&token=a4ed6e6d-95b8-43eb-af2f-1d5c591900ad",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031802346_st2ysa.webp?alt=media&token=a4ed6e6d-95b8-43eb-af2f-1d5c591900ad"
@@ -18248,7 +18616,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031816200_phxruh.webp?alt=media&token=1425b733-ebd6-4dd0-bf43-b2d1b38cdc70",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031816200_phxruh.webp?alt=media&token=1425b733-ebd6-4dd0-bf43-b2d1b38cdc70"
@@ -18263,7 +18631,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031827633_v84xwv.webp?alt=media&token=b0a0e302-edb1-40f0-81f3-9486894335d4",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031827633_v84xwv.webp?alt=media&token=b0a0e302-edb1-40f0-81f3-9486894335d4"
@@ -18278,7 +18646,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031839791_ra05ud.webp?alt=media&token=1fca110b-375d-4bf9-a405-e715f6aa294d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031839791_ra05ud.webp?alt=media&token=1fca110b-375d-4bf9-a405-e715f6aa294d"
@@ -18292,7 +18660,7 @@
       "Subtype": "INSPIRATION",
       "createdAt": { "__time__": "2026-04-26T05:41:28.671Z" },
       "serial": 2,
-      "updatedAt": { "__time__": "2026-07-14T12:24:08.314Z" },
+      "updatedAt": { "__time__": "2026-07-17T09:53:29.173Z" },
       "__collections__": {}
     },
     "J4sCRu2lx9SPqc5K7mMG": {
@@ -18958,6 +19326,113 @@
       "createdAt": { "__time__": "2026-07-06T10:13:56.393Z" },
       "serial": 0,
       "updatedAt": { "__time__": "2026-07-06T10:13:56.393Z" },
+      "__collections__": {}
+    },
+    "JVOE33SC5Xhmf211pcTS": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-20",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278635405_q4tgi0.webp?alt=media&token=6bebd6eb-d693-4429-a8c1-054a15fd7cdf",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278635405_q4tgi0.webp?alt=media&token=6bebd6eb-d693-4429-a8c1-054a15fd7cdf"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041355,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278650478_5d37si.webp?alt=media&token=8f1e8273-48b0-4d38-a9e9-90639a43f87d",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278650478_5d37si.webp?alt=media&token=8f1e8273-48b0-4d38-a9e9-90639a43f87d"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041356,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278661805_g7r9p5.webp?alt=media&token=3dc5b9af-736b-4c97-b56a-994f65d26016",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278661805_g7r9p5.webp?alt=media&token=3dc5b9af-736b-4c97-b56a-994f65d26016"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041357,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278671801_auad59.webp?alt=media&token=6cf99b06-631f-4f4d-8ced-6e63fc6391bd",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278671801_auad59.webp?alt=media&token=6cf99b06-631f-4f4d-8ced-6e63fc6391bd"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041358,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278682439_9myxsl.webp?alt=media&token=cfb0c298-b73e-4bd5-b347-1a468cc35343",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278682439_9myxsl.webp?alt=media&token=cfb0c298-b73e-4bd5-b347-1a468cc35343"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041359,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278693499_97vnvt.webp?alt=media&token=daea1d02-1c5f-4847-9dab-9a9ddc09fd24",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278693499_97vnvt.webp?alt=media&token=daea1d02-1c5f-4847-9dab-9a9ddc09fd24"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784278620261_zetu6z.webp?alt=media&token=42c90a57-3b93-438a-bf43-4f7e3039d760",
+      "Subtype": "shri batukeshwar dutt",
+      "createdAt": { "__time__": "2026-07-17T08:58:18.937Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:58:18.937Z" },
       "__collections__": {}
     },
     "Jghub2Bzi95Dckdb9ZNw": {
@@ -25348,7 +25823,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1777968759493_liicrw.webp?alt=media&token=0e460cc8-1bae-47f8-9859-bd7be45cb860",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1778942473437_ke66z6.webp?alt=media&token=52a237d7-8f3b-48d0-87d5-ee119a45253f"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287424279_n96xh8.webp?alt=media&token=cc9417a4-fc56-4d4f-9c24-926e231b5457"
         },
         {
           "Date": "",
@@ -25363,7 +25838,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1777968845293_ac6wrj.webp?alt=media&token=623e3f47-dcc2-494c-83ee-af23ad7528f8",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1778942339055_cabzgj.webp?alt=media&token=43281330-7113-4d37-ae0a-1134dc0cf48d"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287440262_91u1vc.webp?alt=media&token=3053a988-a46c-42e8-92ca-f845abf79ed3"
         },
         {
           "Date": "",
@@ -25378,7 +25853,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910326433_6z3ash.webp?alt=media&token=84ec428e-8a68-4280-ada8-5a625b5a9b14",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1780910331295_nhorhn.webp?alt=media&token=59acb90e-d1f7-44ad-afdf-4413f0545bd6"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287457053_x8wr7l.webp?alt=media&token=bfb4e72c-4274-4a0b-a48b-83a4e2be05c4"
         },
         {
           "Date": "",
@@ -25393,7 +25868,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910360111_r2iw5j.webp?alt=media&token=25778835-9ed4-4129-ad70-f1d4feda9021",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107515051_w38p49.webp?alt=media&token=88d78a4d-4f5e-4f3d-97d4-91271df24e01"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287477900_2ic8qa.webp?alt=media&token=8c67e2d6-2b87-41d7-87e6-b6c5b71bbccb"
         },
         {
           "Date": "",
@@ -25408,7 +25883,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910379251_wvmnpq.webp?alt=media&token=d29ad63f-a178-4ba7-969b-fe2acf0a4dce",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107542293_5nk41m.webp?alt=media&token=7bb7c2cd-ed73-4bb7-83fb-24da07287ebd"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287492088_gxzmu6.webp?alt=media&token=5c82e42f-9c18-4372-9d45-1fadc3a38087"
         },
         {
           "Date": "",
@@ -25423,7 +25898,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910408546_24texm.webp?alt=media&token=9d7bba14-7c3b-4854-96f9-2c3d34d686fb",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107569124_hb3j7o.webp?alt=media&token=44d78d29-f50c-4778-9905-58f987d81542"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287510995_0goks1.webp?alt=media&token=a80f158b-1ed8-47d5-a923-e9e23fe9045f"
         },
         {
           "Date": "",
@@ -25438,7 +25913,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910435853_m6if6e.webp?alt=media&token=d7ef8f3b-a3c3-42af-972b-7162790e2306",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107594795_9nbot9.webp?alt=media&token=9b72029b-c3db-4286-b52c-8f927581dee1"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287544200_nbjyzd.webp?alt=media&token=bcc3bbec-7811-48b7-a0ea-218f67111fe6"
         },
         {
           "Date": "",
@@ -25453,7 +25928,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910659998_xw1zp7.webp?alt=media&token=c844218e-9dea-42e6-9648-e0787aa97d87",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107616415_pyt98x.webp?alt=media&token=3ec38d03-1886-40f6-96bf-862e4ea1fc2b"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287566503_hab8wm.webp?alt=media&token=f759739e-c7c8-4beb-8649-14a8dd392b24"
         },
         {
           "Date": "",
@@ -25468,7 +25943,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910712702_7f7l5r.webp?alt=media&token=f1c9ddda-fdb3-45fa-9d81-123951924460",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107640215_sonhy3.webp?alt=media&token=e9c75828-cd5f-456c-aa9f-76f3af8e21fc"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287582633_zjtxdv.webp?alt=media&token=143afd8f-133c-4e43-a520-21355db4b975"
         },
         {
           "Date": "",
@@ -25483,7 +25958,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910776279_9f4avx.webp?alt=media&token=a0c2ece6-1c59-4ac9-8164-a209d7918936",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107667376_646tgn.webp?alt=media&token=b21857a7-e55c-46a1-95f7-3d3b8e71305d"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287599038_9j85hk.webp?alt=media&token=5e79161b-0f11-4cf1-8705-34260570515c"
         },
         {
           "Date": "",
@@ -25498,7 +25973,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910800401_9n8kpy.webp?alt=media&token=705a786b-2777-4b12-a3d8-5f7d02f5fb22",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107691595_svpx26.webp?alt=media&token=6f0736a4-b0b6-4a1b-bb96-a9f5d177dda7"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287617088_oclwis.webp?alt=media&token=4d36f0e4-b8ac-4758-8cb5-6d638596232e"
         },
         {
           "Date": "",
@@ -25513,7 +25988,7 @@
           "position": "left",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910828394_g72t0c.webp?alt=media&token=f54a5217-9294-41f3-8e79-f1a839d9dc96",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107718297_lp310z.webp?alt=media&token=f1f2665b-ed88-4915-adc2-bc9177275539"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287633018_d2iz9e.webp?alt=media&token=8e6a6259-1017-47b8-b6a2-e1919610b9ee"
         },
         {
           "Date": "",
@@ -25528,7 +26003,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910867806_h7k67t.webp?alt=media&token=1b26227e-9bf9-4282-8da6-32bcd15dac25",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107742977_ntn4jv.webp?alt=media&token=c45e39c5-6af0-4e8a-a322-a127257a6614"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287647827_mud1rw.webp?alt=media&token=67129ad2-eed5-48d0-98f4-1c66461347c3"
         },
         {
           "Date": "",
@@ -25543,7 +26018,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780910904111_t0q6vg.webp?alt=media&token=d40d5ae0-57a3-4549-aa26-993cf48d0337",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107768074_jevlu3.webp?alt=media&token=f75f2811-373a-4161-999b-41652f83c9b7"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287662317_unl4ce.webp?alt=media&token=bdc3dee6-b687-4ef6-b078-48485f72bdbc"
         },
         {
           "Date": "",
@@ -25558,7 +26033,7 @@
           "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1780911068969_zwa1m6.webp?alt=media&token=ec255147-f859-462a-8508-7334555882fb",
-          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784107796087_fz4vwu.webp?alt=media&token=351daa1c-3155-4853-ae31-4e67a523921b"
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fgraphics%2F1784287676927_zmqdu4.webp?alt=media&token=361541f9-27ca-4cca-bb79-850b2f12350a"
         }
       ],
       "Launched": true,
@@ -25569,7 +26044,7 @@
       "Subtype": "WELCOME",
       "createdAt": { "__time__": "2026-04-26T07:55:44.569Z" },
       "serial": 0,
-      "updatedAt": { "__time__": "2026-07-15T09:30:03.942Z" },
+      "updatedAt": { "__time__": "2026-07-17T11:28:04.381Z" },
       "__collections__": {}
     },
     "OgjvTUWPRCybxQbgetLJ": {
@@ -30555,6 +31030,128 @@
       "updatedAt": { "__time__": "2026-05-18T07:43:36.344Z" },
       "__collections__": {}
     },
+    "SkozDI7MuAaEpaq9aVfm": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-20",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278489323_n92s8p.webp?alt=media&token=c78359bb-93f0-4069-b036-ab504c20d7a7",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278489323_n92s8p.webp?alt=media&token=c78359bb-93f0-4069-b036-ab504c20d7a7"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041349,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278501351_zhg6en.webp?alt=media&token=de4e3250-3caa-4a55-9738-6f0d692a9518",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278501351_zhg6en.webp?alt=media&token=de4e3250-3caa-4a55-9738-6f0d692a9518"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041350,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278512954_4xism2.webp?alt=media&token=9eb6cd8c-4acf-4e64-ac01-cd688b3b59c8",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278512954_4xism2.webp?alt=media&token=9eb6cd8c-4acf-4e64-ac01-cd688b3b59c8"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041351,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278525889_5kizt9.webp?alt=media&token=e215d1b6-d7ec-44e9-9533-a020fca33a17",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278525889_5kizt9.webp?alt=media&token=e215d1b6-d7ec-44e9-9533-a020fca33a17"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041352,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278537493_44r4sd.webp?alt=media&token=26dc1ed8-c0f0-4a11-8c4a-67cb83d95d46",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278537493_44r4sd.webp?alt=media&token=26dc1ed8-c0f0-4a11-8c4a-67cb83d95d46"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041353,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278547526_9zz946.webp?alt=media&token=bade569c-fe18-4f30-817d-35b19b0a48ea",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278547526_9zz946.webp?alt=media&token=bade569c-fe18-4f30-817d-35b19b0a48ea"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041354,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278559612_ci39ii.webp?alt=media&token=7bd177f7-abff-4f85-a742-068b5d641b88",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784278559612_ci39ii.webp?alt=media&token=7bd177f7-abff-4f85-a742-068b5d641b88"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784278462050_dy7wls.webp?alt=media&token=60d78a3b-3110-411a-90a2-26500fb2c2dd",
+      "Subtype": "smt. sheila dixit ji",
+      "createdAt": { "__time__": "2026-07-17T08:56:06.750Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:56:06.750Z" },
+      "__collections__": {}
+    },
     "T1dO8JjxOeJdIXFQdrad": {
       "Active": true,
       "Company": "",
@@ -34619,6 +35216,113 @@
       "updatedAt": { "__time__": "2026-06-27T09:28:07.848Z" },
       "__collections__": {}
     },
+    "Wz0fDDWxazGSZdCjrmdg": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-18",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277157873_hzwfq9.webp?alt=media&token=7ca9d62d-4669-4b1e-a69d-5080c778bdae",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277157873_hzwfq9.webp?alt=media&token=7ca9d62d-4669-4b1e-a69d-5080c778bdae"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041320,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277181193_1espn2.webp?alt=media&token=4418c694-c012-44b1-ae98-2f4fb8da81fb",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277181193_1espn2.webp?alt=media&token=4418c694-c012-44b1-ae98-2f4fb8da81fb"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041321,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277200041_6n1erg.webp?alt=media&token=57dce29b-b364-44f1-9b21-cd1199a12f03",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277200041_6n1erg.webp?alt=media&token=57dce29b-b364-44f1-9b21-cd1199a12f03"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041322,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277214067_i5gsb4.webp?alt=media&token=3d94f156-fe66-4de8-a92b-e2457d52bf88",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277214067_i5gsb4.webp?alt=media&token=3d94f156-fe66-4de8-a92b-e2457d52bf88"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041323,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277225925_qj619n.webp?alt=media&token=fd4fca62-6dd9-47d5-a5f8-339fe1dc081e",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277225925_qj619n.webp?alt=media&token=fd4fca62-6dd9-47d5-a5f8-339fe1dc081e"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041324,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277240990_4xxk0k.webp?alt=media&token=7a499819-0f31-421d-933e-2dc4708dd9e8",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277240990_4xxk0k.webp?alt=media&token=7a499819-0f31-421d-933e-2dc4708dd9e8"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784277093364_cxwcbc.webp?alt=media&token=e7b34989-bc55-4a04-8b9a-ec23eb94dfc0",
+      "Subtype": "nelson mandela international day",
+      "createdAt": { "__time__": "2026-07-17T08:34:12.752Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:34:12.752Z" },
+      "__collections__": {}
+    },
     "X8QHVZHUeNgYtErJDDZB": {
       "Active": true,
       "Company": "",
@@ -35071,7 +35775,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030477953_ix6v8b.webp?alt=media&token=8245e760-e504-4d44-b026-c33fc8fe6f8f",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030477953_ix6v8b.webp?alt=media&token=8245e760-e504-4d44-b026-c33fc8fe6f8f"
@@ -35086,7 +35790,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030495592_g4ynu6.webp?alt=media&token=e09349ca-347a-4826-a865-f69da20f9e4a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030495592_g4ynu6.webp?alt=media&token=e09349ca-347a-4826-a865-f69da20f9e4a"
@@ -35101,7 +35805,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030510360_biegyp.webp?alt=media&token=8b8c3e87-e75e-446e-a8a9-fb02ef0c7a3c",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030510360_biegyp.webp?alt=media&token=8b8c3e87-e75e-446e-a8a9-fb02ef0c7a3c"
@@ -35116,7 +35820,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030524343_fmb5pl.webp?alt=media&token=6e1f4cba-7b39-4b39-b696-50dbf40cc365",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030524343_fmb5pl.webp?alt=media&token=6e1f4cba-7b39-4b39-b696-50dbf40cc365"
@@ -35131,7 +35835,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030537547_6giyz5.webp?alt=media&token=1f0443e3-3a46-450a-afeb-c90a1534eb2a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030537547_6giyz5.webp?alt=media&token=1f0443e3-3a46-450a-afeb-c90a1534eb2a"
@@ -35146,7 +35850,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030553200_sre9o6.webp?alt=media&token=faf331f5-d08f-45a5-9798-e7a705466f31",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030553200_sre9o6.webp?alt=media&token=faf331f5-d08f-45a5-9798-e7a705466f31"
@@ -35161,7 +35865,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030567684_8jpgnm.webp?alt=media&token=14c67729-24b9-45b8-b0c9-0c56e7448bfd",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030567684_8jpgnm.webp?alt=media&token=14c67729-24b9-45b8-b0c9-0c56e7448bfd"
@@ -35176,7 +35880,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030605485_7njza9.webp?alt=media&token=9e7e415d-9268-47c5-ad2a-abfb10e8cea0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030605485_7njza9.webp?alt=media&token=9e7e415d-9268-47c5-ad2a-abfb10e8cea0"
@@ -35191,7 +35895,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030624076_kkryqj.webp?alt=media&token=f8734932-3fbf-4382-8eb2-1289f575c3c0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030624076_kkryqj.webp?alt=media&token=f8734932-3fbf-4382-8eb2-1289f575c3c0"
@@ -35206,7 +35910,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030638760_pq2m43.webp?alt=media&token=c4009904-1a66-4c97-be60-91211766674c",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030638760_pq2m43.webp?alt=media&token=c4009904-1a66-4c97-be60-91211766674c"
@@ -35221,7 +35925,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030658370_hjvjor.webp?alt=media&token=6e9a5deb-a924-449d-bc15-706f5042a86b",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030658370_hjvjor.webp?alt=media&token=6e9a5deb-a924-449d-bc15-706f5042a86b"
@@ -35236,7 +35940,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030680655_fwqyb6.webp?alt=media&token=57d773dd-912a-43b8-a60b-9d2c6622f7ef",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030680655_fwqyb6.webp?alt=media&token=57d773dd-912a-43b8-a60b-9d2c6622f7ef"
@@ -35251,7 +35955,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030706535_2dkxfh.webp?alt=media&token=816312a4-2ab9-4a0c-a044-fa52217ad865",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030706535_2dkxfh.webp?alt=media&token=816312a4-2ab9-4a0c-a044-fa52217ad865"
@@ -35266,7 +35970,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030814294_rkcsm7.webp?alt=media&token=0806ae1f-6a44-40bc-95f4-458eb2e218b2",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784030814294_rkcsm7.webp?alt=media&token=0806ae1f-6a44-40bc-95f4-458eb2e218b2"
@@ -35281,7 +35985,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031000807_1y1jxu.webp?alt=media&token=6203a57c-42df-49a0-ae0a-6502d12684c9",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031000807_1y1jxu.webp?alt=media&token=6203a57c-42df-49a0-ae0a-6502d12684c9"
@@ -35296,7 +36000,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031011505_pt0wx9.webp?alt=media&token=36a4bef2-83f7-49c0-ab48-adacdecf72fb",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031011505_pt0wx9.webp?alt=media&token=36a4bef2-83f7-49c0-ab48-adacdecf72fb"
@@ -35311,7 +36015,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031020486_l921ld.webp?alt=media&token=3129a1c8-809e-4a8a-8440-154efb90f2d1",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031020486_l921ld.webp?alt=media&token=3129a1c8-809e-4a8a-8440-154efb90f2d1"
@@ -35326,7 +36030,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031030639_gdildt.webp?alt=media&token=28a28cc7-8390-46f0-ba5b-4ebb2d50c96a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031030639_gdildt.webp?alt=media&token=28a28cc7-8390-46f0-ba5b-4ebb2d50c96a"
@@ -35341,7 +36045,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031038085_mjw8k1.webp?alt=media&token=642487f1-6b29-4a20-840e-f7da560c24c4",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031038085_mjw8k1.webp?alt=media&token=642487f1-6b29-4a20-840e-f7da560c24c4"
@@ -35356,7 +36060,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031047958_m5d2vg.webp?alt=media&token=6cf6a1fc-3646-4ccd-9721-255f91ac190d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031047958_m5d2vg.webp?alt=media&token=6cf6a1fc-3646-4ccd-9721-255f91ac190d"
@@ -35371,7 +36075,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031057332_95uml6.webp?alt=media&token=c2f1a66a-b9cf-4c0a-9a66-a7547d8891c9",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031057332_95uml6.webp?alt=media&token=c2f1a66a-b9cf-4c0a-9a66-a7547d8891c9"
@@ -35386,7 +36090,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031066892_9flen6.webp?alt=media&token=330293ec-0d41-407c-a4a8-0baa76b593c5",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031066892_9flen6.webp?alt=media&token=330293ec-0d41-407c-a4a8-0baa76b593c5"
@@ -35401,7 +36105,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031078723_c2nlvs.webp?alt=media&token=d9a37eb1-d2a7-46ab-bd68-ccf1f1f43ff7",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031078723_c2nlvs.webp?alt=media&token=d9a37eb1-d2a7-46ab-bd68-ccf1f1f43ff7"
@@ -35416,7 +36120,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031089536_ak3v66.webp?alt=media&token=205f231b-ceea-4279-8497-dae2d2fb036b",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031089536_ak3v66.webp?alt=media&token=205f231b-ceea-4279-8497-dae2d2fb036b"
@@ -35431,7 +36135,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031102879_1batfu.webp?alt=media&token=57e1253d-c901-4df6-8a50-7ea0fd679140",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031102879_1batfu.webp?alt=media&token=57e1253d-c901-4df6-8a50-7ea0fd679140"
@@ -35446,7 +36150,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031113398_86q3l3.webp?alt=media&token=4f5b69b5-8194-4916-9e52-c6343fcb81db",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031113398_86q3l3.webp?alt=media&token=4f5b69b5-8194-4916-9e52-c6343fcb81db"
@@ -35461,7 +36165,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031120645_1yetdu.webp?alt=media&token=980ce10a-839f-43fe-9678-83ff9acb89e0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031120645_1yetdu.webp?alt=media&token=980ce10a-839f-43fe-9678-83ff9acb89e0"
@@ -35476,7 +36180,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031133107_79378h.webp?alt=media&token=649b8b39-fb97-45d7-8e8d-b373f090fe01",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031133107_79378h.webp?alt=media&token=649b8b39-fb97-45d7-8e8d-b373f090fe01"
@@ -35491,7 +36195,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031150259_taofzw.webp?alt=media&token=d81a5f81-a5e9-4f72-bbc8-2a86f7ffbce7",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031150259_taofzw.webp?alt=media&token=d81a5f81-a5e9-4f72-bbc8-2a86f7ffbce7"
@@ -35506,7 +36210,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031168375_okg4my.webp?alt=media&token=2d931ac1-acbd-43bd-b914-2c1270639162",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031168375_okg4my.webp?alt=media&token=2d931ac1-acbd-43bd-b914-2c1270639162"
@@ -35521,7 +36225,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031180100_7217v0.webp?alt=media&token=7a88110d-b858-4353-b124-7f1d3da64e08",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031180100_7217v0.webp?alt=media&token=7a88110d-b858-4353-b124-7f1d3da64e08"
@@ -35536,7 +36240,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031204385_06xsfx.webp?alt=media&token=edb89691-1af9-49e8-908b-336972bd79a2",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031204385_06xsfx.webp?alt=media&token=edb89691-1af9-49e8-908b-336972bd79a2"
@@ -35551,7 +36255,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031212208_trm0a1.webp?alt=media&token=a3fa4d06-94eb-4263-8a74-e96713f56641",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031212208_trm0a1.webp?alt=media&token=a3fa4d06-94eb-4263-8a74-e96713f56641"
@@ -35566,7 +36270,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031219574_rof4ku.webp?alt=media&token=a8b2f743-5525-45a4-ab5c-ea1ae36430e1",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031219574_rof4ku.webp?alt=media&token=a8b2f743-5525-45a4-ab5c-ea1ae36430e1"
@@ -35581,7 +36285,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031227672_o57iio.webp?alt=media&token=f79d7102-3116-4cb4-b56c-eeaa5a90fb79",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031227672_o57iio.webp?alt=media&token=f79d7102-3116-4cb4-b56c-eeaa5a90fb79"
@@ -35596,7 +36300,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031235259_ay78ss.webp?alt=media&token=474a7397-bfd4-497f-bfc2-2016068283b3",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031235259_ay78ss.webp?alt=media&token=474a7397-bfd4-497f-bfc2-2016068283b3"
@@ -35611,7 +36315,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031248525_e9f85j.webp?alt=media&token=8fd69949-ef21-484a-bda8-c91de170c8d0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031248525_e9f85j.webp?alt=media&token=8fd69949-ef21-484a-bda8-c91de170c8d0"
@@ -35626,7 +36330,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031255921_7c5rcy.webp?alt=media&token=05ba8478-889a-4421-abf4-88592c12a73b",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031255921_7c5rcy.webp?alt=media&token=05ba8478-889a-4421-abf4-88592c12a73b"
@@ -35641,7 +36345,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031265892_gwsmtt.webp?alt=media&token=35905e3f-97de-4f43-b45a-c4bd11f4afe8",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031265892_gwsmtt.webp?alt=media&token=35905e3f-97de-4f43-b45a-c4bd11f4afe8"
@@ -35656,7 +36360,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031274217_fliv2u.webp?alt=media&token=b84d2f9f-2d2e-4e58-9ab5-d6fa1a1576c3",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031274217_fliv2u.webp?alt=media&token=b84d2f9f-2d2e-4e58-9ab5-d6fa1a1576c3"
@@ -35671,7 +36375,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031288392_n4ij3v.webp?alt=media&token=2f7dc415-46b9-4732-8b8c-66da777718c2",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784031288392_n4ij3v.webp?alt=media&token=2f7dc415-46b9-4732-8b8c-66da777718c2"
@@ -35685,7 +36389,7 @@
       "Subtype": "HINDI MOTIVATIONAL",
       "createdAt": { "__time__": "2026-04-26T05:39:20.137Z" },
       "serial": 1,
-      "updatedAt": { "__time__": "2026-07-14T12:14:56.180Z" },
+      "updatedAt": { "__time__": "2026-07-17T09:57:11.486Z" },
       "__collections__": {}
     },
     "XctsA9VCyp88tZR6fNxL": {
@@ -38390,6 +39094,83 @@
       "updatedAt": { "__time__": "2026-06-18T05:35:42.651Z" },
       "__collections__": {}
     },
+    "afhZuuSwTLi60q3OflTM": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-18",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277504722_r94iq1.webp?alt=media&token=259ff591-4c7b-4556-ad28-c7fb30cd1dc9",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277504722_r94iq1.webp?alt=media&token=259ff591-4c7b-4556-ad28-c7fb30cd1dc9"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041329,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277516201_yeha9a.webp?alt=media&token=218f2261-d9ca-45d1-b482-37088cf6099f",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277516201_yeha9a.webp?alt=media&token=218f2261-d9ca-45d1-b482-37088cf6099f"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041330,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277530463_4hm7ou.webp?alt=media&token=0a952546-64b4-4de1-b007-312dde7ae902",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277530463_4hm7ou.webp?alt=media&token=0a952546-64b4-4de1-b007-312dde7ae902"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041331,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277541309_91d8hq.webp?alt=media&token=f239aefb-0bba-4a0f-b978-4417b40ebd84",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277541309_91d8hq.webp?alt=media&token=f239aefb-0bba-4a0f-b978-4417b40ebd84"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784277468105_x67u9l.webp?alt=media&token=b1a88676-c1be-4845-8f1b-46036677303b",
+      "Subtype": "shri anna bhau sathe ji",
+      "createdAt": { "__time__": "2026-07-17T08:39:11.500Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:39:11.500Z" },
+      "__collections__": {}
+    },
     "benvv5NYVxWN7GetPwOe": {
       "Active": true,
       "Company": "",
@@ -38755,6 +39536,98 @@
       "createdAt": { "__time__": "2026-05-23T07:29:23.285Z" },
       "serial": 10,
       "updatedAt": { "__time__": "2026-05-23T07:29:23.285Z" },
+      "__collections__": {}
+    },
+    "cPME9Z8ZPuK8NTuFxlVt": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-19",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277893503_yzoft8.webp?alt=media&token=d14c8aa8-cd5d-4bf8-9ecf-c07bcfa7a17c",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277893503_yzoft8.webp?alt=media&token=d14c8aa8-cd5d-4bf8-9ecf-c07bcfa7a17c"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041336,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277908077_7ul0zc.webp?alt=media&token=18bec994-3a82-4ab6-972b-ac0ca0d431ff",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277908077_7ul0zc.webp?alt=media&token=18bec994-3a82-4ab6-972b-ac0ca0d431ff"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041337,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277921501_khpgme.webp?alt=media&token=5b30d4b0-2e91-4b60-af6d-c60a6d7c677e",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277921501_khpgme.webp?alt=media&token=5b30d4b0-2e91-4b60-af6d-c60a6d7c677e"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041338,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277933112_41qm21.webp?alt=media&token=76773abf-0841-45b9-8fd0-c0f0f64212b6",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277933112_41qm21.webp?alt=media&token=76773abf-0841-45b9-8fd0-c0f0f64212b6"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041339,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277944228_g5tqrm.webp?alt=media&token=78fec0d0-9177-4a13-bd10-f443e4484c36",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277944228_g5tqrm.webp?alt=media&token=78fec0d0-9177-4a13-bd10-f443e4484c36"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784277854499_vjvau3.webp?alt=media&token=6bb295fd-6e7f-4053-a91c-92ba73feccb7",
+      "Subtype": "harsha bhogale",
+      "createdAt": { "__time__": "2026-07-17T08:45:51.559Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:45:51.559Z" },
       "__collections__": {}
     },
     "cRl8pLbCbgOjEGrZHKUU": {
@@ -41107,6 +41980,53 @@
       "updatedAt": { "__time__": "2026-05-22T07:20:58.589Z" },
       "__collections__": {}
     },
+    "eYOU0P9KyNp3o9GbTBs3": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-22",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578285,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283854531_mtyx7g.webp?alt=media&token=82aa998d-11eb-4294-9cbd-2eac71eab64a",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283854531_mtyx7g.webp?alt=media&token=82aa998d-11eb-4294-9cbd-2eac71eab64a"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578893,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283865762_w5tjgf.webp?alt=media&token=1d8ccc97-0b68-401e-a56a-3e08f74d797d",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283865762_w5tjgf.webp?alt=media&token=1d8ccc97-0b68-401e-a56a-3e08f74d797d"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784283844353_4yn7ve.webp?alt=media&token=acd77bfa-6e10-4759-955a-d7936588e343",
+      "Subtype": "MUKESH",
+      "createdAt": { "__time__": "2026-07-17T10:24:35.606Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T10:24:35.606Z" },
+      "__collections__": {}
+    },
     "eyT6VXAH0kWpwNS2ZCM3": {
       "Active": true,
       "Company": "",
@@ -41212,6 +42132,68 @@
       "createdAt": { "__time__": "2026-07-14T11:15:50.909Z" },
       "serial": 0,
       "updatedAt": { "__time__": "2026-07-14T11:15:50.909Z" },
+      "__collections__": {}
+    },
+    "fEbi8Q4x2ZRbeZLDEjae": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-21",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578285,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784282728361_79o21y.webp?alt=media&token=e5887f0a-9421-470a-a455-d780fb7033d9",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784282728361_79o21y.webp?alt=media&token=e5887f0a-9421-470a-a455-d780fb7033d9"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578880,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784282737366_zpzqju.webp?alt=media&token=e326d0c6-c004-4374-8b37-c633be34bb56",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784282737366_zpzqju.webp?alt=media&token=e326d0c6-c004-4374-8b37-c633be34bb56"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578881,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784282747180_88tps7.webp?alt=media&token=325b483c-7397-4b1f-8b38-e81d0e3599fb",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784282747180_88tps7.webp?alt=media&token=325b483c-7397-4b1f-8b38-e81d0e3599fb"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784282688415_7g7rve.webp?alt=media&token=8be756da-0fad-4d2a-bd34-949ab1998d05",
+      "Subtype": "malika arjunkharge",
+      "createdAt": { "__time__": "2026-07-17T10:07:38.272Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T10:07:38.272Z" },
       "__collections__": {}
     },
     "fNEQ4UkOi93fygVT21UJ": {
@@ -42178,7 +43160,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032368519_vevw0t.webp?alt=media&token=a59685d7-574b-47f1-9902-818a1f763753",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032368519_vevw0t.webp?alt=media&token=a59685d7-574b-47f1-9902-818a1f763753"
@@ -42193,7 +43175,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032377631_zn834k.webp?alt=media&token=a563c8bb-19fe-4e19-96fa-d6a84952ae0f",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032377631_zn834k.webp?alt=media&token=a563c8bb-19fe-4e19-96fa-d6a84952ae0f"
@@ -42208,7 +43190,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032385199_iwiciu.webp?alt=media&token=d7d34d16-e62c-4918-82c3-832b6700c63f",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032385199_iwiciu.webp?alt=media&token=d7d34d16-e62c-4918-82c3-832b6700c63f"
@@ -42223,7 +43205,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032392157_jaz04e.webp?alt=media&token=f0394e6d-be7b-4d3c-af19-c291c8f467ed",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032392157_jaz04e.webp?alt=media&token=f0394e6d-be7b-4d3c-af19-c291c8f467ed"
@@ -42238,7 +43220,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032399232_y76e1o.webp?alt=media&token=3443c21e-13af-4f35-b2ce-ea9567414e8d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032399232_y76e1o.webp?alt=media&token=3443c21e-13af-4f35-b2ce-ea9567414e8d"
@@ -42253,7 +43235,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032408016_b0r7aj.webp?alt=media&token=c1f85a00-bfce-479e-bc5a-91d90d16a859",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032408016_b0r7aj.webp?alt=media&token=c1f85a00-bfce-479e-bc5a-91d90d16a859"
@@ -42283,7 +43265,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032426806_7wx56y.webp?alt=media&token=e8fb78dc-8cdb-4f99-8981-f3809045c26b",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032426806_7wx56y.webp?alt=media&token=e8fb78dc-8cdb-4f99-8981-f3809045c26b"
@@ -42298,7 +43280,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032435184_m25j04.webp?alt=media&token=95e99a18-fbfe-45ce-b67c-a57dde8889e9",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032435184_m25j04.webp?alt=media&token=95e99a18-fbfe-45ce-b67c-a57dde8889e9"
@@ -42313,7 +43295,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032443835_5seaom.webp?alt=media&token=fe2eb153-1471-46fd-b51c-dec96ca29693",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032443835_5seaom.webp?alt=media&token=fe2eb153-1471-46fd-b51c-dec96ca29693"
@@ -42328,7 +43310,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032451670_a2i2qa.webp?alt=media&token=a61d6186-df62-400b-9ec4-daa76fbb4f5c",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032451670_a2i2qa.webp?alt=media&token=a61d6186-df62-400b-9ec4-daa76fbb4f5c"
@@ -42343,7 +43325,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032459727_sh1dsz.webp?alt=media&token=418ef9cd-72bc-4e3c-9715-680fdfd79259",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032459727_sh1dsz.webp?alt=media&token=418ef9cd-72bc-4e3c-9715-680fdfd79259"
@@ -42358,7 +43340,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032466290_w20jsw.webp?alt=media&token=5fbd10d2-3a96-48ad-9e6f-14051f76cef4",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032466290_w20jsw.webp?alt=media&token=5fbd10d2-3a96-48ad-9e6f-14051f76cef4"
@@ -42373,7 +43355,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032475597_s38c3t.webp?alt=media&token=7bb7b65e-2fd2-4f22-a8dd-358e30ee3ceb",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032475597_s38c3t.webp?alt=media&token=7bb7b65e-2fd2-4f22-a8dd-358e30ee3ceb"
@@ -42388,7 +43370,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032484303_ebqee1.webp?alt=media&token=9ff20810-7001-43d8-9403-d2d60c4839d0",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032484303_ebqee1.webp?alt=media&token=9ff20810-7001-43d8-9403-d2d60c4839d0"
@@ -42403,7 +43385,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032492730_1fkcco.webp?alt=media&token=e463dc23-c692-4f2c-914f-6210ec33b567",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032492730_1fkcco.webp?alt=media&token=e463dc23-c692-4f2c-914f-6210ec33b567"
@@ -42418,7 +43400,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032500954_3kjg87.webp?alt=media&token=9cf2fd6c-94db-4cea-8a78-5e1af7b7ec03",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032500954_3kjg87.webp?alt=media&token=9cf2fd6c-94db-4cea-8a78-5e1af7b7ec03"
@@ -42433,7 +43415,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032511204_ybbnuv.webp?alt=media&token=ce20b2fa-48d2-4b4a-b277-97964dcc2383",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032511204_ybbnuv.webp?alt=media&token=ce20b2fa-48d2-4b4a-b277-97964dcc2383"
@@ -42448,7 +43430,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032518738_fp1wsk.webp?alt=media&token=0df2ee81-1769-4a95-bb4f-cf4295684121",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032518738_fp1wsk.webp?alt=media&token=0df2ee81-1769-4a95-bb4f-cf4295684121"
@@ -42463,7 +43445,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032531375_22ahrk.webp?alt=media&token=bc254c47-efa6-4856-91ce-307c4f09492d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032531375_22ahrk.webp?alt=media&token=bc254c47-efa6-4856-91ce-307c4f09492d"
@@ -42478,7 +43460,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032541659_eefa6f.webp?alt=media&token=6ba77e43-7574-456a-a64b-12c831f477ae",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032541659_eefa6f.webp?alt=media&token=6ba77e43-7574-456a-a64b-12c831f477ae"
@@ -42493,7 +43475,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032554501_pdsi92.webp?alt=media&token=90f19162-3f86-4b47-a2f2-3f77bcc32138",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032554501_pdsi92.webp?alt=media&token=90f19162-3f86-4b47-a2f2-3f77bcc32138"
@@ -42508,7 +43490,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032565021_cv8j3n.webp?alt=media&token=e19fa32e-8868-4900-afc6-eb35206e4ac5",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032565021_cv8j3n.webp?alt=media&token=e19fa32e-8868-4900-afc6-eb35206e4ac5"
@@ -42523,7 +43505,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032573465_gzltai.webp?alt=media&token=6d1cb957-42ab-41cc-9ad4-62039c4269fd",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032573465_gzltai.webp?alt=media&token=6d1cb957-42ab-41cc-9ad4-62039c4269fd"
@@ -42538,7 +43520,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032583717_jbne77.webp?alt=media&token=4a1515e8-faf9-4c12-835d-096ee4f164e4",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032583717_jbne77.webp?alt=media&token=4a1515e8-faf9-4c12-835d-096ee4f164e4"
@@ -42553,7 +43535,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032592468_ya0mk3.webp?alt=media&token=a2860bbc-7317-47e0-987e-73008d592b4a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032592468_ya0mk3.webp?alt=media&token=a2860bbc-7317-47e0-987e-73008d592b4a"
@@ -42568,7 +43550,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032601704_oumdhm.webp?alt=media&token=5c79ef9e-06fe-4f2a-af86-8cea36a2ae9a",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032601704_oumdhm.webp?alt=media&token=5c79ef9e-06fe-4f2a-af86-8cea36a2ae9a"
@@ -42583,7 +43565,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032614092_9kg4ue.webp?alt=media&token=9001d3fd-8871-48f1-afd3-d9c4a43721ca",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032614092_9kg4ue.webp?alt=media&token=9001d3fd-8871-48f1-afd3-d9c4a43721ca"
@@ -42598,7 +43580,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032620946_d0tbjf.webp?alt=media&token=21b02510-7e5b-405c-bfd4-6ad19aa2469d",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032620946_d0tbjf.webp?alt=media&token=21b02510-7e5b-405c-bfd4-6ad19aa2469d"
@@ -42613,7 +43595,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032629187_vqtto7.webp?alt=media&token=72ac5d96-cdb7-4b14-b896-63befd5ff047",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032629187_vqtto7.webp?alt=media&token=72ac5d96-cdb7-4b14-b896-63befd5ff047"
@@ -42628,7 +43610,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032636532_ir4m34.webp?alt=media&token=3604abdf-51f9-46b7-b9c2-bcd6aadd9290",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032636532_ir4m34.webp?alt=media&token=3604abdf-51f9-46b7-b9c2-bcd6aadd9290"
@@ -42643,7 +43625,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032649049_56nu94.webp?alt=media&token=49aa6827-2f38-4bf5-a524-a5a1725af2d6",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032649049_56nu94.webp?alt=media&token=49aa6827-2f38-4bf5-a524-a5a1725af2d6"
@@ -42658,7 +43640,7 @@
           "incmNameId": 0,
           "nameImageUrl": "",
           "pass": "",
-          "position": "left",
+          "position": "right",
           "rankNameImageUrl": "",
           "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032661217_9d8m5d.webp?alt=media&token=e5d09d73-ef21-4884-9b12-539a5796a373",
           "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784032661217_9d8m5d.webp?alt=media&token=e5d09d73-ef21-4884-9b12-539a5796a373"
@@ -42672,7 +43654,7 @@
       "Subtype": "SPECIAL MOTIVATION",
       "createdAt": { "__time__": "2026-04-26T05:42:23.148Z" },
       "serial": 3,
-      "updatedAt": { "__time__": "2026-07-14T12:37:47.880Z" },
+      "updatedAt": { "__time__": "2026-07-17T09:59:53.371Z" },
       "__collections__": {}
     },
     "g4cTWqg6VptX6PJBizIi": {
@@ -44604,6 +45586,98 @@
       "createdAt": { "__time__": "2026-06-18T06:02:57.564Z" },
       "serial": 4,
       "updatedAt": { "__time__": "2026-06-18T06:02:57.564Z" },
+      "__collections__": {}
+    },
+    "lHOZ0QJSHLRetaYi8jYD": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-21",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578285,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283371713_v9k95e.webp?alt=media&token=9044094e-f242-4878-b1a8-ec99812e55b4",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283371713_v9k95e.webp?alt=media&token=9044094e-f242-4878-b1a8-ec99812e55b4"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578883,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283388467_x6mmlj.webp?alt=media&token=3e1bbaca-e8fa-4e34-b464-175200c126bf",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283388467_x6mmlj.webp?alt=media&token=3e1bbaca-e8fa-4e34-b464-175200c126bf"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578884,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283400913_11oqgv.webp?alt=media&token=82457f95-c891-4e6c-aef6-db052e8d4b10",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283400913_11oqgv.webp?alt=media&token=82457f95-c891-4e6c-aef6-db052e8d4b10"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578885,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283412707_rihsiz.webp?alt=media&token=59e67a8f-6f32-461a-af1f-fbe8c2a79a79",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283412707_rihsiz.webp?alt=media&token=59e67a8f-6f32-461a-af1f-fbe8c2a79a79"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578886,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283427923_quho4i.webp?alt=media&token=bcabc6ba-cb06-458d-bfab-b67078005286",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283427923_quho4i.webp?alt=media&token=bcabc6ba-cb06-458d-bfab-b67078005286"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784283357223_uxkphp.webp?alt=media&token=addff101-8fda-4288-9a79-f209608b47fa",
+      "Subtype": "ANAND BAKSHI",
+      "createdAt": { "__time__": "2026-07-17T10:17:17.153Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T10:17:17.153Z" },
       "__collections__": {}
     },
     "lOPTzSsBjjj6ruY9fT1B": {
@@ -47327,6 +48401,98 @@
       "createdAt": { "__time__": "2026-05-23T08:06:25.076Z" },
       "serial": 17,
       "updatedAt": { "__time__": "2026-05-23T08:06:25.076Z" },
+      "__collections__": {}
+    },
+    "oV4FqvvtA5drD3H2vxXs": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-18",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041319,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277324948_dh1l9m.webp?alt=media&token=763ca382-d725-4d5a-a2cd-7654befbfb58",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277324948_dh1l9m.webp?alt=media&token=763ca382-d725-4d5a-a2cd-7654befbfb58"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041325,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277340992_4oh399.webp?alt=media&token=3a51703b-9fe1-49f2-8f34-64f4d95ceffd",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277340992_4oh399.webp?alt=media&token=3a51703b-9fe1-49f2-8f34-64f4d95ceffd"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041326,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277354470_7ql86t.webp?alt=media&token=7b2b971e-41fd-40d3-bc75-6486b5b172f9",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277354470_7ql86t.webp?alt=media&token=7b2b971e-41fd-40d3-bc75-6486b5b172f9"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041327,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277405408_0mrvkv.webp?alt=media&token=42ef18c1-aca5-4c9c-a80c-75623d32c886",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277405408_0mrvkv.webp?alt=media&token=42ef18c1-aca5-4c9c-a80c-75623d32c886"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784277041328,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277383188_njnut5.webp?alt=media&token=6c7addd4-dc5b-4534-8601-de976d64bde7",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784277383188_njnut5.webp?alt=media&token=6c7addd4-dc5b-4534-8601-de976d64bde7"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784277277742_tbph62.webp?alt=media&token=6ce14012-48c6-4673-b077-7615fbfa4354",
+      "Subtype": "",
+      "createdAt": { "__time__": "2026-07-17T08:36:57.820Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T08:36:57.820Z" },
       "__collections__": {}
     },
     "oiizdNvwUcSifS2hkFI0": {
@@ -58147,6 +59313,83 @@
       "createdAt": { "__time__": "2026-07-04T09:06:42.031Z" },
       "serial": 0,
       "updatedAt": { "__time__": "2026-07-04T09:10:08.218Z" },
+      "__collections__": {}
+    },
+    "wrqiqd8TF8jDQszdXO8k": {
+      "Active": true,
+      "Company": "",
+      "Date": "2026-07-22",
+      "GraphicsLink": [
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578285,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "right",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283685587_kku16n.webp?alt=media&token=7c83731c-3cc4-46db-8edd-f3b7129ea114",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283685587_kku16n.webp?alt=media&token=7c83731c-3cc4-46db-8edd-f3b7129ea114"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578890,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283703258_ahk368.webp?alt=media&token=aca9abb6-441e-41f9-a9e0-6c68546c4ce1",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283703258_ahk368.webp?alt=media&token=aca9abb6-441e-41f9-a9e0-6c68546c4ce1"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578891,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283716412_5f33c9.webp?alt=media&token=3cc4c80f-148c-475d-82aa-4d4d3a82cb1c",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283716412_5f33c9.webp?alt=media&token=3cc4c80f-148c-475d-82aa-4d4d3a82cb1c"
+        },
+        {
+          "Date": "",
+          "Filter": "true",
+          "active": "true",
+          "backgroundVideoUrl": "",
+          "bannerId": "",
+          "id": 1784281578892,
+          "incmNameId": 0,
+          "nameImageUrl": "",
+          "pass": "",
+          "position": "left",
+          "rankNameImageUrl": "",
+          "suggestionImage": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283730332_b5t76k.webp?alt=media&token=1909c782-f42c-4c3f-94e6-5235d91780bb",
+          "url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fsuggestion%2F1784283730332_b5t76k.webp?alt=media&token=1909c782-f42c-4c3f-94e6-5235d91780bb"
+        }
+      ],
+      "Launched": true,
+      "MainType": "General",
+      "SelectType": "Festival",
+      "ShowCaseForm": "",
+      "Showcase_url": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/templates%2Fshowcase%2F1784283672998_kkjhc6.webp?alt=media&token=c4b147df-e838-4c08-a771-c04a2599aedb",
+      "Subtype": "AJIT PAWAR",
+      "createdAt": { "__time__": "2026-07-17T10:22:17.194Z" },
+      "serial": 0,
+      "updatedAt": { "__time__": "2026-07-17T10:22:17.194Z" },
       "__collections__": {}
     },
     "x19ygpVYZDtOPXHX3syd": {
