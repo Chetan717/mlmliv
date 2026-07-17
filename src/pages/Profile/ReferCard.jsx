@@ -10,6 +10,7 @@ import {
 } from "@gravity-ui/icons";
 import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import referGraphic from "./refer.png";
+import { createPlayStoreReferralLink } from "../../utils/referralCode";
 import { COLLECTIONS } from "../../collections";
 import { getUser } from "../../utils/authStorage";
 
@@ -155,7 +156,9 @@ export default function ReferCard() {
   }, [user?.referCode]);
 
   const handleShare = useCallback(() => {
-    const appLink = "https://play.google.com/store/apps/details?id=com.mlmbooster.mlmbooster";
+    if (!user?.referCode) return;
+
+    const appLink = createPlayStoreReferralLink(referCode);
     const msg =
       `🌟 *Join MLM LIVE & Grow Your Network!*\n\n` +
       `Hey! I'm using *MLM LIVE* — the best app to create stunning marketing images for your MLM business instantly.\n\n` +
@@ -172,6 +175,9 @@ export default function ReferCard() {
       window.ReactNativeWebView.postMessage(
         JSON.stringify({
           type: "SHARE_SOMETHING",
+          title: "MLM LIVE",
+          message: msg,
+          text: msg,
           url: appLink,
         }),
       );
@@ -193,7 +199,7 @@ export default function ReferCard() {
     // Final fallback: open WhatsApp share link
     const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(waUrl, "_blank");
-  }, [referCode]);
+  }, [referCode, user?.referCode]);
 
   return (
     <>

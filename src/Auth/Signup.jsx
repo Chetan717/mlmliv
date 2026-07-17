@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   FieldError,
@@ -24,6 +24,15 @@ import {
   clearCompanyProfileStorage,
   saveMlmProfileToStorage,
 } from "../utils/companyStorage";
+import {
+  clearPendingReferralCode,
+  getPendingReferralCode,
+  getReferralCodeFromBridgeMessage,
+  getReferralCodeFromSearch,
+  normalizeReferralCode,
+  notifyNativeReferralCleared,
+  savePendingReferralCode,
+} from "../utils/referralCode";
 
 export function Signup() {
   const navigate = useNavigate();
@@ -36,11 +45,45 @@ export function Signup() {
   const [formError, setFormError]   = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpError, setOtpError]     = useState("");
-  const [referInput, setReferInput] = useState("");
+  const [referInput, setReferInput] = useState(() => {
+    const queryCode = getReferralCodeFromSearch(window.location.search);
+    return queryCode || getPendingReferralCode();
+  });
 
   // sessionId returned by Cloud Function after OTP is sent
   const [sessionId, setSessionId]   = useState(verifyState?.sessionId || "");
   const [userMobile, setUserMobile] = useState(verifyState?.mobile    || "");
+
+  // Referral codes can arrive from a normal web/deep-link query or from the
+  // Expo React Native WebView after Google Play returns its install referrer.
+  useEffect(() => {
+    const queryCode = getReferralCodeFromSearch(location.search);
+    if (queryCode) {
+      setReferInput(savePendingReferralCode(queryCode));
+    }
+
+    const acceptReferralCode = (rawMessage) => {
+      const code = getReferralCodeFromBridgeMessage(rawMessage);
+      if (!code) return;
+
+      setReferInput(savePendingReferralCode(code));
+      setFormError("");
+    };
+
+    const handleWindowMessage = (event) => acceptReferralCode(event.data);
+    const handleReferralEvent = (event) => acceptReferralCode(event.detail);
+
+    window.addEventListener("message", handleWindowMessage);
+    // Some Android WebView versions dispatch messages on document.
+    document.addEventListener("message", handleWindowMessage);
+    window.addEventListener("mlmlive:referral-code", handleReferralEvent);
+
+    return () => {
+      window.removeEventListener("message", handleWindowMessage);
+      document.removeEventListener("message", handleWindowMessage);
+      window.removeEventListener("mlmlive:referral-code", handleReferralEvent);
+    };
+  }, [location.search]);
 
   // ── STEP 1: Send OTP ───────────────────────────────────────────────────────
   const onSignupSubmit = async (e) => {
@@ -88,6 +131,8 @@ export function Signup() {
       }
 
       setUser(result.user, true);
+      clearPendingReferralCode();
+      notifyNativeReferralCleared("REFERRAL_CODE_CONSUMED");
       clearCompanyProfileStorage();
 
       if (result.mlmProfile) {
@@ -243,7 +288,14 @@ export function Signup() {
                   maxLength={8}
                   value={referInput}
                   onChange={(e) => {
-                    setReferInput(e.target.value.toUpperCase());
+                    const code = normalizeReferralCode(e.target.value);
+                    setReferInput(code);
+                    if (code) {
+                      savePendingReferralCode(code);
+                    } else {
+                      clearPendingReferralCode();
+                      notifyNativeReferralCleared();
+                    }
                     setFormError("");
                   }}
                   className="h-13 px-4 border border-border bg-white dark:bg-black/20 rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all shadow-sm"

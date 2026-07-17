@@ -2880,7 +2880,7 @@ function GeneralEditPage({
                   ref={profileImageRef}
                   image={ImageProfile}
                   x={isRight ? 165 : 0.5}
-                  y={50}
+                  y={56}
                   width={155}
                   height={230}
                   scaleX={profileAttrs.scaleX}
