@@ -1,13 +1,23 @@
+
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Button } from "@heroui/react";
 import { buildPhotoEnhanceFilter } from "../../utils/photoEnhance";
 
 // ── Helpers ───────────────────────────────────────────────────────
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
 function containDims(imgW, imgH, boxW, boxH) {
-  const ia = imgW / imgH, ba = boxW / boxH;
+  const ia = imgW / imgH;
+  const ba = boxW / boxH;
+
   return ia > ba ? { dw: boxW, dh: boxW / ia } : { dw: boxH * ia, dh: boxH };
+}
+
+function getSelType() {
+  try {
+    return JSON.parse(localStorage.getItem("selType")) || {};
+  } catch {
+    return {};
+  }
 }
 
 function getTouchDist(touches) {
@@ -19,20 +29,36 @@ function getTouchDist(touches) {
 // ── Crop box helpers ──────────────────────────────────────────────
 const HANDLE_VIS = 14;
 const HANDLE_HIT = 36;
-const MIN_BOX_W  = 60;
+const MIN_BOX_W = 60;
 
 function initBox(cw, ch, ratio) {
-  const M = 0.88;
-  let w = cw * M, h = w / ratio;
-  if (h > ch * M) { h = ch * M; w = h * ratio; }
-  return { x: (cw - w) / 2, y: (ch - h) / 2, w, h };
+  const margin = 0.88;
+  let w = cw * margin;
+  let h = w / ratio;
+
+  if (h > ch * margin) {
+    h = ch * margin;
+    w = h * ratio;
+  }
+
+  return {
+    x: (cw - w) / 2,
+    y: (ch - h) / 2,
+    w,
+    h,
+  };
 }
 
 function initBoxInBounds(bounds, ratio) {
   const margin = 0.98;
   let w = bounds.w * margin;
   let h = w / ratio;
-  if (h > bounds.h * margin) { h = bounds.h * margin; w = h * ratio; }
+
+  if (h > bounds.h * margin) {
+    h = bounds.h * margin;
+    w = h * ratio;
+  }
+
   return {
     x: bounds.x + (bounds.w - w) / 2,
     y: bounds.y + (bounds.h - h) / 2,
@@ -42,55 +68,120 @@ function initBoxInBounds(bounds, ratio) {
 }
 
 const CORNERS = {
-  TL: { ax: b => b.x + b.w, ay: b => b.y + b.h, sx: -1, sy: -1 },
-  TR: { ax: b => b.x,       ay: b => b.y + b.h, sx:  1, sy: -1 },
-  BL: { ax: b => b.x + b.w, ay: b => b.y,       sx: -1, sy:  1 },
-  BR: { ax: b => b.x,       ay: b => b.y,        sx:  1, sy:  1 },
+  TL: {
+    ax: (box) => box.x + box.w,
+    ay: (box) => box.y + box.h,
+    sx: -1,
+    sy: -1,
+  },
+  TR: {
+    ax: (box) => box.x,
+    ay: (box) => box.y + box.h,
+    sx: 1,
+    sy: -1,
+  },
+  BL: {
+    ax: (box) => box.x + box.w,
+    ay: (box) => box.y,
+    sx: -1,
+    sy: 1,
+  },
+  BR: {
+    ax: (box) => box.x,
+    ay: (box) => box.y,
+    sx: 1,
+    sy: 1,
+  },
 };
 
 function hitCorner(px, py, box) {
   const half = HANDLE_HIT / 2;
-  const pts = {
-    TL: [box.x,       box.y],
-    TR: [box.x+box.w, box.y],
-    BL: [box.x,       box.y+box.h],
-    BR: [box.x+box.w, box.y+box.h],
+
+  const points = {
+    TL: [box.x, box.y],
+    TR: [box.x + box.w, box.y],
+    BL: [box.x, box.y + box.h],
+    BR: [box.x + box.w, box.y + box.h],
   };
-  for (const [n, [cx, cy]] of Object.entries(pts))
-    if (Math.abs(px-cx) <= half && Math.abs(py-cy) <= half) return n;
+
+  for (const [name, [cx, cy]] of Object.entries(points)) {
+    if (Math.abs(px - cx) <= half && Math.abs(py - cy) <= half) {
+      return name;
+    }
+  }
+
   return null;
 }
 
 function insideBox(px, py, box) {
-  return px >= box.x && px <= box.x+box.w && py >= box.y && py <= box.y+box.h;
+  return (
+    px >= box.x && px <= box.x + box.w && py >= box.y && py <= box.y + box.h
+  );
 }
 
 function resizeBox(dragX, dragY, anchor, sx, sy, cw, ch, ratio, bounds) {
   let dw = (dragX - anchor.x) * sx;
   let dh = (dragY - anchor.y) * sy;
-  let w, h;
-  if (dw > 0 && dh > 0)
-    dw / ratio >= dh ? (w = dw, h = dw / ratio) : (h = dh, w = dh * ratio);
-  else if (dw > 0) { w = dw; h = dw / ratio; }
-  else if (dh > 0) { h = dh; w = dh * ratio; }
-  else { w = MIN_BOX_W; h = MIN_BOX_W / ratio; }
-  w = Math.max(w, MIN_BOX_W); h = w / ratio;
+  let w;
+  let h;
+
+  if (dw > 0 && dh > 0) {
+    if (dw / ratio >= dh) {
+      w = dw;
+      h = dw / ratio;
+    } else {
+      h = dh;
+      w = dh * ratio;
+    }
+  } else if (dw > 0) {
+    w = dw;
+    h = dw / ratio;
+  } else if (dh > 0) {
+    h = dh;
+    w = dh * ratio;
+  } else {
+    w = MIN_BOX_W;
+    h = MIN_BOX_W / ratio;
+  }
+
+  w = Math.max(w, MIN_BOX_W);
+  h = w / ratio;
+
   let x = sx > 0 ? anchor.x : anchor.x - w;
   let y = sy > 0 ? anchor.y : anchor.y - h;
-  x = clamp(x, 0, cw - w); y = clamp(y, 0, ch - h);
-  w = Math.min(w, cw - x); h = Math.min(h, ch - y);
-  if (w / h > ratio) w = h * ratio; else h = w / ratio;
+
+  x = clamp(x, 0, cw - w);
+  y = clamp(y, 0, ch - h);
+
+  w = Math.min(w, cw - x);
+  h = Math.min(h, ch - y);
+
+  if (w / h > ratio) {
+    w = h * ratio;
+  } else {
+    h = w / ratio;
+  }
+
   if (bounds) {
     w = Math.min(w, bounds.w, bounds.h * ratio);
     h = w / ratio;
+
     x = clamp(x, bounds.x, bounds.x + bounds.w - w);
+
     y = clamp(y, bounds.y, bounds.y + bounds.h - h);
   }
+
   return { x, y, w, h };
 }
 
 function moveBox(box, dx, dy, cw, ch, bounds) {
-  const limit = bounds || { x: 0, y: 0, w: cw, h: ch };
+  const limit = bounds || {
+    x: 0,
+    y: 0,
+    w: cw,
+    h: ch,
+  };
+
   return {
     ...box,
     x: clamp(box.x + dx, limit.x, limit.x + limit.w - box.w),
@@ -99,81 +190,168 @@ function moveBox(box, dx, dy, cw, ch, bounds) {
 }
 
 // ── Component ─────────────────────────────────────────────────────
-export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, constrainToImage = true, enableEnhance = false }) {
-  const [zoom, setZoom]         = useState(100);
+export function ImageEditorCanvas({
+  src,
+  onDone,
+  onCancel,
+  editingType,
+  constrainToImage = true,
+  enableEnhance = false,
+}) {
+  const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
-  const [flipH, setFlipH]       = useState(false);
-  const [flipV, setFlipV]       = useState(false);
-  const [tab, setTab]             = useState("crop");
-  const [enhance, setEnhance]     = useState(0);
-  const [skinTone, setSkinTone]   = useState(0);
-  const [isDoing, setIsDoing]     = useState(false);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
+  const [tab, setTab] = useState("crop");
+  const [enhance, setEnhance] = useState(0);
+  const [skinTone, setSkinTone] = useState(0);
+  const [isDoing, setIsDoing] = useState(false);
   const [encodeProgress, setEncodeProgress] = useState(0);
-  const [canvasW, setCanvasW]     = useState(300);
-  const [canvasH, setCanvasH]   = useState(Math.round(300 / ratio));
 
-  const containerRef  = useRef(null);
-  const canvasRef     = useRef(null);
-  const imgRef        = useRef(null);
-  const offscreenRef  = useRef(null);
-  const offDirtyRef   = useRef(true);
-  const canvasSzRef   = useRef({ w: 300, h: Math.round(300 / ratio) });
-  const appliedSzRef  = useRef({ w: 0, h: 0, dpr: 0 });
-  const cropBoxRef    = useRef(initBox(300, Math.round(300 / ratio), ratio));
-  const dragRef       = useRef(null);
-  const pinchRef      = useRef(null);
-  const rafRef           = useRef(null);
+
+  const rankW = 175;
+
+  const rankH = 230;
+
+  // Width ÷ Height based crop ratio
+  const RATIO =
+    editingType === "proof" || editingType === "feature"
+      ? 1
+      : editingType === "main"
+        ? 2
+        : rankW / rankH;
+
+  const [canvasW, setCanvasW] = useState(300);
+  const [canvasH, setCanvasH] = useState(Math.round(300 / RATIO));
+
+  const containerRef = useRef(null);
+  const canvasRef = useRef(null);
+  const imgRef = useRef(null);
+  const offscreenRef = useRef(null);
+  const offDirtyRef = useRef(true);
+
+  const canvasSzRef = useRef({
+    w: 300,
+    h: Math.round(300 / RATIO),
+  });
+
+  const appliedSzRef = useRef({
+    w: 0,
+    h: 0,
+    dpr: 0,
+  });
+
+  const cropBoxRef = useRef(initBox(300, Math.round(300 / RATIO), RATIO));
+
+  const dragRef = useRef(null);
+  const pinchRef = useRef(null);
+  const rafRef = useRef(null);
   const progressTimerRef = useRef(null);
-  const zoomRef          = useRef(100);
-  const rotRef           = useRef(0);
-  const flipHRef      = useRef(false);
-  const flipVRef      = useRef(false);
-  const enhanceRef    = useRef(0);
-  const skinToneRef   = useRef(0);
+  const zoomRef = useRef(100);
+  const rotRef = useRef(0);
+  const flipHRef = useRef(false);
+  const flipVRef = useRef(false);
+  const enhanceRef = useRef(0);
+  const skinToneRef = useRef(0);
 
-  useEffect(() => { zoomRef.current = zoom;    offDirtyRef.current = true; }, [zoom]);
-  useEffect(() => { rotRef.current  = rotation; offDirtyRef.current = true; }, [rotation]);
-  useEffect(() => { flipHRef.current = flipH;   offDirtyRef.current = true; }, [flipH]);
-  useEffect(() => { flipVRef.current = flipV;   offDirtyRef.current = true; }, [flipV]);
-  useEffect(() => { enhanceRef.current = enhance; offDirtyRef.current = true; }, [enhance]);
-  useEffect(() => { skinToneRef.current = skinTone; offDirtyRef.current = true; }, [skinTone]);
+  useEffect(() => {
+    zoomRef.current = zoom;
+    offDirtyRef.current = true;
+  }, [zoom]);
+
+  useEffect(() => {
+    rotRef.current = rotation;
+    offDirtyRef.current = true;
+  }, [rotation]);
+
+  useEffect(() => {
+    flipHRef.current = flipH;
+    offDirtyRef.current = true;
+  }, [flipH]);
+
+  useEffect(() => {
+    flipVRef.current = flipV;
+    offDirtyRef.current = true;
+  }, [flipV]);
+
+  useEffect(() => {
+    enhanceRef.current = enhance;
+    offDirtyRef.current = true;
+  }, [enhance]);
+
+  useEffect(() => {
+    skinToneRef.current = skinTone;
+    offDirtyRef.current = true;
+  }, [skinTone]);
 
   // ── Responsive canvas sizing ───────────────────────────────────
   useEffect(() => {
     const measure = () => {
       if (!containerRef.current) return;
+
       const { width } = containerRef.current.getBoundingClientRect();
+
       const cw = Math.max(200, Math.min(width - 4, 420));
-      const ch = Math.min(Math.round(cw / ratio), 520);
+
+      const ch = Math.min(Math.round(cw / RATIO), 520);
+
       if (cw !== canvasSzRef.current.w || ch !== canvasSzRef.current.h) {
-        canvasSzRef.current = { w: cw, h: ch };
-        cropBoxRef.current  = initBox(cw, ch, ratio);
+        canvasSzRef.current = {
+          w: cw,
+          h: ch,
+        };
+
+        cropBoxRef.current = initBox(cw, ch, RATIO);
+
         offDirtyRef.current = true;
         setCanvasW(cw);
         setCanvasH(ch);
       }
     };
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (containerRef.current) ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, [ratio]);
 
-  // ── Image dim computation ─────────────────────────────────────
-  function imgDims(img, cw, ch, rot, z) {
+    measure();
+
+    const resizeObserver = new ResizeObserver(measure);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [RATIO]);
+
+  // ── Image dimension computation ───────────────────────────────
+  function imgDims(img, cw, ch, rot, zoomValue) {
     const rot90 = rot % 180 !== 0;
-    const bw = rot90 ? ch : cw, bh = rot90 ? cw : ch;
-    const { dw, dh } = containDims(img.naturalWidth, img.naturalHeight, bw, bh);
-    return { dw: dw * (z/100), dh: dh * (z/100) };
+    const boxWidth = rot90 ? ch : cw;
+    const boxHeight = rot90 ? cw : ch;
+
+    const { dw, dh } = containDims(
+      img.naturalWidth,
+      img.naturalHeight,
+      boxWidth,
+      boxHeight,
+    );
+
+    return {
+      dw: dw * (zoomValue / 100),
+      dh: dh * (zoomValue / 100),
+    };
   }
 
   function getCropBounds(img, cw, ch) {
-    if (!constrainToImage || !img) return null;
+    if (!constrainToImage || !img) {
+      return null;
+    }
+
     const { dw, dh } = imgDims(img, cw, ch, rotRef.current, zoomRef.current);
+
     const left = (cw - dw) / 2;
     const top = (ch - dh) / 2;
+
     const x = Math.max(0, left);
     const y = Math.max(0, top);
+
     return {
       x,
       y,
@@ -184,495 +362,1207 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
 
   function initialCropBox(img, cw, ch) {
     const bounds = getCropBounds(img, cw, ch);
-    return bounds ? initBoxInBounds(bounds, ratio) : initBox(cw, ch, ratio);
+
+    return bounds ? initBoxInBounds(bounds, RATIO) : initBox(cw, ch, RATIO);
   }
 
   // ── Rebuild offscreen image cache ─────────────────────────────
   function rebuildOffscreen(img, cw, ch, dpr) {
-    const rot = rotRef.current, fH = flipHRef.current, fV = flipVRef.current, z = zoomRef.current;
-    const oc = document.createElement("canvas");
-    oc.width = cw * dpr; oc.height = ch * dpr;
-    const ctx = oc.getContext("2d");
+    const rot = rotRef.current;
+    const fH = flipHRef.current;
+    const fV = flipVRef.current;
+    const currentZoom = zoomRef.current;
+
+    const offscreenCanvas = document.createElement("canvas");
+
+    offscreenCanvas.width = cw * dpr;
+    offscreenCanvas.height = ch * dpr;
+
+    const ctx = offscreenCanvas.getContext("2d");
+
     ctx.scale(dpr, dpr);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    const { dw, dh } = imgDims(img, cw, ch, rot, z);
+
+    const { dw, dh } = imgDims(img, cw, ch, rot, currentZoom);
+
     ctx.save();
-    ctx.translate(cw/2, ch/2);
+    ctx.translate(cw / 2, ch / 2);
     ctx.rotate((rot * Math.PI) / 180);
     ctx.scale(fH ? -1 : 1, fV ? -1 : 1);
-    ctx.filter = buildPhotoEnhanceFilter(enhanceRef.current, skinToneRef.current);
-    ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+
+    ctx.filter = buildPhotoEnhanceFilter(
+      enhanceRef.current,
+      skinToneRef.current,
+    );
+
+    ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+
     ctx.filter = "none";
     ctx.restore();
-    return oc;
+
+    return offscreenCanvas;
   }
 
-  // ── Draw ─────────────────────────────────────────────────────
+  // ── Draw ───────────────────────────────────────────────────────
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    const img    = imgRef.current;
+    const img = imgRef.current;
+
     if (!canvas) return;
 
     const { w: cw, h: ch } = canvasSzRef.current;
-    const dpr = window.devicePixelRatio || 1;
-    const ap  = appliedSzRef.current;
 
-    if (ap.w !== cw || ap.h !== ch || ap.dpr !== dpr) {
-      canvas.width        = cw * dpr;
-      canvas.height       = ch * dpr;
-      canvas.style.width  = `${cw}px`;
+    const dpr = window.devicePixelRatio || 1;
+    const appliedSize = appliedSzRef.current;
+
+    if (
+      appliedSize.w !== cw ||
+      appliedSize.h !== ch ||
+      appliedSize.dpr !== dpr
+    ) {
+      canvas.width = cw * dpr;
+      canvas.height = ch * dpr;
+      canvas.style.width = `${cw}px`;
       canvas.style.height = `${ch}px`;
-      appliedSzRef.current = { w: cw, h: ch, dpr };
-      offDirtyRef.current  = true;
-      cropBoxRef.current   = initialCropBox(img, cw, ch);
+
+      appliedSzRef.current = {
+        w: cw,
+        h: ch,
+        dpr,
+      };
+
+      offDirtyRef.current = true;
+
+      cropBoxRef.current = initialCropBox(img, cw, ch);
     }
 
     const ctx = canvas.getContext("2d");
+
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (img) {
       if (offDirtyRef.current || !offscreenRef.current) {
         offscreenRef.current = rebuildOffscreen(img, cw, ch, dpr);
-        offDirtyRef.current  = false;
+
+        offDirtyRef.current = false;
       }
+
       ctx.drawImage(offscreenRef.current, 0, 0);
     }
 
-    const box = cropBoxRef.current;
+    const box = cropBoxRef.current || initialCropBox(img, cw, ch);
+
     const { x: fx, y: fy, w: fw, h: fh } = box;
 
     ctx.save();
     ctx.scale(dpr, dpr);
-    ctx.beginPath(); ctx.rect(0, 0, cw, ch); ctx.clip();
 
+    ctx.beginPath();
+    ctx.rect(0, 0, cw, ch);
+    ctx.clip();
+
+    // Dim outside crop area
     ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fillRect(0,    0,    cw,    fy);
-    ctx.fillRect(0,    fy+fh, cw,   ch-fy-fh);
-    ctx.fillRect(0,    fy,    fx,    fh);
-    ctx.fillRect(fx+fw, fy,  cw-fx-fw, fh);
+    ctx.fillRect(0, 0, cw, fy);
+    ctx.fillRect(0, fy + fh, cw, ch - fy - fh);
+    ctx.fillRect(0, fy, fx, fh);
+    ctx.fillRect(fx + fw, fy, cw - fx - fw, fh);
 
+    // Crop border
     ctx.strokeStyle = "rgba(255,255,255,0.9)";
     ctx.lineWidth = 1.5;
     ctx.strokeRect(fx, fy, fw, fh);
 
+    // Grid lines
     ctx.strokeStyle = "rgba(255,255,255,0.25)";
     ctx.lineWidth = 0.7;
-    for (let i = 1; i < 3; i++) {
-      ctx.beginPath(); ctx.moveTo(fx + fw/3*i, fy); ctx.lineTo(fx + fw/3*i, fy+fh); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(fx, fy + fh/3*i); ctx.lineTo(fx+fw, fy + fh/3*i); ctx.stroke();
+
+    for (let index = 1; index < 3; index++) {
+      ctx.beginPath();
+      ctx.moveTo(fx + (fw / 3) * index, fy);
+      ctx.lineTo(fx + (fw / 3) * index, fy + fh);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(fx, fy + (fh / 3) * index);
+      ctx.lineTo(fx + fw, fy + (fh / 3) * index);
+      ctx.stroke();
     }
 
-    const BL = 18, BT = 3;
-    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = BT; ctx.lineCap = "square";
-    [[fx,fy,1,1],[fx+fw,fy,-1,1],[fx,fy+fh,1,-1],[fx+fw,fy+fh,-1,-1]].forEach(([x,y,sx,sy]) => {
-      ctx.beginPath(); ctx.moveTo(x+sx*BL, y); ctx.lineTo(x,y); ctx.lineTo(x, y+sy*BL); ctx.stroke();
+    // Corner lines
+    const bracketLength = 18;
+    const bracketThickness = 3;
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = bracketThickness;
+    ctx.lineCap = "square";
+
+    [
+      [fx, fy, 1, 1],
+      [fx + fw, fy, -1, 1],
+      [fx, fy + fh, 1, -1],
+      [fx + fw, fy + fh, -1, -1],
+    ].forEach(([x, y, sx, sy]) => {
+      ctx.beginPath();
+      ctx.moveTo(x + sx * bracketLength, y);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x, y + sy * bracketLength);
+      ctx.stroke();
     });
 
-    const hs = HANDLE_VIS;
+    // Touch handles
+    const handleSize = HANDLE_VIS;
+
     ctx.fillStyle = "#ffffff";
-    [[fx,fy],[fx+fw,fy],[fx,fy+fh],[fx+fw,fy+fh]].forEach(([cx,cy]) => {
-      ctx.fillRect(cx-hs/2, cy-hs/2, hs, hs);
+
+    [
+      [fx, fy],
+      [fx + fw, fy],
+      [fx, fy + fh],
+      [fx + fw, fy + fh],
+    ].forEach(([cx, cy]) => {
+      ctx.fillRect(
+        cx - handleSize / 2,
+        cy - handleSize / 2,
+        handleSize,
+        handleSize,
+      );
     });
 
     ctx.restore();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ratio]);
+  }, [RATIO]);
 
   const scheduleDraw = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => { rafRef.current = null; draw(); });
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      draw();
+    });
   }, [draw]);
 
   const fitToCrop = useCallback(() => {
     const img = imgRef.current;
+
     if (!img) return;
+
     const { w: cw, h: ch } = canvasSzRef.current;
-    const box = cropBoxRef.current || initBox(cw, ch, ratio);
+
+    const box = cropBoxRef.current || initBox(cw, ch, RATIO);
+
     const rot = rotRef.current;
     const rot90 = rot % 180 !== 0;
-    const bw = rot90 ? ch : cw, bh = rot90 ? cw : ch;
-    const { dw: imgW, dh: imgH } = containDims(img.naturalWidth, img.naturalHeight, bw, bh);
-    const zoomNeeded = Math.max(box.w / imgW, box.h / imgH) * 100;
+
+    const boxWidth = rot90 ? ch : cw;
+    const boxHeight = rot90 ? cw : ch;
+
+    const { dw: imageWidth, dh: imageHeight } = containDims(
+      img.naturalWidth,
+      img.naturalHeight,
+      boxWidth,
+      boxHeight,
+    );
+
+    const zoomNeeded = Math.max(box.w / imageWidth, box.h / imageHeight) * 100;
+
     const newZoom = clamp(Math.ceil(zoomNeeded), 100, 300);
+
     zoomRef.current = newZoom;
     setZoom(newZoom);
     offDirtyRef.current = true;
     scheduleDraw();
-  }, [ratio, scheduleDraw]);
+  }, [RATIO, scheduleDraw]);
 
-  // ── Auto face detect ──────────────────────────────────────────
+  // ── Auto face detection ────────────────────────────────────────
   const autoDetectFace = useCallback(async () => {
     const img = imgRef.current;
-    if (!img || !("FaceDetector" in window)) return;
+
+    if (!img || !("FaceDetector" in window)) {
+      return;
+    }
+
     try {
-      const detector = new window.FaceDetector({ maxDetectedFaces: 1, fastMode: true });
+      const detector = new window.FaceDetector({
+        maxDetectedFaces: 1,
+        fastMode: true,
+      });
+
       const faces = await detector.detect(img);
+
       if (!faces.length) return;
+
       const face = faces[0].boundingBox;
+
       const { w: cw, h: ch } = canvasSzRef.current;
+
       const rot = rotRef.current;
       const rot90 = rot % 180 !== 0;
-      const bw = rot90 ? ch : cw, bh = rot90 ? cw : ch;
-      const { dw, dh } = containDims(img.naturalWidth, img.naturalHeight, bw, bh);
-      const z = zoomRef.current;
-      const sdw = dw * (z / 100), sdh = dh * (z / 100);
-      const imgLeft = (cw - sdw) / 2, imgTop = (ch - sdh) / 2;
-      const sx = sdw / img.naturalWidth, sy = sdh / img.naturalHeight;
-      const fcx = imgLeft + (face.x + face.width  / 2) * sx;
-      const fcy = imgTop  + (face.y + face.height / 2) * sy;
-      const fh  = face.height * sy;
-      const desiredH = fh * 2.2;
-      const desiredW = desiredH * ratio;
-      const bounds = getCropBounds(img, cw, ch) || { x: 0, y: 0, w: cw, h: ch };
-      let fw = Math.min(desiredW, bounds.w, bounds.h * ratio);
-      let fhh = fw / ratio;
-      let bx = clamp(fcx - fw / 2, bounds.x, bounds.x + bounds.w - fw);
-      let by = clamp(
-        (fcy - fh * 0.1) - fhh / 2,
-        bounds.y,
-        bounds.y + bounds.h - fhh,
-      );
-      if (fw < MIN_BOX_W) return;
-      cropBoxRef.current = { x: bx, y: by, w: fw, h: fhh };
-      scheduleDraw();
-    } catch { /* FaceDetector unavailable or failed — no-op */ }
-  }, [ratio, scheduleDraw]);
 
-  // ── Load image ────────────────────────────────────────────────
+      const boxWidth = rot90 ? ch : cw;
+      const boxHeight = rot90 ? cw : ch;
+
+      const { dw, dh } = containDims(
+        img.naturalWidth,
+        img.naturalHeight,
+        boxWidth,
+        boxHeight,
+      );
+
+      const currentZoom = zoomRef.current;
+      const scaledWidth = dw * (currentZoom / 100);
+      const scaledHeight = dh * (currentZoom / 100);
+
+      const imageLeft = (cw - scaledWidth) / 2;
+      const imageTop = (ch - scaledHeight) / 2;
+
+      const scaleX = scaledWidth / img.naturalWidth;
+      const scaleY = scaledHeight / img.naturalHeight;
+
+      const faceCenterX = imageLeft + (face.x + face.width / 2) * scaleX;
+
+      const faceCenterY = imageTop + (face.y + face.height / 2) * scaleY;
+
+      const faceHeight = face.height * scaleY;
+
+      const desiredHeight = faceHeight * 2.2;
+
+      const desiredWidth = desiredHeight * RATIO;
+
+      const bounds = getCropBounds(img, cw, ch) || {
+        x: 0,
+        y: 0,
+        w: cw,
+        h: ch,
+      };
+
+      const finalWidth = Math.min(desiredWidth, bounds.w, bounds.h * RATIO);
+
+      const finalHeight = finalWidth / RATIO;
+
+      const boxX = clamp(
+        faceCenterX - finalWidth / 2,
+        bounds.x,
+        bounds.x + bounds.w - finalWidth,
+      );
+
+      const boxY = clamp(
+        faceCenterY - faceHeight * 0.1 - finalHeight / 2,
+        bounds.y,
+        bounds.y + bounds.h - finalHeight,
+      );
+
+      if (finalWidth < MIN_BOX_W) {
+        return;
+      }
+
+      cropBoxRef.current = {
+        x: boxX,
+        y: boxY,
+        w: finalWidth,
+        h: finalHeight,
+      };
+
+      scheduleDraw();
+    } catch {
+      // FaceDetector unavailable or failed
+    }
+  }, [RATIO, scheduleDraw]);
+
+  // ── Load image ─────────────────────────────────────────────────
   useEffect(() => {
     if (!src) return;
+
     imgRef.current = null;
     offscreenRef.current = null;
     offDirtyRef.current = true;
-    zoomRef.current = 100; setZoom(100);
-    rotRef.current = 0;   setRotation(0);
-    flipHRef.current = false; setFlipH(false);
-    flipVRef.current = false; setFlipV(false);
-    enhanceRef.current = 0; setEnhance(0);
-    skinToneRef.current = 0; setSkinTone(0);
+
+    zoomRef.current = 100;
+    setZoom(100);
+
+    rotRef.current = 0;
+    setRotation(0);
+
+    flipHRef.current = false;
+    setFlipH(false);
+
+    flipVRef.current = false;
+    setFlipV(false);
+
+    enhanceRef.current = 0;
+    setEnhance(0);
+
+    skinToneRef.current = 0;
+    setSkinTone(0);
+
     setIsDoing(false);
+
     const { w: cw, h: ch } = canvasSzRef.current;
-    cropBoxRef.current = initBox(cw, ch, ratio);
+
+    cropBoxRef.current = initBox(cw, ch, RATIO);
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    let url = null;
 
-    const doLoad = () => {
+    let objectUrl = null;
+
+    const handleImageLoad = () => {
       imgRef.current = img;
-      const { w: cw, h: ch } = canvasSzRef.current;
-      cropBoxRef.current = initialCropBox(img, cw, ch);
+
+      const { w, h } = canvasSzRef.current;
+
+      cropBoxRef.current = initialCropBox(img, w, h);
+
       offDirtyRef.current = true;
       scheduleDraw();
+
       setTimeout(autoDetectFace, 80);
     };
 
-    img.onload = doLoad;
-    img.onerror = e => undefined;
+    img.onload = handleImageLoad;
+    img.onerror = () => undefined;
 
     if (src instanceof Blob) {
-      url = URL.createObjectURL(src);
-      img.src = url;
+      objectUrl = URL.createObjectURL(src);
+      img.src = objectUrl;
     } else {
       img.src = src;
     }
-    // If already cached (e.g. same blob URL), fire immediately
-    if (img.complete && img.naturalWidth > 0) doLoad();
 
-    return () => { img.onload = null; if (url) URL.revokeObjectURL(url); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, ratio]);
+    if (img.complete && img.naturalWidth > 0) {
+      handleImageLoad();
+    }
+
+    return () => {
+      img.onload = null;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [src, RATIO, scheduleDraw, autoDetectFace]);
 
   useEffect(() => {
     setTab(enableEnhance ? "enhance" : "crop");
   }, [enableEnhance, src]);
 
-  useEffect(() => { if (imgRef.current) scheduleDraw(); }, [rotation, flipH, flipV, zoom, enhance, skinTone, canvasW, canvasH, scheduleDraw]);
+  useEffect(() => {
+    if (imgRef.current) {
+      scheduleDraw();
+    }
+  }, [
+    rotation,
+    flipH,
+    flipV,
+    zoom,
+    enhance,
+    skinTone,
+    canvasW,
+    canvasH,
+    scheduleDraw,
+  ]);
 
-  // ── Pointer helpers ───────────────────────────────────────────
-  const getPos = (e) => {
+  // ── Pointer helpers ─────────────────────────────────────────────
+  const getPosition = (event) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { px: cx - rect.left, py: cy - rect.top };
+
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+
+    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+    return {
+      px: clientX - rect.left,
+      py: clientY - rect.top,
+    };
   };
 
-  const onDown = (e) => {
-    e.preventDefault();
-    if (e.touches && e.touches.length >= 2) {
-      pinchRef.current = { dist: getTouchDist(e.touches), zoom0: zoomRef.current };
+  const handlePointerDown = (event) => {
+    event.preventDefault();
+
+    if (event.touches && event.touches.length >= 2) {
+      pinchRef.current = {
+        dist: getTouchDist(event.touches),
+        zoom0: zoomRef.current,
+      };
+
       dragRef.current = null;
       return;
     }
+
     pinchRef.current = null;
-    const { px, py } = getPos(e);
+
+    const { px, py } = getPosition(event);
+
     const box = cropBoxRef.current;
     const corner = hitCorner(px, py, box);
+
     if (corner) {
       const { ax, ay, sx, sy } = CORNERS[corner];
-      dragRef.current = { mode: "resize", corner, anchor: { x: ax(box), y: ay(box) }, sx, sy };
+
+      dragRef.current = {
+        mode: "resize",
+        corner,
+        anchor: {
+          x: ax(box),
+          y: ay(box),
+        },
+        sx,
+        sy,
+      };
     } else if (insideBox(px, py, box)) {
-      dragRef.current = { mode: "move", px, py, box0: { ...box } };
-      if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
+      dragRef.current = {
+        mode: "move",
+        px,
+        py,
+        box0: { ...box },
+      };
+
+      if (canvasRef.current) {
+        canvasRef.current.style.cursor = "grabbing";
+      }
     }
   };
 
-  const onMove = (e) => {
-    e.preventDefault();
-    if (e.touches && e.touches.length >= 2 && pinchRef.current) {
-      const newDist = getTouchDist(e.touches);
-      const newZoom = clamp(Math.round(pinchRef.current.zoom0 * newDist / pinchRef.current.dist), 100, 300);
-      zoomRef.current = newZoom; setZoom(newZoom);
-      offDirtyRef.current = true; scheduleDraw();
+  const handlePointerMove = (event) => {
+    event.preventDefault();
+
+    if (event.touches && event.touches.length >= 2 && pinchRef.current) {
+      const newDistance = getTouchDist(event.touches);
+
+      const newZoom = clamp(
+        Math.round(
+          (pinchRef.current.zoom0 * newDistance) / pinchRef.current.dist,
+        ),
+        100,
+        300,
+      );
+
+      zoomRef.current = newZoom;
+      setZoom(newZoom);
+      offDirtyRef.current = true;
+      scheduleDraw();
+
       return;
     }
+
     if (!dragRef.current) return;
-    const { px, py } = getPos(e);
+
+    const { px, py } = getPosition(event);
+
     const { w: cw, h: ch } = canvasSzRef.current;
+
     const bounds = getCropBounds(imgRef.current, cw, ch);
-    const d = dragRef.current;
-    if (d.mode === "resize") {
-      cropBoxRef.current = resizeBox(px, py, d.anchor, d.sx, d.sy, cw, ch, ratio, bounds);
+
+    const drag = dragRef.current;
+
+    if (drag.mode === "resize") {
+      cropBoxRef.current = resizeBox(
+        px,
+        py,
+        drag.anchor,
+        drag.sx,
+        drag.sy,
+        cw,
+        ch,
+        RATIO,
+        bounds,
+      );
     } else {
-      cropBoxRef.current = moveBox(d.box0, px - d.px, py - d.py, cw, ch, bounds);
+      cropBoxRef.current = moveBox(
+        drag.box0,
+        px - drag.px,
+        py - drag.py,
+        cw,
+        ch,
+        bounds,
+      );
     }
+
     scheduleDraw();
   };
 
-  const onUp = (e) => {
-    if (e?.touches?.length > 0) { if (e.touches.length < 2) pinchRef.current = null; return; }
+  const handlePointerUp = (event) => {
+    if (event?.touches?.length > 0) {
+      if (event.touches.length < 2) {
+        pinchRef.current = null;
+      }
+
+      return;
+    }
+
     pinchRef.current = null;
     dragRef.current = null;
-    if (canvasRef.current) canvasRef.current.style.cursor = "grab";
+
+    if (canvasRef.current) {
+      canvasRef.current.style.cursor = "grab";
+    }
   };
 
-  // ── Export ────────────────────────────────────────────────────
+  // ── Export ─────────────────────────────────────────────────────
   const handleDone = () => {
     if (isDoing) return;
+
     const img = imgRef.current;
     if (!img) return;
+
     setIsDoing(true);
     setEncodeProgress(0);
 
-    // Animate progress 0 → 85 while toBlob encodes
-    let p = 0;
+    let progress = 0;
+
     clearInterval(progressTimerRef.current);
+
     progressTimerRef.current = setInterval(() => {
-      p = Math.min(p + (p < 40 ? 10 : p < 70 ? 4 : 1), 85);
-      setEncodeProgress(p);
+      progress = Math.min(
+        progress + (progress < 40 ? 10 : progress < 70 ? 4 : 1),
+        85,
+      );
+
+      setEncodeProgress(progress);
     }, 55);
 
-    const rot = rotRef.current, fH = flipHRef.current, fV = flipVRef.current, z = zoomRef.current;
+    const rot = rotRef.current;
+    const fH = flipHRef.current;
+    const fV = flipVRef.current;
+    const currentZoom = zoomRef.current;
+
     const { w: cw, h: ch } = canvasSzRef.current;
+
     const box = cropBoxRef.current;
 
     const TARGET = 800;
-    const outW = ratio >= 1 ? TARGET : Math.round(TARGET * ratio);
-    const outH = ratio >= 1 ? Math.round(TARGET / ratio) : TARGET;
-    const scale = outW / box.w;
 
-    const { dw, dh } = imgDims(img, cw, ch, rot, z);
-    const cropCX = box.x + box.w / 2;
-    const cropCY = box.y + box.h / 2;
-    const imgCX  = outW/2 + (cw/2 - cropCX) * scale;
-    const imgCY  = outH/2 + (ch/2 - cropCY) * scale;
+    const outputWidth = RATIO >= 1 ? TARGET : Math.round(TARGET * RATIO);
 
-    const out = document.createElement("canvas");
-    out.width = outW; out.height = outH;
-    const ctx = out.getContext("2d");
+    const outputHeight = RATIO >= 1 ? Math.round(TARGET / RATIO) : TARGET;
+
+    const scale = outputWidth / box.w;
+
+    const { dw, dh } = imgDims(img, cw, ch, rot, currentZoom);
+
+    const cropCenterX = box.x + box.w / 2;
+
+    const cropCenterY = box.y + box.h / 2;
+
+    const imageCenterX = outputWidth / 2 + (cw / 2 - cropCenterX) * scale;
+
+    const imageCenterY = outputHeight / 2 + (ch / 2 - cropCenterY) * scale;
+
+    const outputCanvas = document.createElement("canvas");
+
+    outputCanvas.width = outputWidth;
+
+    outputCanvas.height = outputHeight;
+
+    const ctx = outputCanvas.getContext("2d");
+
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+
     ctx.save();
-    ctx.translate(imgCX, imgCY);
+
+    ctx.translate(imageCenterX, imageCenterY);
+
     ctx.rotate((rot * Math.PI) / 180);
+
     ctx.scale(fH ? -1 : 1, fV ? -1 : 1);
-    ctx.filter = buildPhotoEnhanceFilter(enhanceRef.current, skinToneRef.current);
-    ctx.drawImage(img, -dw*scale/2, -dh*scale/2, dw*scale, dh*scale);
+
+    ctx.filter = buildPhotoEnhanceFilter(
+      enhanceRef.current,
+      skinToneRef.current,
+    );
+
+    ctx.drawImage(
+      img,
+      (-dw * scale) / 2,
+      (-dh * scale) / 2,
+      dw * scale,
+      dh * scale,
+    );
+
     ctx.filter = "none";
     ctx.restore();
 
-    out.toBlob(blob => {
-      clearInterval(progressTimerRef.current);
-      setEncodeProgress(100);
-      setTimeout(() => {
-        setIsDoing(false);
-        setEncodeProgress(0);
-        onDone(blob);
-      }, 180);
-    }, "image/webp", 0.92);
+    outputCanvas.toBlob(
+      (blob) => {
+        clearInterval(progressTimerRef.current);
+
+        setEncodeProgress(100);
+
+        setTimeout(() => {
+          setIsDoing(false);
+          setEncodeProgress(0);
+          onDone(blob);
+        }, 180);
+      },
+      "image/webp",
+      0.92,
+    );
   };
 
-  // ── Tabs ──────────────────────────────────────────────────────
   const tabs = [
-    { id: "rotate", label: "Rotate", icon: "↺" },
-    { id: "flip",   label: "Flip",   icon: "⇄" },
-    { id: "crop",   label: "Crop",   icon: "⊡" },
-    { id: "scale",  label: "Zoom",   icon: "⤢" },
-    ...(enableEnhance ? [{ id: "enhance", label: "Enhance", icon: "✨" }] : []),
+    {
+      id: "rotate",
+      label: "Rotate",
+      icon: "↺",
+    },
+    {
+      id: "flip",
+      label: "Flip",
+      icon: "⇄",
+    },
+    {
+      id: "crop",
+      label: "Crop",
+      icon: "⊡",
+    },
+    {
+      id: "scale",
+      label: "Zoom",
+      icon: "⤢",
+    },
+    ...(enableEnhance
+      ? [
+          {
+            id: "enhance",
+            label: "Enhance",
+            icon: "✨",
+          },
+        ]
+      : []),
   ];
-  const btnBase = {
-    background:"none", border:"none", cursor:"pointer",
-    display:"flex", flexDirection:"column", alignItems:"center",
-    justifyContent:"center", gap:4, padding:"12px 8px", flex:1,
+
+  const buttonStyle = {
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    padding: "12px 8px",
+    flex: 1,
   };
 
   return (
-    <div ref={containerRef} style={{
-      display:"flex", flexDirection:"column", height:"100%", width:"100%",
-      backgroundColor:"#181818", userSelect:"none",
-      fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif",
-    }}>
-
+    <div
+      ref={containerRef}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        backgroundColor: "#181818",
+        userSelect: "none",
+        fontFamily: "-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif",
+      }}
+    >
       {/* Top bar */}
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
-        padding:"7px 10px", borderBottom:"1px solid #2c2c2c", flexShrink:0 }}>
-        <button onClick={onCancel} style={{
-          background:"none", border:"none", color:"#fff", fontSize:14,
-          cursor:"pointer", padding:"4px 8px", touchAction:"manipulation" }}>✕</button>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "7px 10px",
+          borderBottom: "1px solid #2c2c2c",
+          flexShrink: 0,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#fff",
+            fontSize: 14,
+            cursor: "pointer",
+            padding: "4px 8px",
+            touchAction: "manipulation",
+          }}
+        >
+          ✕
+        </button>
+
         <button
           type="button"
           disabled={isDoing}
           onClick={handleDone}
           style={{
-            position:"relative", overflow:"hidden",
-            background: isDoing ? "#1c0e04" : "linear-gradient(135deg,#ea580c,#f97316)",
-            color:"#fff", fontWeight:700, fontSize:13, borderRadius:12,
-            minWidth:90, minHeight:36, border:"none",
+            position: "relative",
+            overflow: "hidden",
+            background: isDoing
+              ? "#1c0e04"
+              : "linear-gradient(135deg,#ea580c,#f97316)",
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: 13,
+            borderRadius: 12,
+            minWidth: 90,
+            minHeight: 36,
+            border: "none",
             cursor: isDoing ? "default" : "pointer",
-            touchAction:"manipulation",
-            display:"flex", alignItems:"center", justifyContent:"center", padding:"0 14px",
+            touchAction: "manipulation",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 14px",
           }}
         >
           {isDoing && (
-            <span style={{
-              position:"absolute", left:0, top:0, bottom:0,
-              width:`${encodeProgress}%`,
-              background:"linear-gradient(135deg,#ea580c,#f97316)",
-              transition:"width 0.1s linear",
-              borderRadius:12,
-            }} />
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: `${encodeProgress}%`,
+                background: "linear-gradient(135deg,#ea580c,#f97316)",
+                transition: "width 0.1s linear",
+                borderRadius: 12,
+              }}
+            />
           )}
-          <span style={{ position:"relative", zIndex:1, letterSpacing:"0.01em" }}>
+
+          <span
+            style={{
+              position: "relative",
+              zIndex: 1,
+              letterSpacing: "0.01em",
+            }}
+          >
             {isDoing ? `Encoding ${encodeProgress}%` : "Done / पूरा करें"}
           </span>
         </button>
       </div>
 
-      {/* Canvas area — fills remaining space, image never overflows */}
-      <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center",
-        width:"100%", backgroundColor:"#111", overflow:"hidden", minHeight:200 }}>
-        <canvas ref={canvasRef}
-          style={{ touchAction:"none", display:"block", cursor:"grab",
-            maxWidth:"100%", maxHeight:"100%" }}
-          onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp}
-          onTouchStart={onDown} onTouchMove={onMove} onTouchEnd={onUp} />
+      {/* Canvas */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          backgroundColor: "#111",
+          overflow: "hidden",
+          minHeight: 200,
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            touchAction: "none",
+            display: "block",
+            cursor: "grab",
+            maxWidth: "100%",
+            maxHeight: "100%",
+          }}
+          onMouseDown={handlePointerDown}
+          onMouseMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onMouseLeave={handlePointerUp}
+          onTouchStart={handlePointerDown}
+          onTouchMove={handlePointerMove}
+          onTouchEnd={handlePointerUp}
+        />
       </div>
 
       {/* Tab controls */}
-      <div style={{ backgroundColor:"#f4f4f4", borderTop:"1px solid #e0e0e0", flexShrink:0 }}>
+      <div
+        style={{
+          backgroundColor: "#f4f4f4",
+          borderTop: "1px solid #e0e0e0",
+          flexShrink: 0,
+        }}
+      >
         {tab === "rotate" && (
-          <div style={{ padding:"6px 10px", display:"flex", justifyContent:"center", gap:16 }}>
-            {[["↺",-90],["↻",90]].map(([icon,deg]) => (
-              <button key={deg} onClick={() => setRotation(r => r+deg)} style={{
-                padding:"6px 8px", backgroundColor:"#fff", border:"1px solid #ddd",
-                borderRadius:10, fontSize:14, cursor:"pointer" }}>{icon}</button>
-            ))}
-          </div>
-        )}
-        {tab === "flip" && (
-          <div style={{ padding:"6px 10px", display:"flex", justifyContent:"center", gap:12 }}>
-            {[["⇄",flipH,() => setFlipH(v=>!v)],["⇅",flipV,() => setFlipV(v=>!v)]].map(([label,active,fn]) => (
-              <button key={label} onClick={fn} style={{
-                padding:"6px 12px", backgroundColor: active?"#f97316":"#fff",
-                color: active?"#fff":"#333", border:"1px solid #ddd",
-                borderRadius:10, fontSize:14, fontWeight:600, cursor:"pointer" }}>{label}</button>
-            ))}
-          </div>
-        )}
-        {tab === "crop" && (
-          <div style={{ padding:"8px 10px", textAlign:"center", fontSize:12, color:"#888" }}>
-            Drag corners to resize · अंदर खींचकर फोटो सेट करें · Crop stays inside photo
-          </div>
-        )}
-        {tab === "enhance" && enableEnhance && (
-          <div style={{ padding:"8px 14px 10px", color:"#333" }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:8 }}>
-              <span style={{ fontSize:11, fontWeight:700 }}>Photo Enhance</span>
+          <div
+            style={{
+              padding: "6px 10px",
+              display: "flex",
+              justifyContent: "center",
+              gap: 16,
+            }}
+          >
+            {[
+              ["↺", -90],
+              ["↻", 90],
+            ].map(([icon, degrees]) => (
               <button
                 type="button"
-                onClick={() => setEnhance(value => value ? 0 : 65)}
-                style={{ border:"none", borderRadius:999, padding:"5px 10px", background:enhance?"#f97316":"#ddd", color:enhance?"#fff":"#555", fontSize:10, fontWeight:700, cursor:"pointer" }}
+                key={degrees}
+                onClick={() => setRotation((current) => current + degrees)}
+                style={{
+                  padding: "6px 8px",
+                  backgroundColor: "#fff",
+                  border: "1px solid #ddd",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  cursor: "pointer",
+                }}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {tab === "flip" && (
+          <div
+            style={{
+              padding: "6px 10px",
+              display: "flex",
+              justifyContent: "center",
+              gap: 12,
+            }}
+          >
+            {[
+              ["⇄", flipH, () => setFlipH((value) => !value)],
+              ["⇅", flipV, () => setFlipV((value) => !value)],
+            ].map(([label, active, action]) => (
+              <button
+                type="button"
+                key={label}
+                onClick={action}
+                style={{
+                  padding: "6px 12px",
+                  backgroundColor: active ? "#f97316" : "#fff",
+                  color: active ? "#fff" : "#333",
+                  border: "1px solid #ddd",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {tab === "crop" && (
+          <div
+            style={{
+              padding: "8px 10px",
+              textAlign: "center",
+              fontSize: 12,
+              color: "#888",
+            }}
+          >
+            Drag corners to resize · अंदर खींचकर फोटो सेट करें · Crop stays
+            inside photo
+          </div>
+        )}
+
+        {tab === "enhance" && enableEnhance && (
+          <div
+            style={{
+              padding: "8px 14px 10px",
+              color: "#333",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                marginBottom: 8,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                }}
+              >
+                Photo Enhance
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setEnhance((value) => (value ? 0 : 65))}
+                style={{
+                  border: "none",
+                  borderRadius: 999,
+                  padding: "5px 10px",
+                  background: enhance ? "#f97316" : "#ddd",
+                  color: enhance ? "#fff" : "#555",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
               >
                 {enhance ? "ON" : "AUTO"}
               </button>
             </div>
-            <input aria-label="Photo enhance" type="range" min={0} max={100} value={enhance}
-              onChange={event => setEnhance(Number(event.target.value))}
-              style={{ width:"100%", accentColor:"#f97316" }} />
-            <div style={{ display:"flex", justifyContent:"space-between", marginTop:7, marginBottom:3, fontSize:10, fontWeight:700 }}>
-              <span>Cool</span><span>Skin Tone</span><span>Warm</span>
+
+            <input
+              aria-label="Photo enhance"
+              type="range"
+              min={0}
+              max={100}
+              value={enhance}
+              onChange={(event) => setEnhance(Number(event.target.value))}
+              style={{
+                width: "100%",
+                accentColor: "#f97316",
+              }}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: 7,
+                marginBottom: 3,
+                fontSize: 10,
+                fontWeight: 700,
+              }}
+            >
+              <span>Cool</span>
+              <span>Skin Tone</span>
+              <span>Warm</span>
             </div>
-            <input aria-label="Skin tone" type="range" min={-50} max={50} value={skinTone}
-              onChange={event => setSkinTone(Number(event.target.value))}
-              style={{ width:"100%", accentColor:"#f97316" }} />
+
+            <input
+              aria-label="Skin tone"
+              type="range"
+              min={-50}
+              max={50}
+              value={skinTone}
+              onChange={(event) => setSkinTone(Number(event.target.value))}
+              style={{
+                width: "100%",
+                accentColor: "#f97316",
+              }}
+            />
           </div>
         )}
       </div>
 
       {/* Zoom slider */}
-      {tab !== "enhance" && <div style={{ backgroundColor:"#f4f4f4", padding:"6px 20px 12px", borderTop:"1px solid #e8e8e8", flexShrink:0 }}>
-        <div style={{ textAlign:"center", fontSize:15, fontWeight:700, color:"#f97316", marginBottom:6 }}>
-          {zoom}%
-        </div>
-        <div style={{ position:"relative", height:36, display:"flex", alignItems:"center" }}>
-          <div style={{ position:"absolute", left:0, right:0, display:"flex",
-            justifyContent:"space-between", alignItems:"flex-end",
-            height:20, pointerEvents:"none", padding:"0 2px" }}>
-            {Array.from({length:35}).map((_,i) => (
-              <div key={i} style={{ width:1.5, height: i%5===0?14:7,
-                backgroundColor: i===0?"#f97316":"#bbb", borderRadius:1 }} />
-            ))}
+      {tab !== "enhance" && (
+        <div
+          style={{
+            backgroundColor: "#f4f4f4",
+            padding: "6px 20px 12px",
+            borderTop: "1px solid #e8e8e8",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              textAlign: "center",
+              fontSize: 15,
+              fontWeight: 700,
+              color: "#f97316",
+              marginBottom: 6,
+            }}
+          >
+            {zoom}%
           </div>
-          <input type="range" min={100} max={300} step={1} value={zoom}
-            onChange={e => setZoom(Number(e.target.value))}
-            style={{ width:"100%", appearance:"none", WebkitAppearance:"none",
-              background:"transparent", height:36, cursor:"pointer", position:"relative", zIndex:1 }} />
-        </div>
-        <style>{`
-          input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:5px;height:28px;background:#f97316;border-radius:3px;cursor:pointer;}
-          input[type=range]::-webkit-slider-runnable-track{background:transparent;height:36px;}
-          @keyframes spin{to{transform:rotate(360deg)}}
-        `}</style>
-      </div>}
 
-      {/* Tab bar */}
-      <div style={{ backgroundColor:"#1e1e1e", display:"flex", borderTop:"1px solid #2a2a2a", flexShrink:0 }}>
-        <button onClick={() => {
-          setRotation(0); setFlipH(false); setFlipV(false); setZoom(100); setEnhance(0); setSkinTone(0);
-          const { w: cw, h: ch } = canvasSzRef.current;
-          cropBoxRef.current = initialCropBox(imgRef.current, cw, ch);
-          offDirtyRef.current = true; scheduleDraw();
-        }} style={btnBase}>
-          <span style={{ fontSize:20, color:"#888" }}>↺</span>
-          <span style={{ fontSize:10, color:"#666" }}>Reset</span>
+          <div
+            style={{
+              position: "relative",
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-end",
+                height: 20,
+                pointerEvents: "none",
+                padding: "0 2px",
+              }}
+            >
+              {Array.from({
+                length: 35,
+              }).map((_, index) => (
+                <div
+                  key={index}
+                  style={{
+                    width: 1.5,
+                    height: index % 5 === 0 ? 14 : 7,
+                    backgroundColor: index === 0 ? "#f97316" : "#bbb",
+                    borderRadius: 1,
+                  }}
+                />
+              ))}
+            </div>
+
+            <input
+              type="range"
+              min={100}
+              max={300}
+              step={1}
+              value={zoom}
+              onChange={(event) => setZoom(Number(event.target.value))}
+              style={{
+                width: "100%",
+                appearance: "none",
+                WebkitAppearance: "none",
+                background: "transparent",
+                height: 36,
+                cursor: "pointer",
+                position: "relative",
+                zIndex: 1,
+              }}
+            />
+          </div>
+
+          <style>{`
+            input[type=range]::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              width: 5px;
+              height: 28px;
+              background: #f97316;
+              border-radius: 3px;
+              cursor: pointer;
+            }
+
+            input[type=range]::-webkit-slider-runnable-track {
+              background: transparent;
+              height: 36px;
+            }
+          `}</style>
+        </div>
+      )}
+
+      {/* Bottom toolbar */}
+      <div
+        style={{
+          backgroundColor: "#1e1e1e",
+          display: "flex",
+          borderTop: "1px solid #2a2a2a",
+          flexShrink: 0,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setRotation(0);
+            setFlipH(false);
+            setFlipV(false);
+            setZoom(100);
+            setEnhance(0);
+            setSkinTone(0);
+
+            const { w, h } = canvasSzRef.current;
+
+            cropBoxRef.current = initialCropBox(imgRef.current, w, h);
+
+            offDirtyRef.current = true;
+            scheduleDraw();
+          }}
+          style={buttonStyle}
+        >
+          <span
+            style={{
+              fontSize: 20,
+              color: "#888",
+            }}
+          >
+            ↺
+          </span>
+
+          <span
+            style={{
+              fontSize: 10,
+              color: "#666",
+            }}
+          >
+            Reset
+          </span>
         </button>
-        <button onClick={fitToCrop} style={btnBase}>
-          <span style={{ fontSize:20, color:"#888" }}>⊞</span>
-          <span style={{ fontSize:10, color:"#666" }}>Fit</span>
+
+        <button type="button" onClick={fitToCrop} style={buttonStyle}>
+          <span
+            style={{
+              fontSize: 20,
+              color: "#888",
+            }}
+          >
+            ⊞
+          </span>
+
+          <span
+            style={{
+              fontSize: 10,
+              color: "#666",
+            }}
+          >
+            Fit
+          </span>
         </button>
-        <button onClick={autoDetectFace} style={btnBase}>
-          <span style={{ fontSize:18, color:"#888" }}>👤</span>
-          <span style={{ fontSize:10, color:"#666" }}>Face</span>
+
+        <button type="button" onClick={autoDetectFace} style={buttonStyle}>
+          <span
+            style={{
+              fontSize: 18,
+              color: "#888",
+            }}
+          >
+            👤
+          </span>
+
+          <span
+            style={{
+              fontSize: 10,
+              color: "#666",
+            }}
+          >
+            Face
+          </span>
         </button>
+
         {tabs.map(({ id, label, icon }) => {
           const active = tab === id;
+
           return (
-            <button key={id} onClick={() => setTab(id)}
-              style={{ ...btnBase, borderTop: active ? "2.5px solid #f97316":"2.5px solid transparent" }}>
-              <span style={{ fontSize:20, color: active?"#f97316":"#888" }}>{icon}</span>
-              <span style={{ fontSize:10, color: active?"#f97316":"#777", fontWeight: active?700:400 }}>{label}</span>
+            <button
+              type="button"
+              key={id}
+              onClick={() => setTab(id)}
+              style={{
+                ...buttonStyle,
+                borderTop: active
+                  ? "2.5px solid #f97316"
+                  : "2.5px solid transparent",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 20,
+                  color: active ? "#f97316" : "#888",
+                }}
+              >
+                {icon}
+              </span>
+
+              <span
+                style={{
+                  fontSize: 10,
+                  color: active ? "#f97316" : "#777",
+                  fontWeight: active ? 700 : 400,
+                }}
+              >
+                {label}
+              </span>
             </button>
           );
         })}
