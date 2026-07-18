@@ -1,129 +1,325 @@
-async function convertToWebP(file) {
-  const bitmap = await createImageBitmap(file);
-  const canvas = document.createElement("canvas");
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
-  canvas.getContext("2d").drawImage(bitmap, 0, 0);
+/**
+ * Free, on-device background removal.
+ *
+ * Images never leave the browser. The AI model is downloaded once and then
+ * reused from the browser cache. WebGPU is preferred on supported devices;
+ * Android/iOS devices without WebGPU automatically use the WASM/CPU engine.
+ */
 
-  return new Promise((resolve, reject) =>
+const MODEL_PUBLIC_PATH = import.meta.env.VITE_BG_MODEL_PATH?.trim();
+
+let enginePromise = null;
+let preloadPromise = null;
+let preferredDevice = null;
+let configRevision = 0;
+let activeProgress = null;
+let processingTail = Promise.resolve();
+
+function abortError() {
+  return new DOMException("Background removal cancelled", "AbortError");
+}
+
+function throwIfAborted(signal) {
+  if (signal?.aborted) throw abortError();
+}
+
+function emitProgress(stage, percentage) {
+  if (!activeProgress) return;
+  const safePercentage = Math.max(0, Math.min(100, Math.round(percentage)));
+  activeProgress(stage, safePercentage);
+}
+
+function engineProgress(key, current, total) {
+  const ratio = total > 0 ? Math.min(1, current / total) : 0;
+
+  if (key.startsWith("fetch:/models/")) {
+    emitProgress("AI मॉडल पहली बार तैयार हो रहा है…", 5 + ratio * 50);
+    return;
+  }
+  if (key.includes(".wasm")) {
+    emitProgress("AI इंजन तैयार किया जा रहा है…", 55 + ratio * 15);
+    return;
+  }
+  if (key.includes(".mjs")) {
+    emitProgress("AI फोटो प्रोसेसिंग शुरू हो रही है…", 70 + ratio * 10);
+    return;
+  }
+
+  const computeProgress = {
+    "compute:decode": ["फोटो पढ़ी और पहचानी जा रही है…", 82],
+    "compute:inference": ["AI बैकग्राउंड हटा रहा है…", 88],
+    "compute:mask": ["बाल और किनारे साफ किए जा रहे हैं…", 95],
+    "compute:encode": ["Transparent Photo तैयार हो रही है…", current >= total ? 100 : 98],
+  };
+  const update = computeProgress[key];
+  if (update) emitProgress(update[0], update[1]);
+}
+
+async function loadEngine() {
+  if (!enginePromise) {
+    enginePromise = import("@imgly/background-removal").catch((error) => {
+      enginePromise = null;
+      throw error;
+    });
+  }
+  return enginePromise;
+}
+
+function getPreferredDevice() {
+  if (preferredDevice) return preferredDevice;
+  preferredDevice =
+    typeof navigator !== "undefined" && navigator.gpu ? "gpu" : "cpu";
+  return preferredDevice;
+}
+
+function createConfig(device) {
+  return {
+    // "small" is the fast ~40 MB quantized model. It is the best balance for
+    // phones and is cached after the first download.
+    model: "small",
+    device,
+    proxyToWorker: false,
+    rescale: true,
+    debug: false,
+    output: {
+      // Ask the engine for raw pixels and encode them ourselves below. Some
+      // Android WebViews expose a normal HTMLCanvas without convertToBlob(),
+      // which makes IMG.LY's direct PNG encoder throw after inference.
+      format: "image/x-rgba8",
+      quality: 1,
+    },
+    fetchArgs: { cache: "force-cache" },
+    progress: engineProgress,
+    ...(MODEL_PUBLIC_PATH ? { publicPath: MODEL_PUBLIC_PATH } : {}),
+
+    // IMG.LY memoizes a session from the JSON form of this object. This value
+    // lets refreshRemoveBgKeys() recover from a transient failed download.
+    _cacheKey: configRevision,
+  };
+}
+
+async function prepareFastAiInput(file, maxSize = 1280) {
+  const bitmap = await createImageBitmap(file);
+  const longestSide = Math.max(bitmap.width, bitmap.height);
+  const size = Math.max(1, Math.min(maxSize, longestSide));
+  const scale = Math.min(1, size / longestSide);
+  const drawWidth = Math.max(1, Math.round(bitmap.width * scale));
+  const drawHeight = Math.max(1, Math.round(bitmap.height * scale));
+
+  // The model itself works at 1024×1024. Sending a huge 4K/8K photo only
+  // increases decode, mask-resize and PNG time. A square, aspect-preserving
+  // 1280px working image is much faster and is still ample for app templates.
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) {
+    bitmap.close?.();
+    return file;
+  }
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, size, size);
+  context.drawImage(
+    bitmap,
+    Math.round((size - drawWidth) / 2),
+    Math.round((size - drawHeight) / 2),
+    drawWidth,
+    drawHeight,
+  );
+  bitmap.close?.();
+
+  return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) =>
         blob
           ? resolve(blob)
-          : reject(
-              new Error("WebP conversion failed — canvas.toBlob returned null"),
-            ),
+          : reject(new Error("Fast AI image preparation failed.")),
       "image/webp",
       0.92,
-    ),
-  );
-}
-
-const REMOVEBG_API_URL = import.meta.env.VITE_REMOVEBG_API_URL;
-
-async function removeBgViaApi(file, onProgress, signal) {
-  if (!REMOVEBG_API_URL) {
-    throw new Error(
-      "VITE_REMOVEBG_API_URL is not set. Add it to your .env file and restart the dev server.",
     );
-  }
-
-  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-
-  if (onProgress) onProgress("Converting image…", 10);
-  let webpBlob;
-  try {
-    webpBlob = await convertToWebP(file);
-  } catch (err) {
-    throw new Error("Image conversion failed. Please try another image.");
-  }
-
-  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-
-  if (onProgress) onProgress("Removing background…", 35);
-
-  const formData = new FormData();
-  formData.append("image", webpBlob, "photo.webp");
-
-  let response;
-  try {
-    response = await fetch(REMOVEBG_API_URL, {
-      method: "POST",
-      body: formData,
-      signal,
-    });
-  } catch (err) {
-    if (err?.name === "AbortError") throw err;
-    throw new Error("Unable to process the image. Please check your connection.");
-  }
-
-  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-
-  if (onProgress) onProgress("Removing background…", 65);
-
-  if (!response.ok) {
-    let errorMsg = `API error ${response.status}`;
-    try {
-      const body = await response.json();
-      if (response.status === 429) {
-        const retryAfterSec =
-          body.retryAfterSeconds ??
-          Number(response.headers.get("Retry-After") ?? 3600);
-        const mins = Math.ceil(retryAfterSec / 60);
-        errorMsg =
-          `Rate limit reached — maximum 10 background removals per hour. ` +
-          `Try again in ${mins} minute${mins !== 1 ? "s" : ""}.`;
-      } else {
-        errorMsg = body.error || errorMsg;
-      }
-    } catch (_) {}
-    throw new Error(errorMsg);
-  }
-
-  if (onProgress) onProgress("Finalising…", 90);
-  const resultBlob = await response.blob();
-  if (onProgress) onProgress("Done", 100);
-
-  // console.log("[removeBg] API call complete via Cloud Function");
-
-  return resultBlob;
+  });
 }
 
+async function rawRgbaToPng(rawBlob) {
+  const params = Object.fromEntries(
+    rawBlob.type
+      .split(";")
+      .slice(1)
+      .map((part) => part.trim().split("=")),
+  );
+  const width = Number(params.width);
+  const height = Number(params.height);
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+    throw new Error("The AI engine returned invalid image dimensions.");
+  }
+
+  const pixels = new Uint8ClampedArray(await rawBlob.arrayBuffer());
+  if (pixels.length !== width * height * 4) {
+    throw new Error("The AI engine returned incomplete image pixels.");
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable on this device.");
+  context.putImageData(new ImageData(pixels, width, height), 0, 0);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) =>
+        blob
+          ? resolve(blob)
+          : reject(new Error("Transparent PNG creation failed.")),
+      "image/png",
+    );
+  });
+}
+
+async function preloadDevice(device) {
+  const { preload } = await loadEngine();
+  await preload(createConfig(device));
+  return device;
+}
+
+/** Download and initialise the local model without uploading any photo. */
 export async function preloadBgModel(onProgress) {
-  return "server";
+  if (typeof window === "undefined") return "unavailable";
+  if (onProgress) activeProgress = onProgress;
+
+  if (!preloadPromise) {
+    preloadPromise = (async () => {
+      const device = getPreferredDevice();
+      try {
+        return await preloadDevice(device);
+      } catch (error) {
+        if (device !== "gpu") throw error;
+
+        // A few devices expose WebGPU but cannot run this particular model.
+        // Retry once with the widely-supported CPU/WASM engine.
+        preferredDevice = "cpu";
+        emitProgress("Compatible AI mode शुरू किया जा रहा है…", 8);
+        return preloadDevice("cpu");
+      }
+    })().catch((error) => {
+      preloadPromise = null;
+      configRevision += 1;
+      throw error;
+    });
+  }
+
+  return preloadPromise;
+}
+
+function raceWithAbort(promise, signal) {
+  if (!signal) return promise;
+  if (signal.aborted) return Promise.reject(abortError());
+
+  return new Promise((resolve, reject) => {
+    const onAbort = () => reject(abortError());
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      },
+    );
+  });
+}
+
+function queueProcessing(task, signal) {
+  // ONNX sessions are fastest and most stable when one image is processed at
+  // a time. A cancelled caller returns immediately, while the internal queue
+  // still waits for any already-running inference to finish safely.
+  const scheduled = processingTail.then(async () => {
+    throwIfAborted(signal);
+    return task();
+  });
+  processingTail = scheduled.catch(() => {});
+  return raceWithAbort(scheduled, signal);
 }
 
 /**
- * Remove background from any image via the Firebase Cloud Function API.
- *
- * If the API call fails (network / server error) → returns the original
- * image unchanged (no error thrown), so the UI never breaks.
+ * Remove a background entirely on the user's device.
  *
  * @param {File|Blob} file
  * @param {(stage: string, pct: number) => void} [onProgress]
  * @param {AbortSignal} [signal]
- * @returns {Promise<Blob>} transparent PNG, or original image on failure
+ * @returns {Promise<Blob>} transparent PNG
  */
 export async function removeBg(file, onProgress, signal) {
-  // Honour abort before we even start
-  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-
-  try {
-    return await removeBgViaApi(file, onProgress, signal);
-  } catch (err) {
-
-    if (err?.name === "AbortError") throw err;
-    
-    
-    if (onProgress)
-      onProgress("Could not remove background — showing original", 100);
-
-    // Return original file as a Blob
-    if (file instanceof Blob) return file;
-    return new Blob([await file.arrayBuffer()], {
-      type: file.type || "image/jpeg",
-    });
+  if (!(file instanceof Blob) || file.size === 0) {
+    throw new Error("Please select a valid image.");
   }
+  throwIfAborted(signal);
+  onProgress?.("फ्री AI बैकग्राउंड रिमूवर तैयार हो रहा है…", 2);
+
+  return queueProcessing(async () => {
+    throwIfAborted(signal);
+    activeProgress = onProgress || null;
+
+    try {
+      const engine = await loadEngine();
+      await preloadBgModel(onProgress);
+      throwIfAborted(signal);
+      emitProgress("फोटो को तेज AI प्रोसेसिंग के लिए तैयार किया जा रहा है…", 80);
+      const aiInput = await prepareFastAiInput(file);
+      throwIfAborted(signal);
+
+      // v1.7 exposes removeBackground as a named export at runtime. Some
+      // bundlers also provide a default export, so support both shapes.
+      const removeBackground =
+        engine.removeBackground ||
+        engine.default?.removeBackground ||
+        engine.default;
+      if (typeof removeBackground !== "function") {
+        throw new Error("Background-removal function is unavailable.");
+      }
+
+      let device = getPreferredDevice();
+      let result;
+      try {
+        result = await removeBackground(aiInput, createConfig(device));
+      } catch (gpuError) {
+        if (device !== "gpu" || signal?.aborted) throw gpuError;
+
+        // WebGPU can initialise successfully and still fail on a particular
+        // phone/driver during inference. Retry that photo once on CPU.
+        preferredDevice = "cpu";
+        configRevision += 1;
+        preloadPromise = null;
+        emitProgress("Compatible AI mode शुरू किया जा रहा है…", 10);
+        await preloadDevice("cpu");
+        throwIfAborted(signal);
+        result = await removeBackground(aiInput, createConfig("cpu"));
+      }
+      throwIfAborted(signal);
+
+      if (!(result instanceof Blob) || result.size === 0) {
+        throw new Error("The background remover returned an empty image.");
+      }
+      result = await rawRgbaToPng(result);
+      emitProgress("फोटो तैयार है", 100);
+      return result;
+    } catch (error) {
+      if (error?.name === "AbortError" || signal?.aborted) throw abortError();
+      console.error("[removeBg] On-device background removal failed:", error);
+      throw new Error(
+        "Free background removal could not start. Check the internet once so the AI model can download, then try again.",
+        { cause: error },
+      );
+    } finally {
+      activeProgress = null;
+    }
+  }, signal);
 }
 
-export function refreshRemoveBgKeys() {}
+/** Force a clean model retry after a failed/corrupt browser download. */
+export function refreshRemoveBgKeys() {
+  configRevision += 1;
+  preloadPromise = null;
+}

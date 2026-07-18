@@ -36,9 +36,30 @@ export function processProfileData(mlmForm, mlmProfile) {
   };
 }
 
+export function getAchieverDisplayName(achiever) {
+  if (!achiever) return "";
+
+  const title = String(achiever.title || "Mr.").trim();
+  const name = String(achiever.name || "").trim();
+  const legacyCombinedName = String(achiever.achieverName || "").trim();
+
+  if (name) {
+    // Avoid "Mr. Mr. Rahul" when older saved data already kept the title in
+    // the name field, while ensuring newly selected titles always reach editor.
+    if (/^(?:Mr|Mrs|Ms|Miss|Dr)\.?(?:\s+|$)/i.test(name)) return name;
+    return `${title} ${name}`.trim();
+  }
+
+  if (!legacyCombinedName) return "";
+  if (/^(?:Mr|Mrs|Ms|Miss|Dr)\.?(?:\s+|$)/i.test(legacyCombinedName)) {
+    return legacyCombinedName;
+  }
+  return `${title || "Mr."} ${legacyCombinedName}`.trim();
+}
+
 export function processFormData(mlmForm) {
   return {
-    formName: mlmForm?.achiever?.name || "",
+    formName: getAchieverDisplayName(mlmForm?.achiever),
     formCity: mlmForm?.achiever?.city || "",
     formAmount: mlmForm?.achiever?.amount || "",
   };

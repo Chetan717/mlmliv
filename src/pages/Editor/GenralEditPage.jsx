@@ -58,6 +58,7 @@ import numComma from "./amount_numberImage/comma.webp";
 import numRupee from "./amount_numberImage/rupee.webp";
 import { COLLECTIONS } from "../../collections";
 import { celebrateDownload } from "../../utils/downloadCelebration";
+import { getAchieverDisplayName } from "./utils/canvasDataUtils";
 
 const fs = (n) => n;
 
@@ -1645,7 +1646,7 @@ function GeneralEditPage({
     return () => clearTimeout(t);
   }, [ImageRank, ImageChief, isMeeting]);
 
-  const formname = mlmForm?.achiever?.achieverName || "";
+  const formname = getAchieverDisplayName(mlmForm?.achiever);
   const formcity = mlmForm?.achiever?.city || "";
   const trainingDate = mlmForm?.selectedDate || "";
   const formamount = isIncome

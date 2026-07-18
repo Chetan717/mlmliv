@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from "react";
-import { Spinner, toast } from "@heroui/react";
+import { toast } from "@heroui/react";
 import { removeBg } from "../utils/removeBg";
 import { validateUploadFile } from "../../../lib/fileValidation";
+import RemoveBgLoadingOverlay from "./RemoveBgLoadingOverlay";
 
 export default function ImageUploadWithBgRemove({
   onImageReady,
@@ -24,6 +25,7 @@ export default function ImageUploadWithBgRemove({
   const [progressMsg, setProgressMsg] = useState("Please wait…");
   const [progressPct, setProgressPct] = useState(0);
   const [dots, setDots] = useState("");
+  const [processingPreview, setProcessingPreview] = useState(null);
 
   useEffect(() => {
     if (!load) { setDots(""); return; }
@@ -48,6 +50,7 @@ export default function ImageUploadWithBgRemove({
     setLoad(false);
     setProgressMsg("Please wait…");
     setProgressPct(0);
+    setProcessingPreview(null);
     setEditingImage(null);
     setEnhanceEnabled?.(false);
     setOpen(false);
@@ -68,8 +71,10 @@ export default function ImageUploadWithBgRemove({
 
   const removeBackgroundAfterCrop = (croppedBlob) => {
     if (!croppedBlob) return true;
+    const previewUrl = URL.createObjectURL(croppedBlob);
+    setProcessingPreview(previewUrl);
     setLoad(true);
-    setProgressMsg("Removing background…");
+    setProgressMsg("AI आपकी फोटो तैयार कर रहा है…");
     setProgressPct(0);
     const controller = new AbortController();
     abortRef.current = controller;
@@ -90,13 +95,16 @@ export default function ImageUploadWithBgRemove({
       } catch (err) {
         if (err?.name === "AbortError" || controller.signal.aborted) return;
         
-        toast.error("Background removal failed. You can still finish the crop.");
+        console.error("[removeBg] Image processing failed:", err, err?.cause);
+        toast.danger("Background removal failed. You can still finish the crop.");
         openFinalCrop(croppedBlob, true);
       } finally {
         abortRef.current = null;
         setLoad(false);
         setProgressMsg("Please wait…");
         setProgressPct(0);
+        setProcessingPreview(null);
+        URL.revokeObjectURL(previewUrl);
       }
     })();
 
@@ -109,7 +117,7 @@ export default function ImageUploadWithBgRemove({
     if (!file) return;
     const result = validateUploadFile(file, "image");
     if (!result.valid) {
-      toast.error(result.error || "Invalid image file.");
+      toast.danger(result.error || "Invalid image file.");
       return;
     }
     if (typeof setEditingType === "function") setEditingType(type);
@@ -210,67 +218,13 @@ export default function ImageUploadWithBgRemove({
         }}
       />
 
-      {/* Full-screen loader overlay */}
       {load && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-xs rounded-2xl bg-background border border-border shadow-2xl p-7 flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
-              {/* <svg className="animate-spin w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-              </svg> */}
-              <Spinner size="md" />
-            </div>
-
-            <div className="text-center">
-              <p className="text-[12px] text-accent font-semibold mt-1 min-h-[18px]">
-                {progressMsg}
-                {dots}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Please don't close or navigate away take 30 secconds
-              </p>
-            </div>
-
-            <div className="w-full">
-              <div className="w-full h-[6px] rounded-full bg-accent/15 overflow-hidden">
-                {progressPct > 0 ? (
-                  <div
-                    className="h-full bg-accent rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                ) : (
-                  <div className="h-full w-full relative overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 w-2/5 bg-accent rounded-full"
-                      style={{
-                        animation: "bgremove-slide 1.4s ease-in-out infinite",
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              <p className="text-right text-[10px] font-bold text-accent/60 mt-1">
-                {progressPct > 0 ? `${progressPct}%` : "Working…"}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={cancelRemoveBg}
-              className="w-full py-2.5 rounded-xl border border-border text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-muted/40 transition-all duration-150"
-            >
-              Cancel
-            </button>
-          </div>
-
-          <style>{`
-            @keyframes bgremove-slide {
-              0%   { left: -40%; }
-              100% { left: 140%; }
-            }
-          `}</style>
-        </div>
+        <RemoveBgLoadingOverlay
+          previewUrl={processingPreview}
+          progressMessage={`${progressMsg}${dots}`}
+          progressPct={progressPct}
+          onCancel={cancelRemoveBg}
+        />
       )}
     </div>
   );

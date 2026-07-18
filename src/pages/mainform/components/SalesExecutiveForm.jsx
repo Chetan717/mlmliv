@@ -555,7 +555,7 @@ export default function SalesExecutiveForm() {
       // Keep the processed photo usable in the current form if permanent
       // storage fails, so the user's crop work is not lost.
       setCustomFiles((prev) => [...prev, ...files]);
-      toast.error("Could not save to MLM Profile. Photo kept in this form.");
+      toast.danger("Could not save to MLM Profile. Photo kept in this form.");
     }
   };
 
@@ -615,7 +615,7 @@ export default function SalesExecutiveForm() {
       toast.success("Top upline photo removed from MLM Profile.");
     } catch (error) {
       
-      toast.error("Could not remove the top upline photo. Please try again.");
+      toast.danger("Could not remove the top upline photo. Please try again.");
     }
   };
 
@@ -696,7 +696,6 @@ export default function SalesExecutiveForm() {
             src={formImage}
             alt=""
             className="w-full h-[130px]"
-            autoSave={true}
           />
           <div className="absolute w-1/2 flex flex-col justify-center items-center  gap-2 top-1/2 left-1/2 pl-2 transform -translate-y-1/2">
             <span className=" text-center text-accent text-[16px] font-extrabold  px-2 py-1 rounded">

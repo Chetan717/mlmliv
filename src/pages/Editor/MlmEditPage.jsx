@@ -16,6 +16,7 @@ import { useToolbarPositions } from "./useToolbarPositions";
 import KonvaCanvas from "./KonvaCanvas";
 import FlipToolbar from "./FlipToolbar";
 import ListOfTemplates from "./components/ListOfTemplates";
+import { getAchieverDisplayName } from "./utils/canvasDataUtils";
 
 // ── Font-size helper ──────────────────────────────────────────────
 function calcFontSize(text, large, medium, small) {
@@ -123,7 +124,8 @@ function MlmEditPage({
     const logo2size = logoEntries[1]?.size || 0;
     const logo3size = logoEntries[2]?.size || 0;
     
-  const achieverName = mlmForm?.achiever?.name || "ACHIEVER NAME";
+  const achieverName =
+    getAchieverDisplayName(mlmForm?.achiever) || "ACHIEVER NAME";
   const achieverCity = mlmForm?.achiever?.city || "ACHIEVER CITY";
   const profileName = mlmForm?.promoter?.name
     ? mlmForm.promoter.name

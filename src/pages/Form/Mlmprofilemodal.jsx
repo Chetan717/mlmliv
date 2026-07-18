@@ -21,13 +21,14 @@ import {
 import { convertToWebP } from "../../lib/convertToWebP";
 import MultiImagePicker from "./MultiImagePicker";
 import { ImageEditorCanvas } from "./ImageEditorCanvas";
-import { toast, Button, Spinner } from "@heroui/react";
+import { toast, Button } from "@heroui/react";
 import { useNavigate, useLocation } from "react-router";
 import photoupload from "./photoupload.png";
 import { COLLECTIONS } from "../../collections";
 import { saveMlmProfileToStorage } from "../../utils/companyStorage";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 import { PAGE_REFRESH_EVENT } from "../../utils/pageRefresh";
+import RemoveBgLoadingOverlay from "../mainform/components/RemoveBgLoadingOverlay";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
@@ -479,6 +480,7 @@ export default function MLMProfilePage() {
   const [bgProgressMsg, setBgProgressMsg] = useState("Please wait…");
   const [bgProgressPct, setBgProgressPct] = useState(0);
   const [bgDots, setBgDots] = useState("");
+  const [bgPreviewUrl, setBgPreviewUrl] = useState(null);
   const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const abortProfileRef = useRef(null);
@@ -737,6 +739,7 @@ export default function MLMProfilePage() {
     setRemovingTopupBg(false);
     setBgProgressMsg("Please wait…");
     setBgProgressPct(0);
+    setBgPreviewUrl(null);
     setEditorSrc(null);
     setEditorStage("final");
     setStep("form");
@@ -744,8 +747,10 @@ export default function MLMProfilePage() {
   };
 
   const processTopupFile = async (file) => {
+    const previewUrl = URL.createObjectURL(file);
+    setBgPreviewUrl(previewUrl);
     setRemovingTopupBg(true);
-    setBgProgressMsg("Please wait…");
+    setBgProgressMsg("AI आपकी फोटो तैयार कर रहा है…");
     setBgProgressPct(0);
     const controller = new AbortController();
     abortTopupRef.current = controller;
@@ -769,12 +774,15 @@ export default function MLMProfilePage() {
     } catch (err) {
       if (err?.name === "AbortError" || controller.signal.aborted) return;
       
-      toast.error("Image processing failed. Please try again.");
+      console.error("[removeBg] Top-up image processing failed:", err, err?.cause);
+      toast.danger("Image processing failed. Please try again.");
     } finally {
       abortTopupRef.current = null;
       setRemovingTopupBg(false);
       setBgProgressMsg("Please wait…");
       setBgProgressPct(0);
+      setBgPreviewUrl(null);
+      URL.revokeObjectURL(previewUrl);
     }
   };
 
@@ -832,6 +840,7 @@ export default function MLMProfilePage() {
     setRemovingBg(false);
     setBgProgressMsg("Please wait…");
     setBgProgressPct(0);
+    setBgPreviewUrl(null);
     setEditorSrc(null);
     setEditingProfileIndex(null);
     setEditorStage("final");
@@ -840,8 +849,10 @@ export default function MLMProfilePage() {
   };
 
   const processProfileFile = async (file) => {
+    const previewUrl = URL.createObjectURL(file);
+    setBgPreviewUrl(previewUrl);
     setRemovingBg(true);
-    setBgProgressMsg("Please wait…");
+    setBgProgressMsg("AI आपकी फोटो तैयार कर रहा है…");
     setBgProgressPct(0);
     const controller = new AbortController();
     abortProfileRef.current = controller;
@@ -867,12 +878,15 @@ export default function MLMProfilePage() {
     } catch (err) {
       if (err?.name === "AbortError" || controller.signal.aborted) return;
       
-      toast.error("Image processing failed. Please try again.");
+      console.error("[removeBg] Profile image processing failed:", err, err?.cause);
+      toast.danger("Image processing failed. Please try again.");
     } finally {
       abortProfileRef.current = null;
       setRemovingBg(false);
       setBgProgressMsg("Please wait…");
       setBgProgressPct(0);
+      setBgPreviewUrl(null);
+      URL.revokeObjectURL(previewUrl);
     }
   };
 
@@ -1265,69 +1279,12 @@ export default function MLMProfilePage() {
         </div>
 
         {isBgRemoving && (
-          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="w-full max-w-xs rounded-2xl bg-background border border-border shadow-2xl p-7 flex flex-col items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
-                <Spinner size="md" />
-              </div>
-
-              <div className="text-center">
-                <p className="text-[12px] text-accent font-semibold mt-1 min-h-[18px]">
-                  {bgProgressMsg}
-                  {bgDots}
-                </p>
-
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Please don&apos;t close or navigate away. It may take up to 30
-                  seconds.
-                </p>
-              </div>
-
-              <div className="w-full">
-                <div className="w-full h-[6px] rounded-full bg-accent/15 overflow-hidden">
-                  {bgProgressPct > 0 ? (
-                    <div
-                      className="h-full bg-accent rounded-full transition-all duration-300 ease-out"
-                      style={{ width: `${bgProgressPct}%` }}
-                    />
-                  ) : (
-                    <div className="h-full w-full relative overflow-hidden">
-                      <div
-                        className="absolute inset-y-0 w-2/5 bg-accent rounded-full"
-                        style={{
-                          animation:
-                            "company-bgremove-slide 1.4s ease-in-out infinite",
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <p className="text-right text-[10px] font-bold text-accent/60 mt-1">
-                  {bgProgressPct > 0 ? `${bgProgressPct}%` : "Working\u2026"}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={removingTopupBg ? cancelTopupBg : cancelProfileBg}
-                className="w-full py-2.5 rounded-xl border border-border text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-muted/40 transition-all duration-150"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <style>{`
-            @keyframes company-bgremove-slide {
-              0% {
-                left: -40%;
-              }
-              100% {
-                left: 140%;
-              }
-            }
-          `}</style>
-          </div>
+          <RemoveBgLoadingOverlay
+            previewUrl={bgPreviewUrl}
+            progressMessage={`${bgProgressMsg}${bgDots}`}
+            progressPct={bgProgressPct}
+            onCancel={removingTopupBg ? cancelTopupBg : cancelProfileBg}
+          />
         )}
       </>
     );
@@ -1424,56 +1381,13 @@ export default function MLMProfilePage() {
 
       {/* Full-screen BG removal overlay — shared for both profile & topup */}
       {(removingBg || removingTopupBg) && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-xs rounded-2xl bg-background border border-border shadow-2xl p-7 flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
-              {/* <svg className="animate-spin w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-              </svg> */}
-              <Spinner size="md" />
-            </div>
-            <div className="text-center">
-              <p className="text-[12px] text-accent font-semibold mt-1 min-h-[18px]">
-                {bgProgressMsg}
-                {bgDots}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Please don't close or navigate away its take 30 secconds
-              </p>
-            </div>
-            <div className="w-full">
-              <div className="w-full h-[6px] rounded-full bg-accent/15 overflow-hidden">
-                {bgProgressPct > 0 ? (
-                  <div
-                    className="h-full bg-accent rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${bgProgressPct}%` }}
-                  />
-                ) : (
-                  <div className="h-full w-full relative overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 w-2/5 bg-accent rounded-full"
-                      style={{
-                        animation: "mlmbgslide 1.4s ease-in-out infinite",
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-              <p className="text-right text-[10px] font-bold text-accent/60 mt-1">
-                {bgProgressPct > 0 ? `${bgProgressPct}%` : "Working…"}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={removingTopupBg ? cancelTopupBg : cancelProfileBg}
-              className="w-full py-2.5 rounded-xl border border-border text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-muted/40 transition-all duration-150"
-            >
-              Cancel
-            </button>
-          </div>
-          <style>{`@keyframes mlmbgslide { 0% { left: -40%; } 100% { left: 140%; } }`}</style>
-        </div>
+        <RemoveBgLoadingOverlay
+          previewUrl={bgPreviewUrl}
+          progressMessage={`${bgProgressMsg}${bgDots}`}
+          progressPct={bgProgressPct}
+          onCancel={removingTopupBg ? cancelTopupBg : cancelProfileBg}
+          zIndex="z-[9999]"
+        />
       )}
 
       <div className="max-w-lg mx-auto p-2 bg-background">

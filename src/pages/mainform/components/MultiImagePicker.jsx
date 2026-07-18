@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Modal, toast, Spinner } from "@heroui/react";
+import { Modal, toast } from "@heroui/react";
 import { validateUploadFile } from "../../../lib/fileValidation";
 import { removeBg } from "../utils/removeBg";
 import ImageEditorCanvas from "./ImageEditorCanvas";
 import photoupload from "./photoupload.png";
+import RemoveBgLoadingOverlay from "./RemoveBgLoadingOverlay";
 
 const IcoCheck = () => (
   <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
@@ -52,6 +53,9 @@ export default function MultiImagePicker({
   const [activeFile, setActiveFile] = useState(null);
   const [editingImage, setEditingImage] = useState(null);
   const [bgLoading, setBgLoading] = useState(false);
+  const [bgProgressMsg, setBgProgressMsg] = useState("");
+  const [bgProgressPct, setBgProgressPct] = useState(0);
+  const [bgPreviewUrl, setBgPreviewUrl] = useState(null);
   const [cropOpen, setCropOpen] = useState(false);
   const [cropStage, setCropStage] = useState(null);
   const abortRef = useRef(null);
@@ -110,12 +114,23 @@ export default function MultiImagePicker({
 
     // First crop is complete. Keep the editor open, remove the background,
     // then replace its source with the transparent result for the final crop.
+    const previewUrl = URL.createObjectURL(blob);
+    setBgPreviewUrl(previewUrl);
+    setBgProgressMsg("AI आपकी फोटो तैयार कर रहा है…");
+    setBgProgressPct(0);
     setBgLoading(true);
     const controller = new AbortController();
     abortRef.current = controller;
     (async () => {
       try {
-        const processed = await removeBg(blob, () => {}, controller.signal);
+        const processed = await removeBg(
+          blob,
+          (stage, pct) => {
+            setBgProgressMsg(stage);
+            setBgProgressPct(pct);
+          },
+          controller.signal,
+        );
         if (controller.signal.aborted) return;
         toast.success("Background removed successfully! ✨");
         setEditingImage(URL.createObjectURL(processed || blob));
@@ -130,6 +145,10 @@ export default function MultiImagePicker({
       } finally {
         abortRef.current = null;
         setBgLoading(false);
+        setBgProgressMsg("");
+        setBgProgressPct(0);
+        setBgPreviewUrl(null);
+        URL.revokeObjectURL(previewUrl);
       }
     })();
     return false;
@@ -438,14 +457,11 @@ export default function MultiImagePicker({
 
       {/* Background removal loading overlay */}
       {bgLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-xs rounded-2xl bg-background border border-border shadow-2xl p-7 flex flex-col items-center gap-4">
-            <Spinner size="md" />
-            <p className="text-[12px] text-accent font-semibold">
-              Removing background…
-            </p>
-          </div>
-        </div>
+        <RemoveBgLoadingOverlay
+          previewUrl={bgPreviewUrl}
+          progressMessage={bgProgressMsg}
+          progressPct={bgProgressPct}
+        />
       )}
 
       {/* Initial crop, then the final crop of the background-removed result. */}
