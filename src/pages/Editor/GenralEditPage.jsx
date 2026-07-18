@@ -240,36 +240,84 @@ const FadeBottomFilter = (imageData) => {
     }
   }
 };
+// const FadeEdgesFilter = (imageData) => {
+//   const { data, width, height } = imageData;
+//   if (width <= 1 || height <= 1) return; // guard against degenerate sizes
+
+//   const bottomBorder = 30; // last 50 px fade at bottom (same as FadeBottomFilter)
+//   const sideFade = 0.1; // 18 % from each side (left & right)
+
+//   const wMax = width - 1;
+
+//   for (let y = 0; y < height; y++) {
+//     let bottomAlpha = 1;
+//     if (y >= height - bottomBorder) {
+//       const t = (y - (height - bottomBorder)) / bottomBorder;
+//       bottomAlpha = Math.max(0, 1 - t);
+//     }
+
+//     for (let x = 0; x < width; x++) {
+//       const px = x / wMax;
+
+//       const leftAlpha = px < sideFade ? px / sideFade : 1;
+//       const rightAlpha = px > 1 - sideFade ? (1 - px) / sideFade : 1;
+
+//       const alpha = bottomAlpha * leftAlpha * rightAlpha;
+//       const idx = (y * width + x) * 4;
+//       data[idx + 3] = Math.round(
+//         data[idx + 3] * Math.max(0, Math.min(1, alpha)),
+//       );
+//     }
+//   }
+// };
+
 const FadeEdgesFilter = (imageData) => {
   const { data, width, height } = imageData;
-  if (width <= 1 || height <= 1) return; // guard against degenerate sizes
+  if (width <= 1 || height <= 1) return;
 
-  const bottomBorder = 30; // last 50 px fade at bottom (same as FadeBottomFilter)
-  const sideFade = 0.1; // 18 % from each side (left & right)
+  const bottomBorder = 30;
+  const sideFade = 0.07; // केवल 7% side area में fade
+  const minSideAlpha = 0.4; // sides पर minimum 40% opacity
 
   const wMax = width - 1;
 
+  const clamp01 = (value) => Math.max(0, Math.min(1, value));
+
+  // Smooth transition instead of hard linear fade
+  const smoothstep = (value) => {
+    const t = clamp01(value);
+    return t * t * (3 - 2 * t);
+  };
+
   for (let y = 0; y < height; y++) {
     let bottomAlpha = 1;
+
     if (y >= height - bottomBorder) {
-      const t = (y - (height - bottomBorder)) / bottomBorder;
-      bottomAlpha = Math.max(0, 1 - t);
+      const t = clamp01(
+        (y - (height - bottomBorder)) / Math.max(1, bottomBorder - 1),
+      );
+
+      bottomAlpha = 1 - smoothstep(t);
     }
 
     for (let x = 0; x < width; x++) {
       const px = x / wMax;
 
-      const leftAlpha = px < sideFade ? px / sideFade : 1;
-      const rightAlpha = px > 1 - sideFade ? (1 - px) / sideFade : 1;
+      const leftProgress = smoothstep(px / sideFade);
+      const rightProgress = smoothstep((1 - px) / sideFade);
 
-      const alpha = bottomAlpha * leftAlpha * rightAlpha;
+      const leftAlpha = minSideAlpha + (1 - minSideAlpha) * leftProgress;
+
+      const rightAlpha = minSideAlpha + (1 - minSideAlpha) * rightProgress;
+
+      const alpha = clamp01(bottomAlpha * Math.min(leftAlpha, rightAlpha));
+
       const idx = (y * width + x) * 4;
-      data[idx + 3] = Math.round(
-        data[idx + 3] * Math.max(0, Math.min(1, alpha)),
-      );
+      data[idx + 3] = Math.round(data[idx + 3] * alpha);
     }
   }
 };
+
 const FadeRightFilter = (imageData) => {
   const { data, width, height } = imageData;
   const fadeStart = 0.9; // fade begins at 50% from left ← adjust this
@@ -800,7 +848,7 @@ function GeneralEditPage({
           : isAnyversary
             ? 145
             : isBonanza
-              ? 140
+              ? 150
               : isWelcome
                 ? 160
                 : isClosing
@@ -854,7 +902,7 @@ function GeneralEditPage({
                 : isBonanza
                   ? isRight
                     ? 179
-                    : 0
+                    : -10
                   : isRank
                     ? isRight
                       ? 171
@@ -2841,26 +2889,26 @@ function GeneralEditPage({
                   y={
                     isCapping
                       ? isRight
-                        ? 197
-                        : 197
+                        ? 198
+                        : 198
                       : isAnyversary
-                        ? 175
+                        ? 176
                         : isAchievement
-                          ? 112
+                          ? 113
                           : isWelcome
                             ? isRight
-                              ? 123
-                              : 125
+                              ? 124
+                              : 126
                             : isBonanza
                               ? isRight
-                                ? 111
-                                : 111
+                                ? 112
+                                : 112
                               : 112
                   }
                   width={50}
                   height={5}
-                  text={"FROM/" + `${formcity.toUpperCase() || ""}`}
-                  fontSize={fs(5)}
+                  text={"FROM-" + `${formcity.toUpperCase() || ""}`}
+                  fontSize={fs(7)}
                   fill="white"
                   fontStyle="bold"
                   letterSpacing={0.1}
@@ -2975,7 +3023,7 @@ function GeneralEditPage({
 
               {isBonanza ? (
                 <Image
-                  x={isRight ? 90 : 190}
+                  x={isRight ? 100 : 170}
                   y={isRight ? 210 : 200}
                   width={70}
                   height={70}
