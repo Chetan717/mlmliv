@@ -10,6 +10,7 @@ const MODEL_PUBLIC_PATH = import.meta.env.VITE_BG_MODEL_PATH?.trim();
 
 let enginePromise = null;
 let preloadPromise = null;
+let mediaPipePromise = null;
 let preferredDevice = null;
 let configRevision = 0;
 let activeProgress = null;
@@ -55,6 +56,66 @@ function engineProgress(key, current, total) {
   if (update) emitProgress(update[0], update[1]);
 }
 
+function isEmbeddedWebView() {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
+
+  // React Native exposes this bridge when onMessage is configured. Android
+  // System WebView also includes the `wv` token in its user agent. iOS
+  // WKWebView contains AppleWebKit + Mobile but not the Safari token.
+  if (window.ReactNativeWebView) return true;
+  const userAgent = navigator.userAgent || "";
+  return (
+    /(?:^|[;\s])wv(?:[);\s]|$)/i.test(userAgent) ||
+    /(?:iPhone|iPad|iPod).*AppleWebKit.*Mobile(?!.*Safari)/i.test(userAgent)
+  );
+}
+
+function reportNativeFailure(error) {
+  try {
+    window.ReactNativeWebView?.postMessage(
+      JSON.stringify({
+        type: "REMOVE_BG_ERROR",
+        message: error?.message || String(error),
+      }),
+    );
+  } catch {
+    // Diagnostics must never hide the original processing error.
+  }
+}
+
+async function loadMediaPipeSegmenter() {
+  if (!mediaPipePromise) {
+    mediaPipePromise = import("@mediapipe/selfie_segmentation")
+      .then(async (module) => {
+        const SelfieSegmentation =
+          module.SelfieSegmentation ||
+          module.default?.SelfieSegmentation ||
+          module.default;
+        if (typeof SelfieSegmentation !== "function") {
+          throw new Error("WebView background-removal engine is unavailable.");
+        }
+
+        const assetBase = new URL(
+          `${import.meta.env.BASE_URL}mediapipe-selfie/`,
+          window.location.href,
+        );
+        const segmenter = new SelfieSegmentation({
+          locateFile: (fileName) => new URL(fileName, assetBase).href,
+        });
+        segmenter.setOptions({ modelSelection: 0, selfieMode: false });
+        await segmenter.initialize();
+        return segmenter;
+      })
+      .catch((error) => {
+        mediaPipePromise = null;
+        throw error;
+      });
+  }
+  return mediaPipePromise;
+}
+
 async function loadEngine() {
   if (!enginePromise) {
     enginePromise = import("@imgly/background-removal").catch((error) => {
@@ -98,13 +159,53 @@ function createConfig(device) {
   };
 }
 
-async function prepareFastAiInput(file, maxSize = 1280) {
-  const bitmap = await createImageBitmap(file);
-  const longestSide = Math.max(bitmap.width, bitmap.height);
+async function decodeImage(file) {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return {
+        source: bitmap,
+        width: bitmap.width,
+        height: bitmap.height,
+        close: () => bitmap.close?.(),
+      };
+    } catch {
+      // Older Android WebViews occasionally expose createImageBitmap but fail
+      // to decode camera images. Fall through to the HTML image decoder.
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = objectUrl;
+    if (typeof image.decode === "function") await image.decode();
+    else {
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error("Selected image could not be read."));
+      });
+    }
+    return {
+      source: image,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      close: () => URL.revokeObjectURL(objectUrl),
+    };
+  } catch (error) {
+    URL.revokeObjectURL(objectUrl);
+    throw error;
+  }
+}
+
+async function createSquareInputCanvas(file, maxSize) {
+  const decoded = await decodeImage(file);
+  const longestSide = Math.max(decoded.width, decoded.height);
   const size = Math.max(1, Math.min(maxSize, longestSide));
   const scale = Math.min(1, size / longestSide);
-  const drawWidth = Math.max(1, Math.round(bitmap.width * scale));
-  const drawHeight = Math.max(1, Math.round(bitmap.height * scale));
+  const drawWidth = Math.max(1, Math.round(decoded.width * scale));
+  const drawHeight = Math.max(1, Math.round(decoded.height * scale));
 
   // The model itself works at 1024×1024. Sending a huge 4K/8K photo only
   // increases decode, mask-resize and PNG time. A square, aspect-preserving
@@ -114,19 +215,24 @@ async function prepareFastAiInput(file, maxSize = 1280) {
   canvas.height = size;
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) {
-    bitmap.close?.();
-    return file;
+    decoded.close();
+    throw new Error("Canvas is unavailable on this device.");
   }
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, size, size);
   context.drawImage(
-    bitmap,
+    decoded.source,
     Math.round((size - drawWidth) / 2),
     Math.round((size - drawHeight) / 2),
     drawWidth,
     drawHeight,
   );
-  bitmap.close?.();
+  decoded.close();
+  return canvas;
+}
+
+async function prepareFastAiInput(file, maxSize = 1280) {
+  const canvas = await createSquareInputCanvas(file, maxSize);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -136,6 +242,71 @@ async function prepareFastAiInput(file, maxSize = 1280) {
           : reject(new Error("Fast AI image preparation failed.")),
       "image/webp",
       0.92,
+    );
+  });
+}
+
+async function removeBgWithMediaPipe(file, signal) {
+  emitProgress("WebView के लिए तेज AI मॉडल तैयार हो रहा है…", 10);
+  const [segmenter, inputCanvas] = await Promise.all([
+    loadMediaPipeSegmenter(),
+    createSquareInputCanvas(file, 1024),
+  ]);
+  throwIfAborted(signal);
+  emitProgress("AI फोटो में व्यक्ति को पहचान रहा है…", 55);
+
+  const results = await new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      callback(value);
+    };
+    const timeoutId = window.setTimeout(
+      () => finish(reject, new Error("WebView AI processing timed out.")),
+      60_000,
+    );
+
+    segmenter.onResults((value) => finish(resolve, value));
+    segmenter
+      .send({ image: inputCanvas })
+      .catch((error) => finish(reject, error));
+  });
+
+  throwIfAborted(signal);
+  if (!results?.segmentationMask) {
+    throw new Error("AI could not create a person mask from this image.");
+  }
+
+  emitProgress("फोटो के किनारे साफ किए जा रहे हैं…", 88);
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = inputCanvas.width;
+  outputCanvas.height = inputCanvas.height;
+  const context = outputCanvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable on this device.");
+
+  // Keep only the original pixels covered by MediaPipe's person mask.
+  context.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+  context.drawImage(
+    results.segmentationMask,
+    0,
+    0,
+    outputCanvas.width,
+    outputCanvas.height,
+  );
+  context.globalCompositeOperation = "source-in";
+  context.drawImage(inputCanvas, 0, 0);
+  context.globalCompositeOperation = "source-over";
+
+  emitProgress("Transparent Photo तैयार हो रही है…", 97);
+  return new Promise((resolve, reject) => {
+    outputCanvas.toBlob(
+      (blob) =>
+        blob
+          ? resolve(blob)
+          : reject(new Error("Transparent PNG creation failed.")),
+      "image/png",
     );
   });
 }
@@ -189,6 +360,12 @@ export async function preloadBgModel(onProgress) {
 
   if (!preloadPromise) {
     preloadPromise = (async () => {
+      if (isEmbeddedWebView()) {
+        emitProgress("WebView-compatible AI मॉडल तैयार हो रहा है…", 8);
+        await loadMediaPipeSegmenter();
+        return "webview";
+      }
+
       const device = getPreferredDevice();
       try {
         return await preloadDevice(device);
@@ -263,6 +440,13 @@ export async function removeBg(file, onProgress, signal) {
     activeProgress = onProgress || null;
 
     try {
+      if (isEmbeddedWebView()) {
+        const result = await removeBgWithMediaPipe(file, signal);
+        throwIfAborted(signal);
+        emitProgress("फोटो तैयार है", 100);
+        return result;
+      }
+
       const engine = await loadEngine();
       await preloadBgModel(onProgress);
       throwIfAborted(signal);
@@ -308,8 +492,11 @@ export async function removeBg(file, onProgress, signal) {
     } catch (error) {
       if (error?.name === "AbortError" || signal?.aborted) throw abortError();
       console.error("[removeBg] On-device background removal failed:", error);
+      reportNativeFailure(error);
       throw new Error(
-        "Free background removal could not start. Check the internet once so the AI model can download, then try again.",
+        isEmbeddedWebView()
+          ? "WebView background removal failed. Please update Android System WebView and try again."
+          : "Free background removal could not start. Check the internet once so the AI model can download, then try again.",
         { cause: error },
       );
     } finally {
