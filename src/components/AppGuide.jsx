@@ -224,7 +224,7 @@ const DEFAULT_GUIDE = {
   ],
 };
 
-const HIDDEN_GUIDE_ROUTES = new Set(["/subscription", "/profile"]);
+const HIDDEN_GUIDE_ROUTES = new Set(["/subscription", "/profile", "/editor"]);
 
 function GuideLady() {
   return (
@@ -255,13 +255,26 @@ function safeSet(key, value) {
 
 export default function AppGuide() {
   const { pathname } = useLocation();
-  const guideHidden = HIDDEN_GUIDE_ROUTES.has(pathname);
+  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const guideHidden = HIDDEN_GUIDE_ROUTES.has(pathname) || imageEditorOpen;
   const guide = GUIDES[pathname] || DEFAULT_GUIDE;
   const storageKey = `mlmlive-guide-${GUIDE_VERSION}-${pathname}`;
   const [language, setLanguage] = useState(() => safeGet("mlmlive-guide-language") || "hi");
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
+
+  useEffect(() => {
+    const updateEditorState = () => {
+      setImageEditorOpen(
+        Boolean(document.querySelector('[data-image-editor-open="true"]')),
+      );
+    };
+    updateEditorState();
+    const observer = new MutationObserver(updateEditorState);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
 
   const step = guide.steps[Math.min(stepIndex, guide.steps.length - 1)];
   const isLast = stepIndex === guide.steps.length - 1;

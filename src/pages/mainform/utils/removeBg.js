@@ -246,6 +246,57 @@ async function prepareFastAiInput(file, maxSize = 1280) {
   });
 }
 
+function createCleanPersonMask(segmentationMask, width, height) {
+  const maskCanvas = document.createElement("canvas");
+  maskCanvas.width = width;
+  maskCanvas.height = height;
+  const maskContext = maskCanvas.getContext("2d", {
+    alpha: true,
+    willReadFrequently: true,
+  });
+  if (!maskContext) throw new Error("Canvas is unavailable on this device.");
+
+  maskContext.clearRect(0, 0, width, height);
+  maskContext.drawImage(segmentationMask, 0, 0, width, height);
+  const maskData = maskContext.getImageData(0, 0, width, height);
+  const pixels = maskData.data;
+
+  // MediaPipe usually stores confidence in alpha. A few WebView GPU drivers
+  // expose it as a grayscale texture instead, so detect the available channel.
+  let minAlpha = 255;
+  let maxAlpha = 0;
+  for (let index = 3; index < pixels.length; index += 64) {
+    minAlpha = Math.min(minAlpha, pixels[index]);
+    maxAlpha = Math.max(maxAlpha, pixels[index]);
+  }
+  const confidenceIsAlpha = maxAlpha - minAlpha > 12;
+
+  // A raw selfie mask intentionally keeps soft low-confidence pixels, which
+  // can leave pieces of the background visible. Tighten only that uncertain
+  // band while retaining a narrow feather for hair and natural edges.
+  const removeBelow = 0.56;
+  const keepAbove = 0.76;
+  const confidenceRange = keepAbove - removeBelow;
+  for (let index = 0; index < pixels.length; index += 4) {
+    const confidence = confidenceIsAlpha
+      ? pixels[index + 3] / 255
+      : (pixels[index] + pixels[index + 1] + pixels[index + 2]) / (255 * 3);
+    const normalized = Math.max(
+      0,
+      Math.min(1, (confidence - removeBelow) / confidenceRange),
+    );
+    // Smoothstep creates a clean edge without the jagged outline caused by a
+    // hard binary threshold.
+    const cleaned = normalized * normalized * (3 - 2 * normalized);
+    pixels[index] = 255;
+    pixels[index + 1] = 255;
+    pixels[index + 2] = 255;
+    pixels[index + 3] = Math.round(cleaned * 255);
+  }
+  maskContext.putImageData(maskData, 0, 0);
+  return maskCanvas;
+}
+
 async function removeBgWithMediaPipe(file, signal) {
   emitProgress("WebView के लिए तेज AI मॉडल तैयार हो रहा है…", 10);
   const [segmenter, inputCanvas] = await Promise.all([
@@ -285,16 +336,15 @@ async function removeBgWithMediaPipe(file, signal) {
   outputCanvas.height = inputCanvas.height;
   const context = outputCanvas.getContext("2d");
   if (!context) throw new Error("Canvas is unavailable on this device.");
-
-  // Keep only the original pixels covered by MediaPipe's person mask.
-  context.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
-  context.drawImage(
+  const cleanMask = createCleanPersonMask(
     results.segmentationMask,
-    0,
-    0,
     outputCanvas.width,
     outputCanvas.height,
   );
+
+  // Keep only high-confidence person pixels from the refined WebView mask.
+  context.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+  context.drawImage(cleanMask, 0, 0);
   context.globalCompositeOperation = "source-in";
   context.drawImage(inputCanvas, 0, 0);
   context.globalCompositeOperation = "source-over";

@@ -825,6 +825,7 @@ export default function ImageEditorCanvas({
   return (
     <div
       ref={containerRef}
+      data-image-editor-open="true"
       className="rounded-xl"
       style={{
         display: "flex",

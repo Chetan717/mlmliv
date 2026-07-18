@@ -1051,6 +1051,7 @@ export function ImageEditorCanvas({
   return (
     <div
       ref={containerRef}
+      data-image-editor-open="true"
       style={{
         display: "flex",
         flexDirection: "column",
