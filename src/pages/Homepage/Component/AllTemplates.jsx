@@ -199,7 +199,9 @@ export default function AllTemplates() {
       };
       setSelType(seltype);
       localStorage.setItem("selType", JSON.stringify(seltype));
-      navigate(isDirectEditorTemplate(item.type) ? "/editor" : "/mlmform");
+      const isDirectEditor = isDirectEditorTemplate(item.type);
+      if (!isDirectEditor) localStorage.removeItem("mlmform");
+      navigate(isDirectEditor ? "/editor" : "/mlmform", { replace: true });
     } else {
       navigate("/mlmprofile");
     }

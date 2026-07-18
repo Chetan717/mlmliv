@@ -282,7 +282,7 @@ export default function MeetingForm() {
     try {
       localStorage.setItem("Meeting", JSON.stringify(payload));
       setSavedMessage("Meeting saved successfully.");
-      navigate("/editor");
+      navigate("/editor", { replace: true });
       setIsSaved(true);
     } catch (err) {
       

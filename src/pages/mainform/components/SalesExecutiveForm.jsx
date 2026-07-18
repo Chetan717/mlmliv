@@ -371,21 +371,63 @@ export default function SalesExecutiveForm() {
   const maintypelabel = selll?.type;
 
   useEffect(() => {
-    // 1. Company
-    const da = JSON.parse(localStorage.getItem("selType")) || {};
-    setSelectedType(da.type || "");
-    // 2. mlmProfile (top-upline URLs set externally, e.g. from profile page)
-    const mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile"));
+    let da = {};
+    let mlmProfile = null;
+    let saved = null;
 
-    // 3. Previously saved form — takes priority over mlmProfile for selectedLinks
-    const saved = JSON.parse(localStorage.getItem("mlmform"));
+    try {
+      da = JSON.parse(localStorage.getItem("selType")) || {};
+      mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile"));
+      saved = JSON.parse(localStorage.getItem("mlmform"));
+    } catch {}
+
+    setSelectedType(da.type || "");
 
     if (saved) {
-      if (saved.selectedLinks?.length) {
+      setTab(saved.tab === "self" ? "self" : "team");
+
+      const parsedName = parseAchieverName(saved.achiever || {});
+      setAchiever({
+        title: "Mr.",
+        name: "",
+        achieverName: "",
+        ...(saved.achiever || {}),
+        ...parsedName,
+        image:
+          base64ToBlob(saved.achiever?.image) ||
+          saved.achiever?.image ||
+          null,
+      });
+
+      const savedPromoter = saved.promoter || {};
+      setPromoter({
+        ...savedPromoter,
+        image:
+          base64ToBlob(savedPromoter.image) || savedPromoter.image || null,
+      });
+      setBonanzaForWhom(saved.bonanzaForWhom || "SELF");
+      setBonanzaDays(saved.bonanzaDays || "None");
+
+      if (Array.isArray(saved.selectedLinks)) {
         setSelectedLinks(saved.selectedLinks);
       } else if (mlmProfile?.topuplineURLs?.length) {
         setSelectedLinks(mlmProfile.topuplineURLs);
       }
+
+      const selectedLinkSet = new Set(saved.selectedLinks || []);
+      const restoredCustomFiles = (saved.topuplineURLs || [])
+        .filter(
+          (url) =>
+            typeof url === "string" &&
+            url.startsWith("data:image/") &&
+            !selectedLinkSet.has(url),
+        )
+        .map((previewURL) => ({
+          file: base64ToBlob(previewURL),
+          previewURL,
+        }))
+        .filter(({ file }) => file);
+      setCustomFiles(restoredCustomFiles);
     } else if (mlmProfile?.topuplineURLs?.length) {
       // No saved form yet — seed from mlmProfile
       setSelectedLinks(mlmProfile.topuplineURLs);
@@ -614,7 +656,7 @@ export default function SalesExecutiveForm() {
     };
 
     localStorage.setItem("mlmform", JSON.stringify(formData));
-    navigate("/editor");
+    navigate("/editor", { replace: true });
   };
 
   const addTrainingDate = () => {
