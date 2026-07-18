@@ -2629,7 +2629,7 @@ function GeneralEditPage({
                   videoElRef={videoElRef}
                 />
               ) : null}
-              {isMlmToday ? null : (
+              {/* {isMlmToday ? null : ( */}
                 <Image
                   image={Imagel2}
                   x={1}
@@ -2637,8 +2637,8 @@ function GeneralEditPage({
                   width={woflogo1}
                   height={hoflogo1}
                 />
-              )}
-              {isMlmToday ? null : (
+              {/* )} */}
+              {/* {isMlmToday ? null : ( */}
                 <Image
                   image={Imagel3}
                   x={logo2size === "square" ? 292 : 268}
@@ -2646,7 +2646,7 @@ function GeneralEditPage({
                   width={woflogo2}
                   height={hoflogo2}
                 />
-              )}
+              {/* )} */}
 
               {(() => {
                 const slots = [
@@ -4866,9 +4866,9 @@ function GeneralEditPage({
                 />
               </div>
             </div>
-            {progressLogs.length > 0 && (
+            {progressLogs?.length > 0 && (
               <div className="bg-black/20 dark:bg-black/40 rounded-xl p-3 space-y-0.5 max-h-[60px] overflow-hidden">
-                {progressLogs.slice(-3).map((l, i) => (
+                {progressLogs?.slice(-3).map((l, i) => (
                   <p
                     key={i}
                     className="text-[10px] text-muted-foreground/60 font-mono truncate"
