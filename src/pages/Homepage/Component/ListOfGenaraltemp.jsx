@@ -335,7 +335,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     const formDAta = {
       tab: "team",
       achiever: {
-        title: ".",
+        title: "Mr.",
         name: "",
         achieverName: "",
         city: "",

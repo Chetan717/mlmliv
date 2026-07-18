@@ -95,10 +95,12 @@ function base64ToBlob(dataUrl) {
 }
 
 function parseAchieverName(savedAchiever = {}) {
-  const title = savedAchiever.title || "Mr.";
+  const rawTitle = String(savedAchiever.title || "").trim().toLowerCase().replace(/\./g, "");
+  const hasValidTitle = ["mr", "mrs", "dr"].includes(rawTitle);
+  const title = rawTitle === "mrs" ? "Mrs." : rawTitle === "dr" ? "Dr." : "Mr.";
   let name = savedAchiever.name || "";
 
-  if (!savedAchiever.title && savedAchiever.achieverName) {
+  if (!hasValidTitle && savedAchiever.achieverName) {
     const raw = savedAchiever.achieverName.trim();
     const match = raw.match(/^(Mr\.?|Mrs\.?|Dr\.?)\s*(.*)$/i);
     if (match) {
@@ -638,8 +640,11 @@ export default function SalesExecutiveForm() {
       selectedDate: isTraining ? formatTrainingDateText(trainingDates) : "",
       achiever: {
         ...achiever,
+        title: ["Mr.", "Mrs.", "Dr."].includes(achiever.title)
+          ? achiever.title
+          : "Mr.",
         achieverName:
-          `${achiever.title || "Mr."} ${achiever.name || ""}`.trim(),
+          `${["Mr.", "Mrs.", "Dr."].includes(achiever.title) ? achiever.title : "Mr."} ${achiever.name || ""}`.trim(),
         // If image is already a base64 string (restored), keep it; else convert Blob
         image: achiever.image ? await toBase64(achiever.image) : null,
       },

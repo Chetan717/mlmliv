@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import TabBar from "./components/TabBar";
 import ExpiryAlertBanner from "./components/ExpiryAlertBanner";
 import AppGuide from "./components/AppGuide";
+import DeviceImageUploadLoader from "./components/DeviceImageUploadLoader";
 export default function Layout({ children }) {
   const [collapsed, setCollapsed]     = useState(false);
   const [mobileOpen, setMobileOpen]   = useState(false);
@@ -46,6 +47,7 @@ export default function Layout({ children }) {
       </div>
 
       <AppGuide />
+      <DeviceImageUploadLoader />
 
     </div>
   );

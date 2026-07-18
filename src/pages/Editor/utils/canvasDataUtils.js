@@ -39,7 +39,17 @@ export function processProfileData(mlmForm, mlmProfile) {
 export function getAchieverDisplayName(achiever) {
   if (!achiever) return "";
 
-  const title = String(achiever.title || "Mr.").trim();
+  const rawTitle = String(achiever.title || "").trim().toLowerCase().replace(/\./g, "");
+  const title =
+    rawTitle === "mrs"
+      ? "Mrs."
+      : rawTitle === "dr"
+        ? "Dr."
+        : rawTitle === "ms"
+          ? "Ms."
+          : rawTitle === "miss"
+            ? "Miss"
+            : "Mr.";
   const name = String(achiever.name || "").trim();
   const legacyCombinedName = String(achiever.achieverName || "").trim();
 

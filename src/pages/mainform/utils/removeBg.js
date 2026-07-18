@@ -271,43 +271,123 @@ function createCleanPersonMask(segmentationMask, width, height) {
   }
   const confidenceIsAlpha = maxAlpha - minAlpha > 12;
 
-  // A raw selfie mask intentionally keeps soft low-confidence pixels, which
-  // can leave a visible background halo. WebView output uses a deliberately
-  // strict, narrow confidence band so the outside becomes fully transparent.
-  const removeBelow = 0.68;
-  const keepAbove = 0.82;
-  const confidenceRange = keepAbove - removeBelow;
-  const cleanedAlpha = new Uint8ClampedArray(width * height);
+  // Build a hard foreground mask. MediaPipe's normal soft matte contains
+  // semi-transparent background colors around the body; a binary cutout is
+  // required here so WebView scaling cannot bring that halo back.
+  const totalPixels = width * height;
+  const foreground = new Uint8Array(totalPixels);
+  const confidenceCutoff = 0.74;
+  let foregroundCount = 0;
   for (let index = 0; index < pixels.length; index += 4) {
     const confidence = confidenceIsAlpha
       ? pixels[index + 3] / 255
       : (pixels[index] + pixels[index + 1] + pixels[index + 2]) / (255 * 3);
-    const normalized = Math.max(
-      0,
-      Math.min(1, (confidence - removeBelow) / confidenceRange),
-    );
-    // Smoothstep creates a clean edge without the jagged outline caused by a
-    // hard binary threshold.
-    const cleaned = normalized * normalized * (3 - 2 * normalized);
-    pixels[index] = 255;
-    pixels[index + 1] = 255;
-    pixels[index + 2] = 255;
-    cleanedAlpha[index / 4] = Math.round(cleaned * 255);
+    if (confidence >= confidenceCutoff) {
+      foreground[index / 4] = 1;
+      foregroundCount += 1;
+    }
   }
 
-  // Erode a single output pixel using the nearest neighbours. This removes
-  // the final colored fringe left by upscaling MediaPipe's small AI mask,
-  // while shrinking the subject by less than 0.1% on a 1024px working image.
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const pixelIndex = y * width + x;
-      let alpha = cleanedAlpha[pixelIndex];
-      if (x > 0) alpha = Math.min(alpha, cleanedAlpha[pixelIndex - 1]);
-      if (x + 1 < width) alpha = Math.min(alpha, cleanedAlpha[pixelIndex + 1]);
-      if (y > 0) alpha = Math.min(alpha, cleanedAlpha[pixelIndex - width]);
-      if (y + 1 < height) alpha = Math.min(alpha, cleanedAlpha[pixelIndex + width]);
-      pixels[pixelIndex * 4 + 3] = alpha;
+  // Avoid returning a blank image for unusually dark/low-contrast photos.
+  if (foregroundCount === 0) {
+    for (let index = 0; index < pixels.length; index += 4) {
+      const confidence = confidenceIsAlpha
+        ? pixels[index + 3] / 255
+        : (pixels[index] + pixels[index + 1] + pixels[index + 2]) / (255 * 3);
+      foreground[index / 4] = confidence >= 0.58 ? 1 : 0;
     }
+  }
+
+  // Keep only the main connected person. Detached high-confidence specks are
+  // background mistakes and are removed before edge processing.
+  const labels = new Uint32Array(totalPixels);
+  const queue = new Uint32Array(totalPixels);
+  let label = 0;
+  let largestLabel = 0;
+  let largestArea = 0;
+  for (let start = 0; start < totalPixels; start += 1) {
+    if (!foreground[start] || labels[start]) continue;
+    label += 1;
+    let head = 0;
+    let tail = 0;
+    queue[tail++] = start;
+    labels[start] = label;
+
+    while (head < tail) {
+      const current = queue[head++];
+      const x = current % width;
+      let neighbour;
+      if (x > 0) {
+        neighbour = current - 1;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+      if (x + 1 < width) {
+        neighbour = current + 1;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+      if (current >= width) {
+        neighbour = current - width;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+      if (current + width < totalPixels) {
+        neighbour = current + width;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+    }
+
+    if (tail > largestArea) {
+      largestArea = tail;
+      largestLabel = label;
+    }
+  }
+
+  let cleanForeground = new Uint8Array(totalPixels);
+  for (let index = 0; index < totalPixels; index += 1) {
+    cleanForeground[index] =
+      largestLabel !== 0 && labels[index] === largestLabel ? 1 : 0;
+  }
+
+  // Two-pixel inward erosion removes the colored rim produced when the
+  // 256px AI mask is enlarged to the 1024px output image.
+  for (let pass = 0; pass < 2; pass += 1) {
+    const eroded = new Uint8Array(totalPixels);
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const index = y * width + x;
+        eroded[index] =
+          cleanForeground[index] &&
+          cleanForeground[index - 1] &&
+          cleanForeground[index + 1] &&
+          cleanForeground[index - width] &&
+          cleanForeground[index + width]
+            ? 1
+            : 0;
+      }
+    }
+    cleanForeground = eroded;
+  }
+
+  // Store only 0 or 255 alpha. Transparent pixels also get zero RGB, which
+  // prevents white/colored fringes when React Native scales the PNG.
+  for (let index = 0; index < totalPixels; index += 1) {
+    const dataIndex = index * 4;
+    const isPerson = cleanForeground[index] === 1;
+    pixels[dataIndex] = isPerson ? 255 : 0;
+    pixels[dataIndex + 1] = isPerson ? 255 : 0;
+    pixels[dataIndex + 2] = isPerson ? 255 : 0;
+    pixels[dataIndex + 3] = isPerson ? 255 : 0;
   }
   maskContext.putImageData(maskData, 0, 0);
   return maskCanvas;
