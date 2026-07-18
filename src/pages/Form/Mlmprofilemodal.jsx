@@ -1248,6 +1248,10 @@ export default function MLMProfilePage() {
                     : 2 / 2.5
                 }
                 constrainToImage
+                enableEnhance={
+                  editorStage === "final" &&
+                  (editorContext === "profile" || editorContext === "topup")
+                }
                 onDone={handleEditorDone}
                 onCancel={() => {
                   setStep("form");

@@ -279,6 +279,7 @@ export default function SalesExecutiveForm() {
 
   const [editingImage, setEditingImage] = useState(null);
   const [onImageDone, setOnImageDone] = useState(null);
+  const [enhanceEnabled, setEnhanceEnabled] = useState(false);
 
   const [achiever, setAchiever] = useState({
     title: "Mr.",
@@ -996,6 +997,7 @@ export default function SalesExecutiveForm() {
                     }}
                     setEditingImage={setEditingImage}
                     setOnImageDone={setOnImageDone}
+                    setEnhanceEnabled={setEnhanceEnabled}
                     currentImage={achiever.image}
                     trigger={
                       <UploadZone
@@ -1209,6 +1211,7 @@ export default function SalesExecutiveForm() {
                 }}
                 setEditingImage={setEditingImage}
                 setOnImageDone={setOnImageDone}
+                setEnhanceEnabled={setEnhanceEnabled}
                 currentImage={promoter.image}
                 trigger={
                   <UploadZone
@@ -1274,6 +1277,7 @@ export default function SalesExecutiveForm() {
                 }}
                 onCancel={() => setEditingImage(null)}
                 setOpen={setOpen}
+                enableEnhance={enhanceEnabled}
               />
             </Modal.Dialog>
           </Modal.Container>

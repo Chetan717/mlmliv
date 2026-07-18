@@ -462,6 +462,7 @@ export default function MultiImagePicker({
               setOpen={() => {}}
               onDone={handleCropDone}
               onCancel={handleCropCancel}
+              enableEnhance={cropStage === "final"}
             />
           </div>
         </div>

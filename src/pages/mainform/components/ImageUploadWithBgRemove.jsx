@@ -14,6 +14,7 @@ export default function ImageUploadWithBgRemove({
   type,
   editingType,
   setEditingType,
+  setEnhanceEnabled,
   skipBackgroundRemoval = false,
   guideTarget,
 }) {
@@ -48,15 +49,18 @@ export default function ImageUploadWithBgRemove({
     setProgressMsg("Please wait…");
     setProgressPct(0);
     setEditingImage(null);
+    setEnhanceEnabled?.(false);
     setOpen(false);
     toast("Background removal cancelled.");
   };
 
-  const openFinalCrop = (image) => {
+  const openFinalCrop = (image, canEnhance = false) => {
     const preview = image instanceof Blob ? URL.createObjectURL(image) : image;
+    setEnhanceEnabled?.(canEnhance);
     setEditingImage(preview);
     setOnImageDone(() => (finalBlob) => {
       onImageReady(finalBlob);
+      setEnhanceEnabled?.(false);
       return true;
     });
     setOpen(true);
@@ -81,13 +85,13 @@ export default function ImageUploadWithBgRemove({
         );
         if (controller.signal.aborted) return;
         toast.success("Background removed successfully! ✨");
-        openFinalCrop(processed || croppedBlob);
+        openFinalCrop(processed || croppedBlob, true);
         toast("Adjust the final crop, then tap Done.");
       } catch (err) {
         if (err?.name === "AbortError" || controller.signal.aborted) return;
         
         toast.error("Background removal failed. You can still finish the crop.");
-        openFinalCrop(croppedBlob);
+        openFinalCrop(croppedBlob, true);
       } finally {
         abortRef.current = null;
         setLoad(false);
@@ -112,13 +116,14 @@ export default function ImageUploadWithBgRemove({
 
     // Achievement images keep their existing one-crop flow and background.
     if (skipBackgroundRemoval) {
-      openFinalCrop(file);
+      openFinalCrop(file, false);
       return;
     }
 
     // Standard photo flow: crop the original first. Its Done callback removes
     // the background and reopens the result for a second/final crop.
     const preview = URL.createObjectURL(file);
+    setEnhanceEnabled?.(false);
     setEditingImage(preview);
     setOnImageDone(() => removeBackgroundAfterCrop);
     setOpen(true);

@@ -112,6 +112,7 @@ export default function MeetingForm() {
 
   const [editingImage, setEditingImage] = useState(null);
   const [onImageDone, setOnImageDone] = useState(null);
+  const [enhanceEnabled, setEnhanceEnabled] = useState(false);
   const [open, setOpen] = useState(false);
   const [editingType, setEditingType] = useState("chiefGuest");
   const [showChiefImageModal, setShowChiefImageModal] = useState(false);
@@ -220,6 +221,7 @@ export default function MeetingForm() {
 
   const openEditor = (image) => {
     setEditingType("chiefGuest");
+    setEnhanceEnabled(false);
     setEditingImage(image);
     setOnImageDone(() => (blob) => {
       setChiefImage(blob);
@@ -716,6 +718,7 @@ export default function MeetingForm() {
                 setOpen={setOpen}
                 editingType={editingType}
                 setEditingType={setEditingType}
+                enableEnhance={enhanceEnabled}
               />
             </Modal.Dialog>
           </Modal.Container>
@@ -753,6 +756,7 @@ export default function MeetingForm() {
                       }}
                       setEditingImage={setEditingImage}
                       setOnImageDone={setOnImageDone}
+                      setEnhanceEnabled={setEnhanceEnabled}
                       currentImage={chiefImage}
                       setOpen={(val) => {
                         // Close modal instantly when editor opens (file selected)

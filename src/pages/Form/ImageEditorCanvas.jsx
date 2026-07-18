@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@heroui/react";
+import { buildPhotoEnhanceFilter } from "../../utils/photoEnhance";
 
 // ── Helpers ───────────────────────────────────────────────────────
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -98,12 +99,14 @@ function moveBox(box, dx, dy, cw, ch, bounds) {
 }
 
 // ── Component ─────────────────────────────────────────────────────
-export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, constrainToImage = true }) {
+export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, constrainToImage = true, enableEnhance = false }) {
   const [zoom, setZoom]         = useState(100);
   const [rotation, setRotation] = useState(0);
   const [flipH, setFlipH]       = useState(false);
   const [flipV, setFlipV]       = useState(false);
   const [tab, setTab]             = useState("crop");
+  const [enhance, setEnhance]     = useState(0);
+  const [skinTone, setSkinTone]   = useState(0);
   const [isDoing, setIsDoing]     = useState(false);
   const [encodeProgress, setEncodeProgress] = useState(0);
   const [canvasW, setCanvasW]     = useState(300);
@@ -125,11 +128,15 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
   const rotRef           = useRef(0);
   const flipHRef      = useRef(false);
   const flipVRef      = useRef(false);
+  const enhanceRef    = useRef(0);
+  const skinToneRef   = useRef(0);
 
   useEffect(() => { zoomRef.current = zoom;    offDirtyRef.current = true; }, [zoom]);
   useEffect(() => { rotRef.current  = rotation; offDirtyRef.current = true; }, [rotation]);
   useEffect(() => { flipHRef.current = flipH;   offDirtyRef.current = true; }, [flipH]);
   useEffect(() => { flipVRef.current = flipV;   offDirtyRef.current = true; }, [flipV]);
+  useEffect(() => { enhanceRef.current = enhance; offDirtyRef.current = true; }, [enhance]);
+  useEffect(() => { skinToneRef.current = skinTone; offDirtyRef.current = true; }, [skinTone]);
 
   // ── Responsive canvas sizing ───────────────────────────────────
   useEffect(() => {
@@ -194,7 +201,9 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
     ctx.translate(cw/2, ch/2);
     ctx.rotate((rot * Math.PI) / 180);
     ctx.scale(fH ? -1 : 1, fV ? -1 : 1);
+    ctx.filter = buildPhotoEnhanceFilter(enhanceRef.current, skinToneRef.current);
     ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+    ctx.filter = "none";
     ctx.restore();
     return oc;
   }
@@ -341,6 +350,8 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
     rotRef.current = 0;   setRotation(0);
     flipHRef.current = false; setFlipH(false);
     flipVRef.current = false; setFlipV(false);
+    enhanceRef.current = 0; setEnhance(0);
+    skinToneRef.current = 0; setSkinTone(0);
     setIsDoing(false);
     const { w: cw, h: ch } = canvasSzRef.current;
     cropBoxRef.current = initBox(cw, ch, ratio);
@@ -374,7 +385,11 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, ratio]);
 
-  useEffect(() => { if (imgRef.current) scheduleDraw(); }, [rotation, flipH, flipV, zoom, canvasW, canvasH, scheduleDraw]);
+  useEffect(() => {
+    setTab(enableEnhance ? "enhance" : "crop");
+  }, [enableEnhance, src]);
+
+  useEffect(() => { if (imgRef.current) scheduleDraw(); }, [rotation, flipH, flipV, zoom, enhance, skinTone, canvasW, canvasH, scheduleDraw]);
 
   // ── Pointer helpers ───────────────────────────────────────────
   const getPos = (e) => {
@@ -473,7 +488,9 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
     ctx.translate(imgCX, imgCY);
     ctx.rotate((rot * Math.PI) / 180);
     ctx.scale(fH ? -1 : 1, fV ? -1 : 1);
+    ctx.filter = buildPhotoEnhanceFilter(enhanceRef.current, skinToneRef.current);
     ctx.drawImage(img, -dw*scale/2, -dh*scale/2, dw*scale, dh*scale);
+    ctx.filter = "none";
     ctx.restore();
 
     out.toBlob(blob => {
@@ -493,6 +510,7 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
     { id: "flip",   label: "Flip",   icon: "⇄" },
     { id: "crop",   label: "Crop",   icon: "⊡" },
     { id: "scale",  label: "Zoom",   icon: "⤢" },
+    ...(enableEnhance ? [{ id: "enhance", label: "Enhance", icon: "✨" }] : []),
   ];
   const btnBase = {
     background:"none", border:"none", cursor:"pointer",
@@ -578,10 +596,33 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
             Drag corners to resize · अंदर खींचकर फोटो सेट करें · Crop stays inside photo
           </div>
         )}
+        {tab === "enhance" && enableEnhance && (
+          <div style={{ padding:"8px 14px 10px", color:"#333" }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10, marginBottom:8 }}>
+              <span style={{ fontSize:11, fontWeight:700 }}>Photo Enhance</span>
+              <button
+                type="button"
+                onClick={() => setEnhance(value => value ? 0 : 65)}
+                style={{ border:"none", borderRadius:999, padding:"5px 10px", background:enhance?"#f97316":"#ddd", color:enhance?"#fff":"#555", fontSize:10, fontWeight:700, cursor:"pointer" }}
+              >
+                {enhance ? "ON" : "AUTO"}
+              </button>
+            </div>
+            <input aria-label="Photo enhance" type="range" min={0} max={100} value={enhance}
+              onChange={event => setEnhance(Number(event.target.value))}
+              style={{ width:"100%", accentColor:"#f97316" }} />
+            <div style={{ display:"flex", justifyContent:"space-between", marginTop:7, marginBottom:3, fontSize:10, fontWeight:700 }}>
+              <span>Cool</span><span>Skin Tone</span><span>Warm</span>
+            </div>
+            <input aria-label="Skin tone" type="range" min={-50} max={50} value={skinTone}
+              onChange={event => setSkinTone(Number(event.target.value))}
+              style={{ width:"100%", accentColor:"#f97316" }} />
+          </div>
+        )}
       </div>
 
       {/* Zoom slider */}
-      <div style={{ backgroundColor:"#f4f4f4", padding:"6px 20px 12px", borderTop:"1px solid #e8e8e8", flexShrink:0 }}>
+      {tab !== "enhance" && <div style={{ backgroundColor:"#f4f4f4", padding:"6px 20px 12px", borderTop:"1px solid #e8e8e8", flexShrink:0 }}>
         <div style={{ textAlign:"center", fontSize:15, fontWeight:700, color:"#f97316", marginBottom:6 }}>
           {zoom}%
         </div>
@@ -604,12 +645,12 @@ export function ImageEditorCanvas({ src, onDone, onCancel, ratio = 2 / 2.5, cons
           input[type=range]::-webkit-slider-runnable-track{background:transparent;height:36px;}
           @keyframes spin{to{transform:rotate(360deg)}}
         `}</style>
-      </div>
+      </div>}
 
       {/* Tab bar */}
       <div style={{ backgroundColor:"#1e1e1e", display:"flex", borderTop:"1px solid #2a2a2a", flexShrink:0 }}>
         <button onClick={() => {
-          setRotation(0); setFlipH(false); setFlipV(false); setZoom(100);
+          setRotation(0); setFlipH(false); setFlipV(false); setZoom(100); setEnhance(0); setSkinTone(0);
           const { w: cw, h: ch } = canvasSzRef.current;
           cropBoxRef.current = initialCropBox(imgRef.current, cw, ch);
           offDirtyRef.current = true; scheduleDraw();
