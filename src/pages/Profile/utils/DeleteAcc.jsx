@@ -3,9 +3,11 @@ import { Modal, Button, Label, InputOTP } from "@heroui/react";
 import { useNavigate } from "react-router";
 import { deleteAccount, getAuthErrorMessage } from "../../../services/authService";
 import { getUser, removeUser } from "../../../utils/authStorage";
+import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 
 function DeleteAcc({ show, setDeleteAcc }) {
   const navigate = useNavigate();
+  const { clearCompanySelection } = useSelectedCompany();
 
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
@@ -40,6 +42,12 @@ function DeleteAcc({ show, setDeleteAcc }) {
 
       // PIN verification + deletion all happen server-side
       await deleteAccount(localUser.mobileNo, pin);
+
+      // The callable removes the account/profile. The existing Firebase ID
+      // token remains available for this final UID-scoped Firestore cleanup.
+      // deleteDoc is idempotent, so this is also safe when the backend has
+      // already removed the selection.
+      await clearCompanySelection();
 
       // Clear local session
       removeUser();

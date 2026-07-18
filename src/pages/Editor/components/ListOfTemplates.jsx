@@ -7,9 +7,64 @@ import { PAGE_REFRESH_EVENT } from "../../../utils/pageRefresh";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 
 const BATCH_SIZE = 20;
+const EDITOR_TEMPLATE_SEED_KEY = "editorTemplateSeed";
 
 const PRESET_VIDEO_ITEMS = [];
 const _editorTemplateCache = new Map();
+const _preloadedCanvasAssets = new Set();
+const _preloadingCanvasAssets = new Set();
+
+function getCanvasAssetUrl(item) {
+  return item?.url || item?.backgroundVideoUrl || item?.videoUrl || "";
+}
+
+function preloadCanvasAsset(item) {
+  const src = getCanvasAssetUrl(item);
+  if (
+    !src ||
+    item?.backgroundVideoUrl ||
+    _preloadedCanvasAssets.has(src) ||
+    _preloadingCanvasAssets.has(src)
+  ) {
+    return;
+  }
+
+  _preloadingCanvasAssets.add(src);
+  const image = new window.Image();
+  image.crossOrigin = "anonymous";
+  image.decoding = "async";
+  image.onload = () => {
+    _preloadingCanvasAssets.delete(src);
+    _preloadedCanvasAssets.add(src);
+  };
+  image.onerror = () => _preloadingCanvasAssets.delete(src);
+  image.src = src;
+}
+
+function readEditorTemplateSeed({ type, subType, mainType, companyId }) {
+  try {
+    const raw = sessionStorage.getItem(EDITOR_TEMPLATE_SEED_KEY);
+    if (!raw) return [];
+    const seed = JSON.parse(raw);
+    const sameSelection =
+      seed?.type === type &&
+      String(seed?.subType || "") === String(subType || "") &&
+      String(seed?.mainType || "") === String(mainType || "") &&
+      String(seed?.companyId || "") === String(companyId || "");
+
+    if (!sameSelection || !Array.isArray(seed?.items)) return [];
+
+    return seed.items.filter(Boolean).map((item) => ({
+      ...item,
+      _template: {
+        id: seed.templateId || "",
+        serial: seed.serial || 0,
+      },
+    }));
+  } catch {
+    return [];
+  }
+}
 
 const SHIMMER_STYLE = `@keyframes shimmerSlide {
   0%   { background-position: 100% 50%; }
@@ -234,6 +289,8 @@ function Tile({ item, isSelected, onSelect, isVideo }) {
   return (
     <button
       type="button"
+      onPointerEnter={() => preloadCanvasAsset(item)}
+      onPointerDown={() => preloadCanvasAsset(item)}
       onClick={() => onSelect(item)}
       className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-150 focus:outline-none ${
         isSelected
@@ -371,6 +428,11 @@ export default function ListOfTemplates({
   const renderedCount = useRef(0);
   const refreshSequenceRef = useRef(0);
   const pendingRefreshRef = useRef(null);
+  const selectedRef = useRef(selected);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
 
   useEffect(() => {
     const handlePageRefresh = (event) => {
@@ -428,6 +490,28 @@ export default function ListOfTemplates({
 
       const isGeneralTemplate = mainTypeLower === "General";
 
+      const seededItems = readEditorTemplateSeed({
+        type: filterType,
+        subType: filterSubType,
+        mainType: selType?.MainType,
+        companyId: filterCompanyId,
+      });
+
+      if (seededItems.length > 0) {
+        setAllItems(seededItems);
+        renderedCount.current = Math.min(BATCH_SIZE, seededItems.length);
+        setVisibleItems(seededItems.slice(0, BATCH_SIZE));
+
+        const seededDefault =
+          seededItems.find((item) => !item.backgroundVideoUrl) ||
+          seededItems[0];
+        const nextSeeded = cleanItem(seededDefault);
+        selectedRef.current = nextSeeded;
+        setSelected(nextSeeded);
+        setPendingSelectedId(nextSeeded?.id ?? null);
+        setLoading(false);
+      }
+
       const cacheKey = `${filterType}__${filterSubType}__${isGeneralTemplate ? "General" : "MLM"}__${filterCompanyId}__${meetingHostMode}__${closeFilter}`;
 
       if (_editorTemplateCache?.has(cacheKey)) {
@@ -436,7 +520,7 @@ export default function ListOfTemplates({
         renderedCount.current = 0;
 
         const currentSelectedItem = filteredItems.find(
-          (i) => i.id === selected?.id,
+          (i) => i.id === selectedRef.current?.id,
         );
         const defaultItem =
           currentSelectedItem ||
@@ -445,6 +529,7 @@ export default function ListOfTemplates({
           null;
 
         const nextSelected = defaultItem ? cleanItem(defaultItem) : null;
+        selectedRef.current = nextSelected;
         setSelected(nextSelected);
         setPendingSelectedId(nextSelected?.id ?? null);
 
@@ -456,7 +541,7 @@ export default function ListOfTemplates({
         return;
       }
 
-      setLoading(true);
+      if (seededItems.length === 0) setLoading(true);
       setError(null);
       try {
         let items = [];
@@ -534,7 +619,9 @@ export default function ListOfTemplates({
         setAllItems(filteredItems);
         renderedCount.current = 0;
 
-        const currentSelectedItem = filteredItems.find((i) => i.id === selected?.id);
+        const currentSelectedItem = filteredItems.find(
+          (i) => i.id === selectedRef.current?.id,
+        );
         const defaultItem =
           currentSelectedItem ||
           filteredItems.find((i) => !i.backgroundVideoUrl) ||
@@ -545,6 +632,7 @@ export default function ListOfTemplates({
           ? cleanItem(defaultItem)
           : null;
 
+        selectedRef.current = nextSelected;
         setSelected(nextSelected);
         setPendingSelectedId(nextSelected?.id ?? null);
 
@@ -603,6 +691,12 @@ export default function ListOfTemplates({
     tabRenderedCount.current = firstBatch.length;
   }, [activeTab, allItems]);
 
+  useEffect(() => {
+    // Preload only the first visible row to keep mobile data/memory controlled
+    // while making the most likely taps appear instantly on the canvas.
+    visibleTabItems.slice(0, 6).forEach(preloadCanvasAsset);
+  }, [visibleTabItems]);
+
   const loadMore = useCallback(() => {
     const items = tabItemsRef.current;
     if (tabRenderedCount.current >= items.length) return;
@@ -642,6 +736,7 @@ export default function ListOfTemplates({
       // Update the canvas immediately — startTransition was marking this
       // as low priority, so the selected template could sit behind other
       // pending work and take a visible beat to appear on the canvas.
+      selectedRef.current = next;
       setSelected(next);
     },
     [activeTab, videoItems, imageItems, onTabChange, setSelected],
@@ -650,7 +745,9 @@ export default function ListOfTemplates({
   const handleSelect = useCallback(
     (item) => {
       setPendingSelectedId(item.id);
-      setSelected(cleanItem(item));
+      const nextSelected = cleanItem(item);
+      selectedRef.current = nextSelected;
+      setSelected(nextSelected);
     },
     [setSelected],
   );

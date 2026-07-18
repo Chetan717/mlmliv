@@ -110,36 +110,34 @@ function MainEditor() {
     Footersframes[0] || null,
   );
   const [isOpenFtr, setIsOpenFtr] = useState(false);
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4">
-      <div
-        className="rounded-2xl bg-muted/30 border border-border animate-pulse"
-        style={{ width: 320, height: 320 }}
-      />
-      <div className="flex gap-3">
-        {[80, 60, 100].map((w, i) => (
-          <div key={i} className="h-9 rounded-xl bg-muted/30 animate-pulse" style={{ width: w }} />
-        ))}
-      </div>
-      <p className="text-sm font-medium text-muted-foreground animate-pulse mt-1">
-        Loading editor...
-      </p>
-    </div>
-  );
-  if (error) return (
-    <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-      <div className="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-danger">
-          <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
-        </svg>
-      </div>
-      <p className="font-semibold text-foreground">Failed to load editor</p>
-      <p className="text-sm text-muted-foreground">{error}</p>
-    </div>
-  );
+
+  // The editor does not need to wait for optional top/footer graphics. Render
+  // it immediately and attach those defaults as soon as their background
+  // Firestore request completes.
+  useEffect(() => {
+    if (!selectedTopFrame && frames.length > 0) {
+      setSelectedTopFrame(frames[0]);
+    }
+  }, [frames, selectedTopFrame]);
+
+  useEffect(() => {
+    if (!selectedFooterFrame && Footersframes.length > 0) {
+      setSelectedFooterFrame(Footersframes[0]);
+    }
+  }, [Footersframes, selectedFooterFrame]);
 
   return (
     <>
+      {loading && (
+        <div className="fixed top-16 right-3 z-[90] rounded-full bg-background/90 border border-border px-3 py-1.5 text-[11px] font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+          Loading editor tools…
+        </div>
+      )}
+      {error && (
+        <div className="fixed top-16 right-3 z-[90] rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-[11px] text-danger shadow-sm">
+          Optional editor tools could not load.
+        </div>
+      )}
       {/* {isGeneralType ? ( */}
         <GeneralEditPage
           graphicsMap={graphicsMap}

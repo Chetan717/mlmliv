@@ -57,6 +57,7 @@ import num9 from "./amount_numberImage/number_9.webp";
 import numComma from "./amount_numberImage/comma.webp";
 import numRupee from "./amount_numberImage/rupee.webp";
 import { COLLECTIONS } from "../../collections";
+import { celebrateDownload } from "../../utils/downloadCelebration";
 
 const fs = (n) => n;
 
@@ -1726,6 +1727,7 @@ function GeneralEditPage({
       }
       // await deductCredits(IMAGE_CREDIT_COST, "Downloaded!"); {change for free}
       setExportedUri(uri);
+      celebrateDownload();
     } catch (err) {
       
       showToast("Export failed. Please try again.", "error");
@@ -1881,6 +1883,7 @@ function GeneralEditPage({
       }
       setProgressTarget(100);
       setProgressLabel("Done!");
+      celebrateDownload();
       // await deductCredits(VIDEO_CREDIT_COST, "Video downloaded!"); {change for free}
     } catch (err) {
       
@@ -2363,6 +2366,7 @@ function GeneralEditPage({
       }
       setProgressTarget(100);
       setProgressLabel("Done!");
+      celebrateDownload();
       // await deductCredits(VIDEO_CREDIT_COST, "Video downloaded!"); {change for free}
     } catch (err) {
       

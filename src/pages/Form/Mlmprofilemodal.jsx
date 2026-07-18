@@ -5,7 +5,6 @@ import {
   collection,
   addDoc,
   updateDoc,
-  deleteDoc,
   doc,
   serverTimestamp,
   query,
@@ -448,7 +447,7 @@ export default function MLMProfilePage() {
     selectedCompany: companyData,
     loading: loadingCompany,
     refreshCompany,
-    clearCompanySelection,
+    deleteProfileAndCompanySelection,
   } = useSelectedCompany();
   const userMlm = getUserMlm();
   const userMobile = (userMlm.mobileNo || "").trim();
@@ -1213,19 +1212,7 @@ export default function MLMProfilePage() {
     if (!existingDocId) return;
     setDeleting(true);
     try {
-      const q = query(
-        collection(db, COLLECTIONS.MLMPROFILES),
-        where("mobile", "==", userMobile),
-      );
-      const snap = await getDocs(q);
-
-      if (!snap.empty) {
-        await deleteDoc(doc(db, COLLECTIONS.MLMPROFILES, snap.docs[0].id));
-      }
-
-      // Releasing the server-side selection lets this user choose another
-      // company after intentionally deleting the current company profile.
-      await clearCompanySelection();
+      await deleteProfileAndCompanySelection(existingDocId);
 
       localStorage.removeItem("mlmProfile");
       sessionStorage.removeItem("mlmProfile");

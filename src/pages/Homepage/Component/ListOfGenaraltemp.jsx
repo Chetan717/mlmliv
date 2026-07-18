@@ -179,6 +179,41 @@ function DesignationSelectModal({
   );
 }
 
+function normalizeCompanyDesignations(company) {
+  const source = [
+    company?.profile,
+    company?.designation,
+    company?.designations,
+    company?.ranks,
+  ].find(Array.isArray) || [];
+
+  return source
+    .map((item) => {
+      if (typeof item === "string") {
+        const name = item.trim();
+        return name
+          ? { name, image: "", profilename: name, profileimage: "" }
+          : null;
+      }
+
+      const name = String(
+        item?.profilename ||
+          item?.name ||
+          item?.designation ||
+          item?.rankName ||
+          "",
+      ).trim();
+      const image = String(
+        item?.profileimage || item?.image || item?.rankImage || "",
+      ).trim();
+
+      return name
+        ? { ...item, name, image, profilename: name, profileimage: image }
+        : null;
+    })
+    .filter(Boolean);
+}
+
 const GENERAL_SELECT_TYPES = new Set([
   "Trending",
   "Festival",
@@ -313,6 +348,44 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     localStorage.setItem("mlmform", JSON.stringify(formDAta));
   }, []);
 
+  const prepareEditorTemplate = useCallback(
+    (item, selttype) => {
+      const graphics = Array.isArray(item?.GraphicsLink)
+        ? item.GraphicsLink.filter(Boolean).slice(0, 20)
+        : [];
+
+      if (graphics.length === 0) {
+        sessionStorage.removeItem("editorTemplateSeed");
+        return;
+      }
+
+      try {
+        sessionStorage.setItem(
+          "editorTemplateSeed",
+          JSON.stringify({
+            mainType: selttype.MainType || "",
+            type: selttype.type || "",
+            subType: selttype.Subtype || "",
+            templateId: item?.id || "",
+            serial: item?.serial || 0,
+            companyId: selectedCompany?.id || "",
+            items: graphics,
+          }),
+        );
+      } catch {
+        sessionStorage.removeItem("editorTemplateSeed");
+      }
+
+      // Begin downloading the first canvas background before navigation. The
+      // editor's useImage request will reuse the browser cache.
+      const firstImage = graphics.find(
+        (graphic) => !graphic?.backgroundVideoUrl && graphic?.url,
+      );
+      if (firstImage?.url) preloadImage(firstImage.url);
+    },
+    [selectedCompany?.id],
+  );
+
   const proceedWithTemplateSelection = useCallback(
     (selttype, designationSelection) => {
       if (designationSelection) {
@@ -371,6 +444,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
       localStorage.removeItem("achieve_form");
       setSelType(selttype);
       localStorage.setItem("selType", JSON.stringify(selttype));
+      prepareEditorTemplate(item, selttype);
 
       if (selttype.type === "ThankYou_Banner_B") {
         setDesignationModalPending(selttype);
@@ -379,36 +453,43 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
 
       proceedWithTemplateSelection(selttype);
     },
-    [handleReset, proceedWithTemplateSelection, setSelType],
-  );
-
-  const readDesignations = useCallback(
-    (company = selectedCompany) =>
-      Array.isArray(company?.profile) ? company.profile : [],
-    [selectedCompany],
+    [handleReset, prepareEditorTemplate, proceedWithTemplateSelection, setSelType],
   );
 
   // Refresh the authenticated user's company document when the designation
-  // picker opens so backend changes are reflected immediately.
+  // picker opens so backend changes are reflected immediately. Cached ranks
+  // remain visible during refresh, and this effect intentionally depends only
+  // on the company ID so refreshCompany() cannot trigger a refresh loop.
   useEffect(() => {
     if (!designationModalPending) return;
 
     let cancelled = false;
-    setDesignationOptions(readDesignations());
-    setDesignationLoading(true);
+    const cachedDesignations = normalizeCompanyDesignations(selectedCompany);
+    setDesignationOptions(cachedDesignations);
+    setDesignationLoading(cachedDesignations.length === 0);
 
-    refreshCompany().then((company) => {
-      if (cancelled) return;
-      setDesignationOptions(readDesignations(company));
-    }).finally(() => {
-      if (cancelled) return;
-      setDesignationLoading(false);
-    });
+    const loadFreshDesignations = async () => {
+      try {
+        const company = await refreshCompany();
+        if (cancelled) return;
+
+        const freshDesignations = normalizeCompanyDesignations(company);
+        if (freshDesignations.length > 0 || cachedDesignations.length === 0) {
+          setDesignationOptions(freshDesignations);
+        }
+      } catch {
+        // Keep the already loaded company ranks when an online refresh fails.
+      } finally {
+        if (!cancelled) setDesignationLoading(false);
+      }
+    };
+
+    loadFreshDesignations();
 
     return () => {
       cancelled = true;
     };
-  }, [designationModalPending, readDesignations, refreshCompany]);
+  }, [designationModalPending, refreshCompany, selectedCompany?.id]);
 
   if (loading && (!templates || templates.length === 0)) {
     return (

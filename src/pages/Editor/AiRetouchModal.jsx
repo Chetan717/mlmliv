@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { celebrateDownload } from "../../utils/downloadCelebration";
 
 const ACCENT = "#0088DA";
 
@@ -138,6 +139,7 @@ export default function AiRetouchModal({ imageUri, onClose, onToast }) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    celebrateDownload();
     onToast?.("AI image saved!", "success");
   };
 

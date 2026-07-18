@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   setDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import {
   createContext,
@@ -29,6 +30,7 @@ const SelectedCompanyContext = createContext({
   selectCompany: async () => {},
   refreshCompany: async () => {},
   clearCompanySelection: async () => {},
+  deleteProfileAndCompanySelection: async () => {},
 });
 
 async function readCompany(companyId) {
@@ -150,17 +152,35 @@ export function SelectedCompanyProvider({ children }) {
     setSelectedCompany(null);
   }, [user]);
 
+  const deleteProfileAndCompanySelection = useCallback(
+    async (profileId) => {
+      if (!user?.uid) throw new Error("Authenticated user is required.");
+      if (!profileId) throw new Error("MLM profile is required.");
+
+      // Delete both documents in one atomic Firestore commit. This prevents a
+      // deleted profile from leaving an orphaned company selection behind.
+      const batch = writeBatch(db);
+      batch.delete(doc(db, COLLECTIONS.MLMPROFILES, profileId));
+      batch.delete(doc(db, COMPANY_SELECTION_COLLECTION, user.uid));
+      await batch.commit();
+      setSelectedCompany(null);
+    },
+    [user],
+  );
+
   const value = useMemo(
     () => ({
       selectedCompany,
       loading: authLoading || loading,
       selectCompany,
       clearCompanySelection,
+      deleteProfileAndCompanySelection,
       refreshCompany: loadSelection,
     }),
     [
       authLoading,
       clearCompanySelection,
+      deleteProfileAndCompanySelection,
       loadSelection,
       loading,
       selectCompany,
