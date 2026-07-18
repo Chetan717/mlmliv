@@ -131,14 +131,15 @@
     "ID": "zQjBAIRX7U4Pp3hOX51U",
     "name": "VEDVEDYA",
     "logos": [
+       {
+        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1783845034131_89wgi8.webp?alt=media&token=9d78c5b8-1c8a-4378-9c12-90dac08e1475",
+        "size": "square"
+      },
       {
         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1783845093254_8qq1sy.webp?alt=media&token=d449d85f-ffc1-48d0-8aa3-963280b2c75d",
         "size": "rectangle"
-      },
-      {
-        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1783845034131_89wgi8.webp?alt=media&token=9d78c5b8-1c8a-4378-9c12-90dac08e1475",
-        "size": "square"
       }
+     
     ]
   },
   {
