@@ -275,15 +275,37 @@ function createCleanPersonMask(segmentationMask, width, height) {
   // semi-transparent background colors around the body; a binary cutout is
   // required here so WebView scaling cannot bring that halo back.
   const totalPixels = width * height;
+  const confidenceMap = new Uint8Array(totalPixels);
   const foreground = new Uint8Array(totalPixels);
-  const confidenceCutoff = 0.74;
+  let personTop = height;
+  let personBottom = -1;
   let foregroundCount = 0;
   for (let index = 0; index < pixels.length; index += 4) {
     const confidence = confidenceIsAlpha
       ? pixels[index + 3] / 255
       : (pixels[index] + pixels[index + 1] + pixels[index + 2]) / (255 * 3);
-    if (confidence >= confidenceCutoff) {
-      foreground[index / 4] = 1;
+    const pixelIndex = index / 4;
+    confidenceMap[pixelIndex] = Math.round(confidence * 255);
+    if (confidence >= 0.42) {
+      const y = Math.floor(pixelIndex / width);
+      personTop = Math.min(personTop, y);
+      personBottom = Math.max(personBottom, y);
+    }
+  }
+
+  const hasPersonBounds = personBottom >= personTop;
+  const protectedHeadEnd = hasPersonBounds
+    ? personTop + Math.round((personBottom - personTop) * 0.42)
+    : Math.round(height * 0.4);
+
+  // Ears and hair are naturally lower-confidence than the face and torso.
+  // Preserve them with a gentler cutoff in the upper part of the person,
+  // while retaining a stricter body cutoff to reject background objects.
+  for (let pixelIndex = 0; pixelIndex < totalPixels; pixelIndex += 1) {
+    const y = Math.floor(pixelIndex / width);
+    const cutoff = y <= protectedHeadEnd ? 0.55 : 0.68;
+    if (confidenceMap[pixelIndex] / 255 >= cutoff) {
+      foreground[pixelIndex] = 1;
       foregroundCount += 1;
     }
   }
@@ -291,10 +313,7 @@ function createCleanPersonMask(segmentationMask, width, height) {
   // Avoid returning a blank image for unusually dark/low-contrast photos.
   if (foregroundCount === 0) {
     for (let index = 0; index < pixels.length; index += 4) {
-      const confidence = confidenceIsAlpha
-        ? pixels[index + 3] / 255
-        : (pixels[index] + pixels[index + 1] + pixels[index + 2]) / (255 * 3);
-      foreground[index / 4] = confidence >= 0.58 ? 1 : 0;
+      foreground[index / 4] = confidenceMap[index / 4] / 255 >= 0.5 ? 1 : 0;
     }
   }
 
@@ -345,6 +364,36 @@ function createCleanPersonMask(segmentationMask, width, height) {
           queue[tail++] = neighbour;
         }
       }
+      // Diagonal connectivity keeps thin ears, hair strands and fingers
+      // attached to the main person instead of treating them as noise.
+      if (x > 0 && current >= width) {
+        neighbour = current - width - 1;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+      if (x + 1 < width && current >= width) {
+        neighbour = current - width + 1;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+      if (x > 0 && current + width < totalPixels) {
+        neighbour = current + width - 1;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
+      if (x + 1 < width && current + width < totalPixels) {
+        neighbour = current + width + 1;
+        if (foreground[neighbour] && !labels[neighbour]) {
+          labels[neighbour] = label;
+          queue[tail++] = neighbour;
+        }
+      }
     }
 
     if (tail > largestArea) {
@@ -359,25 +408,27 @@ function createCleanPersonMask(segmentationMask, width, height) {
       largestLabel !== 0 && labels[index] === largestLabel ? 1 : 0;
   }
 
-  // Two-pixel inward erosion removes the colored rim produced when the
-  // 256px AI mask is enlarged to the 1024px output image.
-  for (let pass = 0; pass < 2; pass += 1) {
-    const eroded = new Uint8Array(totalPixels);
-    for (let y = 1; y < height - 1; y += 1) {
-      for (let x = 1; x < width - 1; x += 1) {
-        const index = y * width + x;
-        eroded[index] =
-          cleanForeground[index] &&
-          cleanForeground[index - 1] &&
-          cleanForeground[index + 1] &&
-          cleanForeground[index - width] &&
-          cleanForeground[index + width]
-            ? 1
-            : 0;
+  // Use only one erosion pass, and never erode the protected head region.
+  // This cleans the body outline without shrinking ears or the top of hair.
+  const eroded = new Uint8Array(totalPixels);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const index = y * width + x;
+      if (y <= protectedHeadEnd || x === 0 || y === 0 || x + 1 === width || y + 1 === height) {
+        eroded[index] = cleanForeground[index];
+        continue;
       }
+      eroded[index] =
+        cleanForeground[index] &&
+        cleanForeground[index - 1] &&
+        cleanForeground[index + 1] &&
+        cleanForeground[index - width] &&
+        cleanForeground[index + width]
+          ? 1
+          : 0;
     }
-    cleanForeground = eroded;
   }
+  cleanForeground = eroded;
 
   // Store only 0 or 255 alpha. Transparent pixels also get zero RGB, which
   // prevents white/colored fringes when React Native scales the PNG.
