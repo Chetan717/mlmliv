@@ -246,7 +246,79 @@ async function prepareFastAiInput(file, maxSize = 1280) {
   });
 }
 
-function createCleanPersonMask(segmentationMask, sourceCanvas) {
+function refineConfidenceWithImage(
+  confidenceMap,
+  sourcePixels,
+  width,
+  height,
+) {
+  // MediaPipe's general selfie model produces a 256px confidence mask. When
+  // that mask is enlarged for a phone photo, interpolation can put high mask
+  // values over a bright background rim. A compact joint-bilateral pass uses
+  // the original photo as the guide: confidence is smoothed across similar
+  // colours, but not across a real hair/skin-to-background colour edge.
+  let current = confidenceMap;
+  const radius = 2;
+
+  for (let pass = 0; pass < 2; pass += 1) {
+    const refined = current.slice();
+    for (let y = radius; y < height - radius; y += 1) {
+      for (let x = radius; x < width - radius; x += 1) {
+        const index = y * width + x;
+        const centerConfidence = current[index];
+        if (centerConfidence <= 5 || centerConfidence >= 250) continue;
+
+        const dataIndex = index * 4;
+        const centerRed = sourcePixels[dataIndex];
+        const centerGreen = sourcePixels[dataIndex + 1];
+        const centerBlue = sourcePixels[dataIndex + 2];
+        let confidenceSum = centerConfidence * 6;
+        let weightSum = 6;
+
+        for (let offsetY = -radius; offsetY <= radius; offsetY += 1) {
+          for (let offsetX = -radius; offsetX <= radius; offsetX += 1) {
+            if (offsetX === 0 && offsetY === 0) continue;
+            const neighbour = index + offsetY * width + offsetX;
+            const neighbourDataIndex = neighbour * 4;
+            const redDifference = sourcePixels[neighbourDataIndex] - centerRed;
+            const greenDifference =
+              sourcePixels[neighbourDataIndex + 1] - centerGreen;
+            const blueDifference =
+              sourcePixels[neighbourDataIndex + 2] - centerBlue;
+            const colourDistanceSquared =
+              redDifference * redDifference +
+              greenDifference * greenDifference +
+              blueDifference * blueDifference;
+            const spatialWeight =
+              6 - Math.abs(offsetX) - Math.abs(offsetY);
+            const colourWeight = 1 / (1 + colourDistanceSquared / 1100);
+            const weight = spatialWeight * colourWeight;
+            confidenceSum += current[neighbour] * weight;
+            weightSum += weight;
+          }
+        }
+
+        refined[index] = Math.round(confidenceSum / weightSum);
+      }
+    }
+    current = refined;
+  }
+
+  return current;
+}
+
+function colourDistanceSquared(red, green, blue, otherRed, otherGreen, otherBlue) {
+  const redDifference = red - otherRed;
+  const greenDifference = green - otherGreen;
+  const blueDifference = blue - otherBlue;
+  return (
+    redDifference * redDifference +
+    greenDifference * greenDifference +
+    blueDifference * blueDifference
+  );
+}
+
+function createCleanPersonCutout(segmentationMask, sourceCanvas) {
   const width = sourceCanvas.width;
   const height = sourceCanvas.height;
   const maskCanvas = document.createElement("canvas");
@@ -262,6 +334,12 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
   maskContext.drawImage(segmentationMask, 0, 0, width, height);
   const maskData = maskContext.getImageData(0, 0, width, height);
   const pixels = maskData.data;
+  const sourceContext = sourceCanvas.getContext("2d", {
+    alpha: false,
+    willReadFrequently: true,
+  });
+  if (!sourceContext) throw new Error("Canvas is unavailable on this device.");
+  const sourcePixels = sourceContext.getImageData(0, 0, width, height).data;
 
   // MediaPipe usually stores confidence in alpha. A few WebView GPU drivers
   // expose it as a grayscale texture instead, so detect the available channel.
@@ -277,7 +355,7 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
   // semi-transparent background colors around the body; a binary cutout is
   // required here so WebView scaling cannot bring that halo back.
   const totalPixels = width * height;
-  const confidenceMap = new Uint8Array(totalPixels);
+  let confidenceMap = new Uint8Array(totalPixels);
   const foreground = new Uint8Array(totalPixels);
   let personTop = height;
   let personBottom = -1;
@@ -288,6 +366,17 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
       : (pixels[index] + pixels[index + 1] + pixels[index + 2]) / (255 * 3);
     const pixelIndex = index / 4;
     confidenceMap[pixelIndex] = Math.round(confidence * 255);
+  }
+
+  confidenceMap = refineConfidenceWithImage(
+    confidenceMap,
+    sourcePixels,
+    width,
+    height,
+  );
+
+  for (let pixelIndex = 0; pixelIndex < totalPixels; pixelIndex += 1) {
+    const confidence = confidenceMap[pixelIndex] / 255;
     if (confidence >= 0.42) {
       const y = Math.floor(pixelIndex / width);
       personTop = Math.min(personTop, y);
@@ -410,44 +499,11 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
       largestLabel !== 0 && labels[index] === largestLabel ? 1 : 0;
   }
 
-  // Remove color spill from the original background, not from the person.
-  // This is what eliminates the white/gray rim visible around dark hair while
-  // keeping ears intact. Corner pixels give a reliable background-color sample
-  // because the prepared portrait is padded to a square before segmentation.
-  const sourceContext = sourceCanvas.getContext("2d", {
-    alpha: false,
-    willReadFrequently: true,
-  });
-  if (!sourceContext) throw new Error("Canvas is unavailable on this device.");
-  const sourcePixels = sourceContext.getImageData(0, 0, width, height).data;
-  const sampleSize = Math.max(4, Math.round(Math.min(width, height) * 0.018));
-  let backgroundRed = 0;
-  let backgroundGreen = 0;
-  let backgroundBlue = 0;
-  let backgroundSamples = 0;
-  for (let y = 0; y < sampleSize; y += 1) {
-    for (let x = 0; x < sampleSize; x += 1) {
-      const cornerPoints = [
-        y * width + x,
-        y * width + (width - 1 - x),
-        (height - 1 - y) * width + x,
-        (height - 1 - y) * width + (width - 1 - x),
-      ];
-      for (const point of cornerPoints) {
-        const dataIndex = point * 4;
-        backgroundRed += sourcePixels[dataIndex];
-        backgroundGreen += sourcePixels[dataIndex + 1];
-        backgroundBlue += sourcePixels[dataIndex + 2];
-        backgroundSamples += 1;
-      }
-    }
-  }
-  backgroundRed /= backgroundSamples;
-  backgroundGreen /= backgroundSamples;
-  backgroundBlue /= backgroundSamples;
-
-  // Peel away up to five boundary pixels only when their original color
-  // matches the sampled background. Skin, ears and dark hair remain untouched.
+  // Compare every boundary pixel with its *local* outside and inside colours.
+  // The old corner sampler saw the white square padding instead of the real
+  // photo background, so coloured particles survived and white rims could be
+  // retained. Local sampling works for every backdrop and keeps skin/ears when
+  // they match the inner-person colour.
   for (let pass = 0; pass < 5; pass += 1) {
     const decontaminated = cleanForeground.slice();
     for (let y = 1; y < height - 1; y += 1) {
@@ -465,23 +521,94 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
         const red = sourcePixels[dataIndex];
         const green = sourcePixels[dataIndex + 1];
         const blue = sourcePixels[dataIndex + 2];
-        const redDifference = red - backgroundRed;
-        const greenDifference = green - backgroundGreen;
-        const blueDifference = blue - backgroundBlue;
-        const backgroundDistanceSquared =
-          redDifference * redDifference +
-          greenDifference * greenDifference +
-          blueDifference * blueDifference;
+        let outsideRed = 0;
+        let outsideGreen = 0;
+        let outsideBlue = 0;
+        let outsideCount = 0;
+        let insideRed = 0;
+        let insideGreen = 0;
+        let insideBlue = 0;
+        let insideWeight = 0;
+
+        for (let offsetY = -4; offsetY <= 4; offsetY += 1) {
+          const sampleY = y + offsetY;
+          if (sampleY < 0 || sampleY >= height) continue;
+          for (let offsetX = -4; offsetX <= 4; offsetX += 1) {
+            const sampleX = x + offsetX;
+            if (sampleX < 0 || sampleX >= width) continue;
+            if (offsetX === 0 && offsetY === 0) continue;
+            const sampleIndex = sampleY * width + sampleX;
+            const sampleDataIndex = sampleIndex * 4;
+            const distance = Math.max(Math.abs(offsetX), Math.abs(offsetY));
+
+            if (!cleanForeground[sampleIndex] && distance <= 3) {
+              outsideRed += sourcePixels[sampleDataIndex];
+              outsideGreen += sourcePixels[sampleDataIndex + 1];
+              outsideBlue += sourcePixels[sampleDataIndex + 2];
+              outsideCount += 1;
+            } else if (
+              cleanForeground[sampleIndex] &&
+              confidenceMap[sampleIndex] >= 178
+            ) {
+              const weight = confidenceMap[sampleIndex] / (255 * distance);
+              insideRed += sourcePixels[sampleDataIndex] * weight;
+              insideGreen += sourcePixels[sampleDataIndex + 1] * weight;
+              insideBlue += sourcePixels[sampleDataIndex + 2] * weight;
+              insideWeight += weight;
+            }
+          }
+        }
+
+        if (outsideCount === 0 || insideWeight === 0) continue;
+        outsideRed /= outsideCount;
+        outsideGreen /= outsideCount;
+        outsideBlue /= outsideCount;
+        insideRed /= insideWeight;
+        insideGreen /= insideWeight;
+        insideBlue /= insideWeight;
+
+        const backgroundDistanceSquared = colourDistanceSquared(
+          red,
+          green,
+          blue,
+          outsideRed,
+          outsideGreen,
+          outsideBlue,
+        );
+        const personDistanceSquared = colourDistanceSquared(
+          red,
+          green,
+          blue,
+          insideRed,
+          insideGreen,
+          insideBlue,
+        );
         const brightest = Math.max(red, green, blue);
         const darkest = Math.min(red, green, blue);
         const neutralLightSpill = darkest >= 178 && brightest - darkest <= 42;
+        const likelySkin =
+          red >= 72 &&
+          red > green &&
+          green >= blue &&
+          red - blue >= 18 &&
+          brightest - darkest >= 20;
         const confidence = confidenceMap[index] / 255;
-        const matchesCornerBackground = backgroundDistanceSquared <= 90 * 90;
+        const clearlyMatchesBackground =
+          backgroundDistanceSquared + 1200 < personDistanceSquared * 0.72;
+        const strongBackgroundMatch =
+          backgroundDistanceSquared <= 38 * 38 * 3 &&
+          personDistanceSquared >= 48 * 48;
 
-        if (
-          (matchesCornerBackground && confidence < 0.9) ||
-          (neutralLightSpill && confidence < 0.84)
-        ) {
+        const shouldRemove =
+          (clearlyMatchesBackground && confidence < 0.97) ||
+          (strongBackgroundMatch && confidence < 0.985) ||
+          (neutralLightSpill && clearlyMatchesBackground && confidence < 0.992);
+        const safelyRemovableSkinSpill =
+          backgroundDistanceSquared <= 24 * 24 * 3 &&
+          personDistanceSquared >= 62 * 62 * 3 &&
+          confidence < 0.82;
+
+        if (shouldRemove && (!likelySkin || safelyRemovableSkinSpill)) {
           decontaminated[index] = 0;
         }
       }
@@ -538,36 +665,153 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
     cleanForeground = smoothed;
   }
 
-  // Keep outside pixels completely transparent. Give the cleaned inner edge a
-  // tiny one-pixel feather made from actual person colors for a smooth outline.
+  // Measure the first three *inside* edge layers. Feathering only inside the
+  // cleaned silhouette prevents background pixels from being reintroduced.
+  const edgeDepth = new Uint8Array(totalPixels);
+  let remaining = cleanForeground.slice();
+  for (let depth = 1; depth <= 3; depth += 1) {
+    const nextRemaining = remaining.slice();
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const index = y * width + x;
+        if (!remaining[index]) continue;
+        if (
+          !remaining[index - 1] ||
+          !remaining[index + 1] ||
+          !remaining[index - width] ||
+          !remaining[index + width]
+        ) {
+          edgeDepth[index] = depth;
+          nextRemaining[index] = 0;
+        }
+      }
+    }
+    remaining = nextRemaining;
+  }
+
+  // White/grey halo is frequently baked into the RGB values of otherwise
+  // valid foreground edge pixels. Pull only contaminated edge colours toward
+  // nearby high-confidence inner-person colours. This preserves the shape of
+  // fine hair and ears instead of eroding them to solve colour spill.
+  const cleanedPixels = new Uint8ClampedArray(sourcePixels);
+  for (let y = 1; y < height - 1; y += 1) {
+    for (let x = 1; x < width - 1; x += 1) {
+      const index = y * width + x;
+      const depth = edgeDepth[index];
+      if (!depth || !cleanForeground[index]) continue;
+
+      let insideRed = 0;
+      let insideGreen = 0;
+      let insideBlue = 0;
+      let insideWeight = 0;
+      let outsideRed = 0;
+      let outsideGreen = 0;
+      let outsideBlue = 0;
+      let outsideCount = 0;
+
+      for (let offsetY = -6; offsetY <= 6; offsetY += 1) {
+        const sampleY = y + offsetY;
+        if (sampleY < 0 || sampleY >= height) continue;
+        for (let offsetX = -6; offsetX <= 6; offsetX += 1) {
+          const sampleX = x + offsetX;
+          if (sampleX < 0 || sampleX >= width) continue;
+          if (offsetX === 0 && offsetY === 0) continue;
+          const distance = Math.max(Math.abs(offsetX), Math.abs(offsetY));
+          const sampleIndex = sampleY * width + sampleX;
+          const sampleDataIndex = sampleIndex * 4;
+
+          if (!cleanForeground[sampleIndex] && distance <= 3) {
+            outsideRed += sourcePixels[sampleDataIndex];
+            outsideGreen += sourcePixels[sampleDataIndex + 1];
+            outsideBlue += sourcePixels[sampleDataIndex + 2];
+            outsideCount += 1;
+          } else if (
+            cleanForeground[sampleIndex] &&
+            (edgeDepth[sampleIndex] === 0 || edgeDepth[sampleIndex] > depth) &&
+            confidenceMap[sampleIndex] >= 185
+          ) {
+            const weight = confidenceMap[sampleIndex] / (255 * distance);
+            insideRed += sourcePixels[sampleDataIndex] * weight;
+            insideGreen += sourcePixels[sampleDataIndex + 1] * weight;
+            insideBlue += sourcePixels[sampleDataIndex + 2] * weight;
+            insideWeight += weight;
+          }
+        }
+      }
+
+      if (insideWeight === 0) continue;
+      insideRed /= insideWeight;
+      insideGreen /= insideWeight;
+      insideBlue /= insideWeight;
+      const dataIndex = index * 4;
+      const red = sourcePixels[dataIndex];
+      const green = sourcePixels[dataIndex + 1];
+      const blue = sourcePixels[dataIndex + 2];
+      let blend = depth === 1 ? 0.32 : depth === 2 ? 0.18 : 0.08;
+
+      if (outsideCount > 0) {
+        outsideRed /= outsideCount;
+        outsideGreen /= outsideCount;
+        outsideBlue /= outsideCount;
+        const backgroundDistance = colourDistanceSquared(
+          red,
+          green,
+          blue,
+          outsideRed,
+          outsideGreen,
+          outsideBlue,
+        );
+        const personDistance = colourDistanceSquared(
+          red,
+          green,
+          blue,
+          insideRed,
+          insideGreen,
+          insideBlue,
+        );
+        if (backgroundDistance + 900 < personDistance) {
+          blend = depth === 1 ? 0.9 : depth === 2 ? 0.68 : 0.38;
+        }
+      }
+
+      cleanedPixels[dataIndex] = Math.round(
+        red * (1 - blend) + insideRed * blend,
+      );
+      cleanedPixels[dataIndex + 1] = Math.round(
+        green * (1 - blend) + insideGreen * blend,
+      );
+      cleanedPixels[dataIndex + 2] = Math.round(
+        blue * (1 - blend) + insideBlue * blend,
+      );
+    }
+  }
+
+  // Write the transparent cutout directly. This avoids an additional canvas
+  // composite step that can re-premultiply light mask-edge pixels in WebViews.
   for (let index = 0; index < totalPixels; index += 1) {
     const dataIndex = index * 4;
-    const isPerson = cleanForeground[index] === 1;
-    if (!isPerson) {
-      pixels[dataIndex] = 0;
-      pixels[dataIndex + 1] = 0;
-      pixels[dataIndex + 2] = 0;
-      pixels[dataIndex + 3] = 0;
+    if (!cleanForeground[index]) {
+      cleanedPixels[dataIndex] = 0;
+      cleanedPixels[dataIndex + 1] = 0;
+      cleanedPixels[dataIndex + 2] = 0;
+      cleanedPixels[dataIndex + 3] = 0;
       continue;
     }
-    const x = index % width;
-    const y = Math.floor(index / width);
-    const isSmoothEdge =
-      x === 0 ||
-      y === 0 ||
-      x + 1 === width ||
-      y + 1 === height ||
-      !cleanForeground[index - 1] ||
-      !cleanForeground[index + 1] ||
-      !cleanForeground[index - width] ||
-      !cleanForeground[index + width];
-    pixels[dataIndex] = 255;
-    pixels[dataIndex + 1] = 255;
-    pixels[dataIndex + 2] = 255;
-    pixels[dataIndex + 3] = isSmoothEdge ? 220 : 255;
+    cleanedPixels[dataIndex + 3] =
+      edgeDepth[index] === 1 ? 210 : edgeDepth[index] === 2 ? 242 : 255;
   }
-  maskContext.putImageData(maskData, 0, 0);
-  return maskCanvas;
+
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = width;
+  outputCanvas.height = height;
+  const outputContext = outputCanvas.getContext("2d");
+  if (!outputContext) throw new Error("Canvas is unavailable on this device.");
+  outputContext.putImageData(
+    new ImageData(cleanedPixels, width, height),
+    0,
+    0,
+  );
+  return outputCanvas;
 }
 
 async function removeBgWithMediaPipe(file, signal) {
@@ -604,22 +848,10 @@ async function removeBgWithMediaPipe(file, signal) {
   }
 
   emitProgress("फोटो के किनारे साफ किए जा रहे हैं…", 88);
-  const outputCanvas = document.createElement("canvas");
-  outputCanvas.width = inputCanvas.width;
-  outputCanvas.height = inputCanvas.height;
-  const context = outputCanvas.getContext("2d");
-  if (!context) throw new Error("Canvas is unavailable on this device.");
-  const cleanMask = createCleanPersonMask(
+  const outputCanvas = createCleanPersonCutout(
     results.segmentationMask,
     inputCanvas,
   );
-
-  // Keep only high-confidence person pixels from the refined WebView mask.
-  context.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
-  context.drawImage(cleanMask, 0, 0);
-  context.globalCompositeOperation = "source-in";
-  context.drawImage(inputCanvas, 0, 0);
-  context.globalCompositeOperation = "source-over";
 
   emitProgress("Transparent Photo तैयार हो रही है…", 97);
   return new Promise((resolve, reject) => {

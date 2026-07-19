@@ -990,6 +990,9 @@ export function ImageEditorCanvas({
     ctx.filter = "none";
     ctx.restore();
 
+    // A transparent cutout must stay lossless. Lossy WebP colour compression
+    // can recreate a pale fringe even though the alpha channel is valid.
+    const exportType = enableEnhance ? "image/png" : "image/webp";
     outputCanvas.toBlob(
       (blob) => {
         clearInterval(progressTimerRef.current);
@@ -1002,8 +1005,8 @@ export function ImageEditorCanvas({
           onDone(blob);
         }, 180);
       },
-      "image/webp",
-      0.92,
+      exportType,
+      exportType === "image/webp" ? 0.92 : undefined,
     );
   };
 

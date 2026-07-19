@@ -774,6 +774,11 @@ export default function ImageEditorCanvas({
     ctx.filter = "none";
     ctx.restore();
 
+    // The second/final crop contains the transparent remove-bg result. Lossy
+    // WebP can bleed light RGB/chroma into transparent edge pixels and recreate
+    // a white halo when the cutout is placed on a dark banner. Preserve that
+    // edge losslessly as PNG; the initial photo crop can stay compact WebP.
+    const exportType = enableEnhance ? "image/png" : "image/webp";
     out.toBlob(
       (blob) => {
         clearInterval(progressTimerRef.current);
@@ -793,8 +798,8 @@ export default function ImageEditorCanvas({
           }
         }, 180);
       },
-      "image/webp",
-      0.92,
+      exportType,
+      exportType === "image/webp" ? 0.92 : undefined,
     );
   };
 
