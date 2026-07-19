@@ -246,7 +246,9 @@ async function prepareFastAiInput(file, maxSize = 1280) {
   });
 }
 
-function createCleanPersonMask(segmentationMask, width, height) {
+function createCleanPersonMask(segmentationMask, sourceCanvas) {
+  const width = sourceCanvas.width;
+  const height = sourceCanvas.height;
   const maskCanvas = document.createElement("canvas");
   maskCanvas.width = width;
   maskCanvas.height = height;
@@ -408,6 +410,85 @@ function createCleanPersonMask(segmentationMask, width, height) {
       largestLabel !== 0 && labels[index] === largestLabel ? 1 : 0;
   }
 
+  // Remove color spill from the original background, not from the person.
+  // This is what eliminates the white/gray rim visible around dark hair while
+  // keeping ears intact. Corner pixels give a reliable background-color sample
+  // because the prepared portrait is padded to a square before segmentation.
+  const sourceContext = sourceCanvas.getContext("2d", {
+    alpha: false,
+    willReadFrequently: true,
+  });
+  if (!sourceContext) throw new Error("Canvas is unavailable on this device.");
+  const sourcePixels = sourceContext.getImageData(0, 0, width, height).data;
+  const sampleSize = Math.max(4, Math.round(Math.min(width, height) * 0.018));
+  let backgroundRed = 0;
+  let backgroundGreen = 0;
+  let backgroundBlue = 0;
+  let backgroundSamples = 0;
+  for (let y = 0; y < sampleSize; y += 1) {
+    for (let x = 0; x < sampleSize; x += 1) {
+      const cornerPoints = [
+        y * width + x,
+        y * width + (width - 1 - x),
+        (height - 1 - y) * width + x,
+        (height - 1 - y) * width + (width - 1 - x),
+      ];
+      for (const point of cornerPoints) {
+        const dataIndex = point * 4;
+        backgroundRed += sourcePixels[dataIndex];
+        backgroundGreen += sourcePixels[dataIndex + 1];
+        backgroundBlue += sourcePixels[dataIndex + 2];
+        backgroundSamples += 1;
+      }
+    }
+  }
+  backgroundRed /= backgroundSamples;
+  backgroundGreen /= backgroundSamples;
+  backgroundBlue /= backgroundSamples;
+
+  // Peel away up to three boundary pixels only when their original color
+  // matches the sampled background. Skin, ears and dark hair remain untouched.
+  for (let pass = 0; pass < 3; pass += 1) {
+    const decontaminated = cleanForeground.slice();
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const index = y * width + x;
+        if (!cleanForeground[index]) continue;
+        const isBoundary =
+          !cleanForeground[index - 1] ||
+          !cleanForeground[index + 1] ||
+          !cleanForeground[index - width] ||
+          !cleanForeground[index + width];
+        if (!isBoundary) continue;
+
+        const dataIndex = index * 4;
+        const red = sourcePixels[dataIndex];
+        const green = sourcePixels[dataIndex + 1];
+        const blue = sourcePixels[dataIndex + 2];
+        const redDifference = red - backgroundRed;
+        const greenDifference = green - backgroundGreen;
+        const blueDifference = blue - backgroundBlue;
+        const backgroundDistanceSquared =
+          redDifference * redDifference +
+          greenDifference * greenDifference +
+          blueDifference * blueDifference;
+        const brightest = Math.max(red, green, blue);
+        const darkest = Math.min(red, green, blue);
+        const neutralLightSpill = darkest >= 178 && brightest - darkest <= 42;
+        const confidence = confidenceMap[index] / 255;
+        const matchesCornerBackground = backgroundDistanceSquared <= 90 * 90;
+
+        if (
+          (matchesCornerBackground && confidence < 0.9) ||
+          (neutralLightSpill && confidence < 0.84)
+        ) {
+          decontaminated[index] = 0;
+        }
+      }
+    }
+    cleanForeground = decontaminated;
+  }
+
   // Use only one erosion pass, and never erode the protected head region.
   // This cleans the body outline without shrinking ears or the top of hair.
   const eroded = new Uint8Array(totalPixels);
@@ -430,15 +511,33 @@ function createCleanPersonMask(segmentationMask, width, height) {
   }
   cleanForeground = eroded;
 
-  // Store only 0 or 255 alpha. Transparent pixels also get zero RGB, which
-  // prevents white/colored fringes when React Native scales the PNG.
+  // Keep outside pixels completely transparent. Give the cleaned inner edge a
+  // tiny one-pixel feather made from actual person colors for a smooth outline.
   for (let index = 0; index < totalPixels; index += 1) {
     const dataIndex = index * 4;
     const isPerson = cleanForeground[index] === 1;
-    pixels[dataIndex] = isPerson ? 255 : 0;
-    pixels[dataIndex + 1] = isPerson ? 255 : 0;
-    pixels[dataIndex + 2] = isPerson ? 255 : 0;
-    pixels[dataIndex + 3] = isPerson ? 255 : 0;
+    if (!isPerson) {
+      pixels[dataIndex] = 0;
+      pixels[dataIndex + 1] = 0;
+      pixels[dataIndex + 2] = 0;
+      pixels[dataIndex + 3] = 0;
+      continue;
+    }
+    const x = index % width;
+    const y = Math.floor(index / width);
+    const isSmoothEdge =
+      x === 0 ||
+      y === 0 ||
+      x + 1 === width ||
+      y + 1 === height ||
+      !cleanForeground[index - 1] ||
+      !cleanForeground[index + 1] ||
+      !cleanForeground[index - width] ||
+      !cleanForeground[index + width];
+    pixels[dataIndex] = 255;
+    pixels[dataIndex + 1] = 255;
+    pixels[dataIndex + 2] = 255;
+    pixels[dataIndex + 3] = isSmoothEdge ? 220 : 255;
   }
   maskContext.putImageData(maskData, 0, 0);
   return maskCanvas;
@@ -485,8 +584,7 @@ async function removeBgWithMediaPipe(file, signal) {
   if (!context) throw new Error("Canvas is unavailable on this device.");
   const cleanMask = createCleanPersonMask(
     results.segmentationMask,
-    outputCanvas.width,
-    outputCanvas.height,
+    inputCanvas,
   );
 
   // Keep only high-confidence person pixels from the refined WebView mask.
