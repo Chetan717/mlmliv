@@ -2,8 +2,9 @@
  * Free, on-device background removal.
  *
  * Images never leave the browser. The AI model is downloaded once and then
- * reused from the browser cache. WebGPU is preferred on supported devices;
- * Android/iOS devices without WebGPU automatically use the WASM/CPU engine.
+ * reused from the browser cache. Normal browsers use IMG.LY; embedded React
+ * Native WebViews use MODNet portrait matting so hair and ears get a real
+ * continuous alpha edge instead of MediaPipe's low-resolution binary mask.
  */
 
 const MODEL_PUBLIC_PATH = import.meta.env.VITE_BG_MODEL_PATH?.trim();
@@ -11,6 +12,7 @@ const MODEL_PUBLIC_PATH = import.meta.env.VITE_BG_MODEL_PATH?.trim();
 let enginePromise = null;
 let preloadPromise = null;
 let mediaPipePromise = null;
+let modNetPromise = null;
 let preferredDevice = null;
 let configRevision = 0;
 let activeProgress = null;
@@ -124,6 +126,16 @@ async function loadEngine() {
     });
   }
   return enginePromise;
+}
+
+async function loadModNetEngine() {
+  if (!modNetPromise) {
+    modNetPromise = import("./modnetBg.js").catch((error) => {
+      modNetPromise = null;
+      throw error;
+    });
+  }
+  return modNetPromise;
 }
 
 function getPreferredDevice() {
@@ -920,9 +932,11 @@ export async function preloadBgModel(onProgress) {
   if (!preloadPromise) {
     preloadPromise = (async () => {
       if (isEmbeddedWebView()) {
-        emitProgress("WebView-compatible AI मॉडल तैयार हो रहा है…", 8);
-        await loadMediaPipeSegmenter();
-        return "webview";
+        emitProgress("Professional portrait AI मॉडल तैयार हो रहा है…", 5);
+        const { preloadModNet } = await loadModNetEngine();
+        return preloadModNet((stage, percentage) =>
+          emitProgress(stage, percentage),
+        );
       }
 
       const device = getPreferredDevice();
@@ -1000,7 +1014,12 @@ export async function removeBg(file, onProgress, signal) {
 
     try {
       if (isEmbeddedWebView()) {
-        const result = await removeBgWithMediaPipe(file, signal);
+        const { removeBackgroundWithModNet } = await loadModNetEngine();
+        const result = await removeBackgroundWithModNet(
+          file,
+          (stage, percentage) => emitProgress(stage, percentage),
+          signal,
+        );
         throwIfAborted(signal);
         emitProgress("फोटो तैयार है", 100);
         return result;
@@ -1054,7 +1073,7 @@ export async function removeBg(file, onProgress, signal) {
       reportNativeFailure(error);
       throw new Error(
         isEmbeddedWebView()
-          ? "WebView background removal failed. Please update Android System WebView and try again."
+          ? "Professional background removal failed. First use पर internet चालू रखें ताकि free AI model download हो सके, फिर try करें."
           : "Free background removal could not start. Check the internet once so the AI model can download, then try again.",
         { cause: error },
       );
