@@ -11,6 +11,7 @@ import {
 import profileCreate from "../../../../public/prcrete.png";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
+import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
 
 const ImageWithSkeleton = React.memo(({ src, alt, className }) => {
   const alreadySeen = seenImages.has(src);
@@ -415,13 +416,15 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
       }
 
       if (hasMlmProfileInStorage()) {
-        navigate(
-          GENERAL_SELECT_TYPES.has(selttype.type)
-            ? "/editor"
-            : CIRCLE_TYPES?.has(selttype.type)
-              ? "/editor"
-              : "/mlmform",
-        );
+        const isDirectEditor =
+          GENERAL_SELECT_TYPES.has(selttype.type) ||
+          CIRCLE_TYPES.has(selttype.type);
+        if (isDirectEditor) {
+          rememberEditorBackTarget("/", selttype);
+          navigate("/editor", { state: { editorBackTarget: "/" } });
+        } else {
+          navigate("/mlmform");
+        }
       } else {
         setProfileModalPending(selttype);
       }

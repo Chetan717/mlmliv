@@ -36,6 +36,7 @@ import {
   Modal,
   toast,
 } from "@heroui/react";
+import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
 import { db, app } from "@firebase-config";
 import {
   arrayRemove,
@@ -662,7 +663,10 @@ export default function SalesExecutiveForm() {
     };
 
     localStorage.setItem("mlmform", JSON.stringify(formData));
-    navigate("/editor", { replace: true });
+    rememberEditorBackTarget("/mlmform");
+    navigate("/editor", {
+      state: { editorBackTarget: "/mlmform" },
+    });
   };
 
   const addTrainingDate = () => {

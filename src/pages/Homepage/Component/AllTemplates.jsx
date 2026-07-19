@@ -7,7 +7,10 @@ import { useNavigate } from "react-router";
 import { ArrowLeft, Check, Compass } from "lucide-react";
 import { seenImages, markImageSeen, isNewTemplate } from "./templateCacheUtils";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
-import { isDirectEditorTemplate } from "../../../utils/editorNavigation";
+import {
+  isDirectEditorTemplate,
+  rememberEditorBackTarget,
+} from "../../../utils/editorNavigation";
 
 const SkeletonCard = () => (
   <div className="rounded-[24px] overflow-hidden bg-muted aspect-square w-full relative border border-border">
@@ -201,7 +204,15 @@ export default function AllTemplates() {
       localStorage.setItem("selType", JSON.stringify(seltype));
       const isDirectEditor = isDirectEditorTemplate(item.type);
       if (!isDirectEditor) localStorage.removeItem("mlmform");
-      navigate(isDirectEditor ? "/editor" : "/mlmform", { replace: true });
+      if (isDirectEditor) {
+        rememberEditorBackTarget("/", seltype);
+        navigate("/editor", {
+          replace: true,
+          state: { editorBackTarget: "/" },
+        });
+      } else {
+        navigate("/mlmform", { replace: true });
+      }
     } else {
       navigate("/mlmprofile");
     }

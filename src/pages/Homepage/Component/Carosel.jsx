@@ -12,6 +12,7 @@ import { Skeleton } from "@heroui/react";
 import defaultImage from "../../../../public/carasol.webp";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
+import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
 
 export default function Carosel() {
   const { setSelType } = useGeneralData();
@@ -55,7 +56,8 @@ export default function Carosel() {
     localStorage.setItem("selType", JSON.stringify(selttype));
 
     if (hasMlmProfileInStorage()) {
-      navigate("/editor");
+      rememberEditorBackTarget("/", selttype);
+      navigate("/editor", { state: { editorBackTarget: "/" } });
     } else {
       navigate("/mlmprofile");
     }

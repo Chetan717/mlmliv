@@ -10,6 +10,7 @@ import {
   sanitizeFormValue,
   sanitizeName,
 } from "../utils/inputSanitize";
+import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
 
 const toBase64 = (blob) =>
   new Promise((resolve) => {
@@ -284,7 +285,10 @@ export default function MeetingForm() {
     try {
       localStorage.setItem("Meeting", JSON.stringify(payload));
       setSavedMessage("Meeting saved successfully.");
-      navigate("/editor", { replace: true });
+      rememberEditorBackTarget("/mlmform");
+      navigate("/editor", {
+        state: { editorBackTarget: "/mlmform" },
+      });
       setIsSaved(true);
     } catch (err) {
       

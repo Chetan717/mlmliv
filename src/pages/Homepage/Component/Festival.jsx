@@ -197,6 +197,7 @@ import { useNavigate } from "react-router";
 import { Skeleton } from "@heroui/react";
 import { Calendar } from "@gravity-ui/icons";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
+import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
 
 export default function Festival() {
   const sliderRef = useRef(null);
@@ -342,7 +343,8 @@ export default function Festival() {
     localStorage.setItem("selType", JSON.stringify(selttype));
 
     if (hasMlmProfileInStorage()) {
-      navigate("/editor");
+      rememberEditorBackTarget("/", selttype);
+      navigate("/editor", { state: { editorBackTarget: "/" } });
     } else {
       navigate("/mlmprofile");
     }

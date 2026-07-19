@@ -198,12 +198,17 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
     if (backBusyRef.current) return;
     backBusyRef.current = true;
     if (location.pathname === "/editor") {
-      navigate(getEditorBackTarget(selType), { replace: true });
+      const backTarget = getEditorBackTarget(selType, location.state);
+      if (location.state?.editorBackTarget === backTarget) {
+        navigate(-1);
+      } else {
+        navigate(backTarget, { replace: true });
+      }
     } else {
       runProfileNavigationGuard(location.pathname, () => navigate(-1));
     }
     window.setTimeout(() => { backBusyRef.current = false; }, 450);
-  }, [location.pathname, navigate, selType]);
+  }, [location.pathname, location.state, navigate, selType]);
 
   if (location.pathname === "/profile") return null;
 

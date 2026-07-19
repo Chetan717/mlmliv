@@ -11,7 +11,10 @@ import {
 import { useGeneralData } from "../../Context/GeneralContext";
 import profileCreate from "../../../public/prcrete.png";
 import { hasMlmProfileInStorage } from "../../utils/companyStorage";
-import { isDirectEditorTemplate } from "../../utils/editorNavigation";
+import {
+  isDirectEditorTemplate,
+  rememberEditorBackTarget,
+} from "../../utils/editorNavigation";
 
 const TOTAL_GROUPS    = 4;
 const CACHE_TTL_MS    = 5 * 60 * 1000;
@@ -413,7 +416,12 @@ function Homepage() {
       setSelType(selttype);
       localStorage.setItem("selType", JSON.stringify(selttype));
       if (hasMlmProfileInStorage()) {
-        navigate(isDirectEditorTemplate(selttype.type) ? "/editor" : "/mlmform");
+        if (isDirectEditorTemplate(selttype.type)) {
+          rememberEditorBackTarget("/", selttype);
+          navigate("/editor", { state: { editorBackTarget: "/" } });
+        } else {
+          navigate("/mlmform");
+        }
       } else {
         setProfileModalPending(selttype);
       }

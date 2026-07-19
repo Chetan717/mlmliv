@@ -175,7 +175,8 @@ function App() {
     loading: companyLoading,
   } = useSelectedCompany();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const [splashDone, setSplashDone] = useState(false);
 
   const showOnboarding =
@@ -185,7 +186,12 @@ function App() {
   useEffect(() => {
     const handleBackPressed = () => {
       if (pathname === "/editor") {
-        navigate(getEditorBackTarget(), { replace: true });
+        const backTarget = getEditorBackTarget(undefined, location.state);
+        if (location.state?.editorBackTarget === backTarget) {
+          navigate(-1);
+        } else {
+          navigate(backTarget, { replace: true });
+        }
         return;
       }
       runProfileNavigationGuard(pathname, () => navigate(-1));
@@ -193,7 +199,7 @@ function App() {
     window.addEventListener("webviewBackPressed", handleBackPressed);
     return () =>
       window.removeEventListener("webviewBackPressed", handleBackPressed);
-  }, [navigate, pathname]);
+  }, [location.state, navigate, pathname]);
 
   if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
 
