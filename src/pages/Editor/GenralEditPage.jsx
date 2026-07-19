@@ -69,7 +69,7 @@ const isIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-const EXPORT_PIXEL_RATIO = isIOS() ? 3 : 6;
+const EXPORT_PIXEL_RATIO = isIOS() ? 3 : 8;
 const VIDEO_PIXEL_RATIO = isIOS() ? 2 : 4;
 const MAX_MUSIC_SECONDS = 20;
 
