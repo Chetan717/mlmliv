@@ -1156,7 +1156,11 @@ export function ImageEditorCanvas({
           alignItems: "center",
           justifyContent: "center",
           width: "100%",
-          backgroundColor: "#111",
+          backgroundColor: "#d1d5db",
+          backgroundImage:
+            "linear-gradient(45deg,#f3f4f6 25%,transparent 25%),linear-gradient(-45deg,#f3f4f6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#f3f4f6 75%),linear-gradient(-45deg,transparent 75%,#f3f4f6 75%)",
+          backgroundSize: "20px 20px",
+          backgroundPosition: "0 0,0 10px,10px -10px,-10px 0px",
           overflow: "hidden",
           minHeight: 200,
         }}

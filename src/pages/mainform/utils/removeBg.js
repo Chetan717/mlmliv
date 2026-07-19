@@ -504,7 +504,7 @@ function createCleanPersonCutout(segmentationMask, sourceCanvas) {
   // photo background, so coloured particles survived and white rims could be
   // retained. Local sampling works for every backdrop and keeps skin/ears when
   // they match the inner-person colour.
-  for (let pass = 0; pass < 5; pass += 1) {
+  for (let pass = 0; pass < 10; pass += 1) {
     const decontaminated = cleanForeground.slice();
     for (let y = 1; y < height - 1; y += 1) {
       for (let x = 1; x < width - 1; x += 1) {
@@ -587,25 +587,30 @@ function createCleanPersonCutout(segmentationMask, sourceCanvas) {
         const darkest = Math.min(red, green, blue);
         const neutralLightSpill = darkest >= 178 && brightest - darkest <= 42;
         const likelySkin =
-          red >= 72 &&
+          red >= 95 &&
+          green >= 40 &&
+          blue >= 20 &&
           red > green &&
-          green >= blue &&
-          red - blue >= 18 &&
-          brightest - darkest >= 20;
+          red > blue &&
+          Math.abs(red - green) >= 15 &&
+          brightest - darkest >= 15;
         const confidence = confidenceMap[index] / 255;
         const clearlyMatchesBackground =
           backgroundDistanceSquared + 1200 < personDistanceSquared * 0.72;
         const strongBackgroundMatch =
           backgroundDistanceSquared <= 38 * 38 * 3 &&
           personDistanceSquared >= 48 * 48;
+        const extremeBackgroundMatch =
+          backgroundDistanceSquared <= 24 * 24 * 3 &&
+          personDistanceSquared >= 70 * 70 * 3;
 
         const shouldRemove =
+          extremeBackgroundMatch ||
           (clearlyMatchesBackground && confidence < 0.97) ||
           (strongBackgroundMatch && confidence < 0.985) ||
           (neutralLightSpill && clearlyMatchesBackground && confidence < 0.992);
         const safelyRemovableSkinSpill =
-          backgroundDistanceSquared <= 24 * 24 * 3 &&
-          personDistanceSquared >= 62 * 62 * 3 &&
+          extremeBackgroundMatch &&
           confidence < 0.82;
 
         if (shouldRemove && (!likelySkin || safelyRemovableSkinSpill)) {
