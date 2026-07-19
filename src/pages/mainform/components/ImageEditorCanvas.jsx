@@ -151,7 +151,7 @@ export default function ImageEditorCanvas({
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
   const [tab, setTab] = useState("crop");
-  const [enhance, setEnhance] = useState(0);
+  const [enhance, setEnhance] = useState(() => (enableEnhance ? 65 : 0));
   const [skinTone, setSkinTone] = useState(0);
 
   const selll = getSelType();
@@ -231,7 +231,7 @@ export default function ImageEditorCanvas({
   const rotRef = useRef(0);
   const flipHRef = useRef(false);
   const flipVRef = useRef(false);
-  const enhanceRef = useRef(0);
+  const enhanceRef = useRef(enableEnhance ? 65 : 0);
   const skinToneRef = useRef(0);
 
   useEffect(() => {
@@ -558,8 +558,9 @@ export default function ImageEditorCanvas({
     setFlipH(false);
     flipVRef.current = false;
     setFlipV(false);
-    enhanceRef.current = 0;
-    setEnhance(0);
+    const defaultEnhance = enableEnhance ? 65 : 0;
+    enhanceRef.current = defaultEnhance;
+    setEnhance(defaultEnhance);
     skinToneRef.current = 0;
     setSkinTone(0);
     setReopenedOnce(false);
@@ -596,6 +597,9 @@ export default function ImageEditorCanvas({
   }, [currentSrc]);
 
   useEffect(() => {
+    const defaultEnhance = enableEnhance ? 65 : 0;
+    enhanceRef.current = defaultEnhance;
+    setEnhance(defaultEnhance);
     setTab(enableEnhance ? "enhance" : "crop");
   }, [enableEnhance, currentSrc]);
 

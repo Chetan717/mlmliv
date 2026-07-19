@@ -446,9 +446,9 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
   backgroundGreen /= backgroundSamples;
   backgroundBlue /= backgroundSamples;
 
-  // Peel away up to three boundary pixels only when their original color
+  // Peel away up to five boundary pixels only when their original color
   // matches the sampled background. Skin, ears and dark hair remain untouched.
-  for (let pass = 0; pass < 3; pass += 1) {
+  for (let pass = 0; pass < 5; pass += 1) {
     const decontaminated = cleanForeground.slice();
     for (let y = 1; y < height - 1; y += 1) {
       for (let x = 1; x < width - 1; x += 1) {
@@ -510,6 +510,33 @@ function createCleanPersonMask(segmentationMask, sourceCanvas) {
     }
   }
   cleanForeground = eroded;
+
+  // A small majority filter removes isolated 1–2px foreground particles and
+  // fills tiny pinholes without changing real facial features. Two lightweight
+  // passes also smooth the stair-step outline from the 256px MediaPipe mask.
+  for (let pass = 0; pass < 2; pass += 1) {
+    const smoothed = cleanForeground.slice();
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const index = y * width + x;
+        const neighbours =
+          cleanForeground[index - width - 1] +
+          cleanForeground[index - width] +
+          cleanForeground[index - width + 1] +
+          cleanForeground[index - 1] +
+          cleanForeground[index + 1] +
+          cleanForeground[index + width - 1] +
+          cleanForeground[index + width] +
+          cleanForeground[index + width + 1];
+        if (cleanForeground[index]) {
+          if (neighbours <= 2) smoothed[index] = 0;
+        } else if (neighbours >= 7) {
+          smoothed[index] = 1;
+        }
+      }
+    }
+    cleanForeground = smoothed;
+  }
 
   // Keep outside pixels completely transparent. Give the cleaned inner edge a
   // tiny one-pixel feather made from actual person colors for a smooth outline.
