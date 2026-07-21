@@ -2683,22 +2683,22 @@ function GeneralEditPage({
                 />
               ) : null}
               {/* {isMlmToday ? null : ( */}
-                <Image
-                  image={Imagel2}
-                  x={1}
-                  y={2}
-                  width={woflogo1}
-                  height={hoflogo1}
-                />
+              <Image
+                image={Imagel2}
+                x={1}
+                y={2}
+                width={woflogo1}
+                height={hoflogo1}
+              />
               {/* )} */}
               {/* {isMlmToday ? null : ( */}
-                <Image
-                  image={Imagel3}
-                  x={logo2size === "square" ? 292 : 268}
-                  y={2}
-                  width={woflogo2}
-                  height={hoflogo2}
-                />
+              <Image
+                image={Imagel3}
+                x={logo2size === "square" ? 292 : 268}
+                y={2}
+                width={woflogo2}
+                height={hoflogo2}
+              />
               {/* )} */}
 
               {(() => {
@@ -3047,6 +3047,16 @@ function GeneralEditPage({
                   y={isRight ? 115 : 115}
                   width={150}
                   height={100}
+                  image={imgTraining}
+                />
+              ) : null}
+
+              {isMeeting ? (
+                <Image
+                  x={isRight ? 10 : 155}
+                  y={isRight ? 62 : 62}
+                  width={150}
+                  height={90}
                   image={imgTraining}
                 />
               ) : null}

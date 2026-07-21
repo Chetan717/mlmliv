@@ -33,7 +33,13 @@ export default defineConfig({
         manualChunks: {
           "vendor-react": ["react", "react-dom"],
           "vendor-konva": ["konva", "react-konva"],
-          "vendor-data": ["firebase/app", "firebase/auth", "firebase/firestore", "firebase/storage", "firebase/functions"],
+          "vendor-data": [
+            "firebase/app",
+            "firebase/auth",
+            "firebase/firestore",
+            "firebase/storage",
+            "firebase/functions",
+          ],
           "vendor-ui": ["@heroui/react", "framer-motion"],
         },
       },
@@ -43,7 +49,12 @@ export default defineConfig({
     port,
     host: true,
     allowedHosts: true,
-    hmr: { clientPort: 443 }
+    hmr: { clientPort: 443 },
+
+    watch: {
+      usePolling: true,
+      interval: 10, // checks for changes every 100ms
+    },
   },
   preview: {
     port,
