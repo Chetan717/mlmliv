@@ -3486,7 +3486,18 @@ function GeneralEditPage({
                   meetingData?.platformType === "instagram" ||
                   meetingData?.platformType === "youtube" ||
                   meetingData?.platformType === "facebook" ? (
-                    <Group x={isRight ? 135 : 0} y={285}>
+                    <Group
+                      x={
+                        meetingData?.hostMode === "add"
+                          ? isRight
+                            ? 180
+                            : 0
+                          : isRight
+                            ? 135
+                            : 0
+                      }
+                      y={285}
+                    >
                       <Image
                         image={
                           meetingData?.platformType === "instagram"
