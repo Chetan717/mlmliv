@@ -3516,7 +3516,7 @@ function GeneralEditPage({
                       <Text
                         fontFamily="Roboto"
                         x={isRight ? 35 : 45}
-                        y={5}
+                        y={8}
                         text={meetingData?.platformInput}
                         fontSize={fs(12)}
                         fontStyle="1000"
