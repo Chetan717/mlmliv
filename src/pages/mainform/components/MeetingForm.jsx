@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Facebook, Instagram, Upload, Video, ZoomIn, Youtube } from "lucide-react";
 import ImageUploadWithBgRemove from "./ImageUploadWithBgRemove";
 import ImageEditorCanvas from "./ImageEditorCanvas";
+import RemoveBgLoadingOverlay from "./RemoveBgLoadingOverlay";
 import { Modal } from "@heroui/react";
 import { useNavigate } from "react-router";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
@@ -117,6 +118,13 @@ export default function MeetingForm() {
   const [open, setOpen] = useState(false);
   const [editingType, setEditingType] = useState("chiefGuest");
   const [showChiefImageModal, setShowChiefImageModal] = useState(false);
+  const [removeBgProcessing, setRemoveBgProcessing] = useState({
+    active: false,
+    previewUrl: null,
+    progressMessage: "",
+    progressPct: 0,
+    onCancel: null,
+  });
   const [companyImageSearch, setCompanyImageSearch] = useState("");
   const [companyImagePage, setCompanyImagePage] = useState(1);
 
@@ -761,6 +769,7 @@ export default function MeetingForm() {
                       setEditingImage={setEditingImage}
                       setOnImageDone={setOnImageDone}
                       setEnhanceEnabled={setEnhanceEnabled}
+                      onProcessingChange={setRemoveBgProcessing}
                       currentImage={chiefImage}
                       setOpen={(val) => {
                         // Close modal instantly when editor opens (file selected)
@@ -910,6 +919,15 @@ export default function MeetingForm() {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
+
+      {removeBgProcessing.active && (
+        <RemoveBgLoadingOverlay
+          previewUrl={removeBgProcessing.previewUrl}
+          progressMessage={removeBgProcessing.progressMessage}
+          progressPct={removeBgProcessing.progressPct}
+          onCancel={removeBgProcessing.onCancel}
+        />
+      )}
     </div>
   );
 }

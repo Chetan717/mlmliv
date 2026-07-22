@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { toast } from "@heroui/react";
-import { removeBg } from "../utils/removeBg";
+import { preloadBgModel, removeBg } from "../utils/removeBg";
 import { validateUploadFile } from "../../../lib/fileValidation";
 import RemoveBgLoadingOverlay from "./RemoveBgLoadingOverlay";
 
@@ -16,11 +16,21 @@ export default function ImageUploadWithBgRemove({
   editingType,
   setEditingType,
   setEnhanceEnabled,
+  onProcessingChange,
   skipBackgroundRemoval = false,
   guideTarget,
 }) {
   const inputRef = useRef();
   const abortRef = useRef(null);
+  const processingRef = useRef(false);
+  const processingIdRef = useRef(0);
+  const processingStateRef = useRef({
+    active: false,
+    previewUrl: null,
+    progressMessage: "",
+    progressPct: 0,
+    onCancel: null,
+  });
   const [load, setLoad] = useState(false);
   const [progressMsg, setProgressMsg] = useState("Please wait…");
   const [progressPct, setProgressPct] = useState(0);
@@ -42,7 +52,15 @@ export default function ImageUploadWithBgRemove({
   const selll = getSelType();
   const isAchv = selll?.type === "Achievements";
 
+  const publishProcessing = (patch) => {
+    const next = { ...processingStateRef.current, ...patch };
+    processingStateRef.current = next;
+    onProcessingChange?.(next);
+  };
+
   const cancelRemoveBg = () => {
+    processingIdRef.current += 1;
+    processingRef.current = false;
     if (abortRef.current) {
       abortRef.current.abort();
       abortRef.current = null;
@@ -51,7 +69,15 @@ export default function ImageUploadWithBgRemove({
     setProgressMsg("Please wait…");
     setProgressPct(0);
     setProcessingPreview(null);
+    publishProcessing({
+      active: false,
+      previewUrl: null,
+      progressMessage: "",
+      progressPct: 0,
+      onCancel: null,
+    });
     setEditingImage(null);
+    setOnImageDone(null);
     setEnhanceEnabled?.(false);
     setOpen(false);
     toast("Background removal cancelled.");
@@ -64,6 +90,7 @@ export default function ImageUploadWithBgRemove({
     setOnImageDone(() => (finalBlob) => {
       onImageReady(finalBlob);
       setEnhanceEnabled?.(false);
+      setEditingImage(null);
       return true;
     });
     setOpen(true);
@@ -71,6 +98,11 @@ export default function ImageUploadWithBgRemove({
 
   const removeBackgroundAfterCrop = (croppedBlob) => {
     if (!croppedBlob) return true;
+    if (processingRef.current) return false;
+
+    processingRef.current = true;
+    const processingId = processingIdRef.current + 1;
+    processingIdRef.current = processingId;
     const previewUrl = URL.createObjectURL(croppedBlob);
     setProcessingPreview(previewUrl);
     setLoad(true);
@@ -78,38 +110,91 @@ export default function ImageUploadWithBgRemove({
     setProgressPct(0);
     const controller = new AbortController();
     abortRef.current = controller;
+    publishProcessing({
+      active: true,
+      previewUrl,
+      progressMessage: "AI आपकी फोटो तैयार कर रहा है…",
+      progressPct: 0,
+      onCancel: cancelRemoveBg,
+    });
+
+    // The first crop is finished. Close that editor while AI is running so a
+    // second tap cannot enqueue the same photo again. MeetingForm closes its
+    // image-picker modal before this callback, so its parent-level loader keeps
+    // the processing state visible even if this uploader is temporarily gone.
+    setEditingImage(null);
+    setOpen(false);
+
     (async () => {
+      let finalImage = croppedBlob;
+      let completed = false;
       try {
         const processed = await removeBg(
           croppedBlob,
           (stage, pct) => {
+            if (processingId !== processingIdRef.current) return;
             setProgressMsg(stage);
             setProgressPct(pct);
+            publishProcessing({
+              active: true,
+              previewUrl,
+              progressMessage: stage,
+              progressPct: pct,
+              onCancel: cancelRemoveBg,
+            });
           },
           controller.signal,
         );
-        if (controller.signal.aborted) return;
+        if (
+          controller.signal.aborted ||
+          processingId !== processingIdRef.current
+        ) return;
+        finalImage = processed || croppedBlob;
+        completed = true;
         toast.success("Background removed successfully! ✨");
-        openFinalCrop(processed || croppedBlob, true);
-        toast("Adjust the final crop, then tap Done.");
       } catch (err) {
-        if (err?.name === "AbortError" || controller.signal.aborted) return;
+        if (
+          err?.name === "AbortError" ||
+          controller.signal.aborted ||
+          processingId !== processingIdRef.current
+        ) return;
         
         console.error("[removeBg] Image processing failed:", err, err?.cause);
         toast.danger("Background removal failed. You can still finish the crop.");
-        openFinalCrop(croppedBlob, true);
+        finalImage = croppedBlob;
+        completed = true;
       } finally {
-        abortRef.current = null;
-        setLoad(false);
-        setProgressMsg("Please wait…");
-        setProgressPct(0);
-        setProcessingPreview(null);
+        if (processingId === processingIdRef.current) {
+          abortRef.current = null;
+          processingRef.current = false;
+          setLoad(false);
+          setProgressMsg("Please wait…");
+          setProgressPct(0);
+          setProcessingPreview(null);
+          publishProcessing({
+            active: false,
+            previewUrl: null,
+            progressMessage: "",
+            progressPct: 0,
+            onCancel: null,
+          });
+        }
         URL.revokeObjectURL(previewUrl);
+      }
+
+      if (
+        completed &&
+        !controller.signal.aborted &&
+        processingId === processingIdRef.current
+      ) {
+        openFinalCrop(finalImage, true);
+        toast("Adjust the final crop, then tap Done.");
       }
     })();
 
-    // Keep the editor mounted while the cropped image is processed. The same
-    // editor receives the transparent result for the second/final crop.
+    // The callback contract remains false for parents that decide whether to
+    // close the current editor. This flow already closed it above and will open
+    // a fresh final editor only after AI processing completes.
     return false;
   };
 
@@ -121,6 +206,15 @@ export default function ImageUploadWithBgRemove({
       return;
     }
     if (typeof setEditingType === "function") setEditingType(type);
+
+    // Start downloading/initialising the free on-device model while the user
+    // adjusts the first crop. removeBg() reuses this promise, so Done feels much
+    // faster without uploading the selected photo anywhere.
+    if (!skipBackgroundRemoval) {
+      void preloadBgModel().catch(() => {
+        // removeBg() performs the normal retry/fallback and shows any error.
+      });
+    }
 
     // Achievement images keep their existing one-crop flow and background.
     if (skipBackgroundRemoval) {
@@ -218,7 +312,7 @@ export default function ImageUploadWithBgRemove({
         }}
       />
 
-      {load && (
+      {load && !onProcessingChange && (
         <RemoveBgLoadingOverlay
           previewUrl={processingPreview}
           progressMessage={`${progressMsg}${dots}`}

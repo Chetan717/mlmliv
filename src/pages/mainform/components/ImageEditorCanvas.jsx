@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Button } from "@heroui/react";
+import { toast } from "@heroui/react";
 import { buildPhotoEnhanceFilter } from "../../../utils/photoEnhance";
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -145,6 +145,7 @@ export default function ImageEditorCanvas({
   const [currentSrc, setCurrentSrc] = useState(src);
   const [reopenedOnce, setReopenedOnce] = useState(false);
   const [isDoing, setIsDoing] = useState(false);
+  const [isImageReady, setIsImageReady] = useState(false);
   const [encodeProgress, setEncodeProgress] = useState(0);
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
@@ -227,6 +228,7 @@ export default function ImageEditorCanvas({
   const pinchRef = useRef(null);
   const rafRef = useRef(null);
   const progressTimerRef = useRef(null);
+  const isDoingRef = useRef(false);
   const zoomRef = useRef(100);
   const rotRef = useRef(0);
   const flipHRef = useRef(false);
@@ -546,6 +548,7 @@ export default function ImageEditorCanvas({
 
   // ── Load image ────────────────────────────────────────────────
   useEffect(() => {
+    setIsImageReady(false);
     if (!currentSrc) return;
     imgRef.current = null;
     offscreenRef.current = null;
@@ -564,6 +567,7 @@ export default function ImageEditorCanvas({
     skinToneRef.current = 0;
     setSkinTone(0);
     setReopenedOnce(false);
+    isDoingRef.current = false;
     setIsDoing(false);
     const { w: cw, h: ch } = canvasSzRef.current;
     cropBoxRef.current = initBox(cw, ch, RATIO);
@@ -574,6 +578,7 @@ export default function ImageEditorCanvas({
 
     const doLoad = () => {
       imgRef.current = img;
+      setIsImageReady(true);
       const { w: cw, h: ch } = canvasSzRef.current;
       cropBoxRef.current = initialCropBox(img, cw, ch);
       offDirtyRef.current = true;
@@ -582,7 +587,10 @@ export default function ImageEditorCanvas({
     };
 
     img.onload = doLoad;
-    img.onerror = (e) => undefined;
+    img.onerror = () => {
+      setIsImageReady(false);
+      toast.danger("Selected photo could not be loaded. Please choose it again.");
+    };
     if (currentSrc instanceof Blob) {
       url = URL.createObjectURL(currentSrc);
       img.src = url;
@@ -604,8 +612,16 @@ export default function ImageEditorCanvas({
   }, [enableEnhance, currentSrc]);
 
   useEffect(() => {
-    if (currentSrc) setCurrentSrc(src);
+    setCurrentSrc(src);
   }, [src]);
+
+  useEffect(
+    () => () => {
+      clearInterval(progressTimerRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (imgRef.current) scheduleDraw();
@@ -715,9 +731,13 @@ export default function ImageEditorCanvas({
 
   // ── Export ────────────────────────────────────────────────────
   const handleDone = () => {
-    if (isDoing) return;
+    if (isDoingRef.current) return;
     const img = imgRef.current;
-    if (!img) return;
+    if (!img) {
+      toast("Photo is still loading. Please wait a moment.");
+      return;
+    }
+    isDoingRef.current = true;
     setIsDoing(true);
     setEncodeProgress(0);
 
@@ -754,6 +774,14 @@ export default function ImageEditorCanvas({
     out.width = outW;
     out.height = outH;
     const ctx = out.getContext("2d");
+    if (!ctx) {
+      clearInterval(progressTimerRef.current);
+      isDoingRef.current = false;
+      setIsDoing(false);
+      setEncodeProgress(0);
+      toast.danger("Photo editor could not start. Please tap Done again.");
+      return;
+    }
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.save();
@@ -782,19 +810,55 @@ export default function ImageEditorCanvas({
     out.toBlob(
       (blob) => {
         clearInterval(progressTimerRef.current);
+        if (!blob) {
+          // A few Android WebViews occasionally return null from canvas.toBlob.
+          // Retry synchronously through a data URL so Done never appears stuck.
+          try {
+            const dataUrl = out.toDataURL(
+              exportType,
+              exportType === "image/webp" ? 0.92 : undefined,
+            );
+            const [header, encoded] = dataUrl.split(",");
+            const mime = header.match(/data:([^;]+)/)?.[1] || exportType;
+            const binary = atob(encoded);
+            const bytes = new Uint8Array(binary.length);
+            for (let index = 0; index < binary.length; index += 1) {
+              bytes[index] = binary.charCodeAt(index);
+            }
+            blob = new Blob([bytes], { type: mime });
+          } catch (error) {
+            console.error("[ImageEditorCanvas] Photo encoding failed:", error);
+          }
+        }
+
+        if (!blob) {
+          isDoingRef.current = false;
+          setIsDoing(false);
+          setEncodeProgress(0);
+          toast.danger("Photo could not be saved. Please tap Done again.");
+          return;
+        }
+
         setEncodeProgress(100);
         setTimeout(() => {
           if (isAchv && !reopenedOnce) {
             setReopenedOnce(true);
             setCurrentSrc(blob);
+            isDoingRef.current = false;
             setIsDoing(false);
             setEncodeProgress(0);
             onDone(blob);
           } else {
+            isDoingRef.current = false;
             setIsDoing(false);
             setEncodeProgress(0);
-            const shouldClose = onDone(blob) !== false;
-            if (shouldClose) setOpen(false);
+            try {
+              const shouldClose = onDone?.(blob) !== false;
+              if (shouldClose) setOpen(false);
+            } catch (error) {
+              console.error("[ImageEditorCanvas] Done callback failed:", error);
+              toast.danger("Photo could not be applied. Please try again.");
+            }
           }
         }, 180);
       },
@@ -875,12 +939,12 @@ export default function ImageEditorCanvas({
         </button>
         <button
           type="button"
-          disabled={isDoing}
+          disabled={isDoing || !isImageReady}
           onClick={handleDone}
           style={{
             position: "relative",
             overflow: "hidden",
-            background: isDoing
+            background: isDoing || !isImageReady
               ? "#1c0e04"
               : "linear-gradient(135deg,#ea580c,#f97316)",
             color: "#fff",
@@ -890,7 +954,7 @@ export default function ImageEditorCanvas({
             minWidth: 100,
             minHeight: 36,
             border: "none",
-            cursor: isDoing ? "default" : "pointer",
+            cursor: isDoing || !isImageReady ? "default" : "pointer",
             touchAction: "manipulation",
             display: "flex",
             alignItems: "center",
@@ -915,7 +979,11 @@ export default function ImageEditorCanvas({
           <span
             style={{ position: "relative", zIndex: 1, letterSpacing: "0.01em" }}
           >
-            {isDoing ? `Encoding ${encodeProgress}%` : "Done / पूरा करें"}
+            {!isImageReady
+              ? "Loading photo…"
+              : isDoing
+                ? `Encoding ${encodeProgress}%`
+                : "Done / पूरा करें"}
           </span>
         </button>
       </div>

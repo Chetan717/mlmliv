@@ -39,7 +39,7 @@ export default function MultiImagePicker({
   inputRef,
   companyGridCols = 4,
   thumbHeight = "h-10",
-  maxImages = 7,
+  maxImages = 15,
   inlineStrip = false,
 }) {
   const [tab, setTab] = useState("company");
@@ -253,18 +253,21 @@ export default function MultiImagePicker({
 
       <Modal isOpen={open} onOpenChange={handleClose}>
         <Modal.Backdrop>
-          <Modal.Container className="w-full">
-            <Modal.Dialog className="rounded-2xl shadow-2xl bg-background border border-border">
+          <Modal.Container
+            placement="center"
+            className="w-full p-3 sm:p-4"
+          >
+            <Modal.Dialog className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:max-h-[90dvh]">
               <Modal.CloseTrigger />
 
-              <Modal.Header>
-                <Modal.Heading className="text-[17px] font-bold mb-5 text-foreground">
+              <Modal.Header className="flex-shrink-0">
+                <Modal.Heading className="text-[17px] font-bold text-foreground">
                   Select Images
                 </Modal.Heading>
               </Modal.Header>
 
-              <div className="flex flex-col gap-2 justify-center items-center">
-                <div className="flex flex-col gap-4 p-5 overflow-y-auto flex-1 min-h-0">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-5 py-3">
+                <div className="flex w-full flex-shrink-0 flex-col gap-4">
                   {[
                     { key: "company", label: "From company" },
                     { key: "upload", label: "Upload manually" },
@@ -291,7 +294,7 @@ export default function MultiImagePicker({
                         No images found in company data.
                       </p>
                     ) : (
-                      <div className={`grid ${colClass} gap-3`}>
+                      <div className={`grid w-full ${colClass} gap-3`}>
                         {companyImages.map((img, idx) => {
                           const link = typeof img === "string" ? img : img.link;
                           const name =
@@ -407,7 +410,7 @@ export default function MultiImagePicker({
                     />
 
                     {customFiles.length > 0 && (
-                      <div className={`grid ${colClass} gap-3`}>
+                      <div className={`grid w-full ${colClass} gap-3`}>
                         {customFiles.map((item, i) => (
                           <div
                             key={i}
@@ -441,11 +444,11 @@ export default function MultiImagePicker({
                 </p>
               </div>
 
-              <Modal.Footer>
+              <Modal.Footer className="flex-shrink-0 border-t border-border bg-background">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="w-full mt-3 py-3 rounded-2xl bg-accent text-white font-bold text-[14px] shadow-md"
+                  className="w-full rounded-2xl bg-accent py-3 text-[14px] font-bold text-white shadow-md"
                 >
                   Continue
                 </button>
@@ -466,8 +469,8 @@ export default function MultiImagePicker({
 
       {/* Initial crop, then the final crop of the background-removed result. */}
       {cropOpen && editingImage && !bgLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-3">
-          <div className="w-full max-w-sm h-[560px] max-h-[90vh]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/70 p-3">
+          <div className="h-[min(560px,calc(100dvh-1.5rem))] w-full max-w-sm flex-shrink-0">
             <ImageEditorCanvas
               src={editingImage}
               editingType="feature"
