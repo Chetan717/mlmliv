@@ -155,5 +155,19 @@
         "size": "square"
       }
     ]
-  }
+  },
+   {
+     "ID": "5ofZZdwgdIA7V0jaY6b8",
+     "name": "YTM",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1784716338039_bg729d.webp?alt=media&token=95f93726-96ab-4db3-820b-7ddc05c4721d",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1784716338039_bg729d.webp?alt=media&token=95f93726-96ab-4db3-820b-7ddc05c4721d",
+         "size": "rectangle"
+       }
+     ]
+   }
 ]
