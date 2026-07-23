@@ -2908,7 +2908,7 @@ function GeneralEditPage({
                   }
                   width={50}
                   height={5}
-                  text={"FROM-" + `${formcity.toUpperCase() || ""}`}
+                  text={"FROM/"+`${formcity.toUpperCase() || ""}`}
                   fontSize={fs(7)}
                   fill="white"
                   fontStyle="bold"
