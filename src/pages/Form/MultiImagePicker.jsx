@@ -75,9 +75,22 @@ function PickerModal({ open, onClose, children }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 flex flex-col max-h-[92dvh] sm:max-h-[88vh] overflow-hidden z-10">
+    <div
+      data-keyboard-modal
+      role="dialog"
+      aria-modal="true"
+      aria-label="Select top upline images"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        data-keyboard-modal-content
+        className="relative w-full sm:max-w-lg bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 flex flex-col max-h-[92dvh] sm:max-h-[88vh] overflow-hidden z-10"
+      >
         {children}
       </div>
     </div>
@@ -231,7 +244,10 @@ const filtered = useMemo(() => {
         </div>
 
         {/* Scrollable body */}
-        <div className="flex flex-col gap-4 p-5 overflow-y-auto flex-1 min-h-0">
+        <div
+          data-keyboard-modal-scroll
+          className="flex flex-col gap-4 p-5 overflow-y-auto flex-1 min-h-0"
+        >
 
           {/* Tab bar — hidden when upload is disabled */}
           {!hideUpload && (
@@ -265,6 +281,9 @@ const filtered = useMemo(() => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by name…"
+                  aria-label="Search top upline by name"
+                  autoComplete="off"
+                  enterKeyHint="search"
                   className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400 transition"
                 />
                 {search && (

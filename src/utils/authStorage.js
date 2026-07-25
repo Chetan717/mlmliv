@@ -32,35 +32,6 @@ export function hasLegacyAuthStorage() {
   return false;
 }
 
-export function hasPersistedFirebaseAuthStorage() {
-  const containsFirebaseAuthKey = (storage) => {
-    try {
-      for (let index = 0; index < storage.length; index += 1) {
-        if (storage.key(index)?.startsWith("firebase:authUser:")) return true;
-      }
-    } catch {}
-    return false;
-  };
-
-  return (
-    containsFirebaseAuthKey(localStorage) ||
-    containsFirebaseAuthKey(sessionStorage)
-  );
-}
-
-export function clearPersistedFirebaseAuthStorage() {
-  for (const storage of [localStorage, sessionStorage]) {
-    try {
-      const keys = [];
-      for (let index = 0; index < storage.length; index += 1) {
-        const key = storage.key(index);
-        if (key?.startsWith("firebase:authUser:")) keys.push(key);
-      }
-      keys.forEach((key) => storage.removeItem(key));
-    } catch {}
-  }
-}
-
 export function clearLegacyAuthStorage() {
   try { localStorage.removeItem(LEGACY_USER_KEY); } catch {}
   try { sessionStorage.removeItem(LEGACY_USER_KEY); } catch {}

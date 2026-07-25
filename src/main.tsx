@@ -9,6 +9,7 @@ import { ErrorBoundary, OnlineProvider } from "./components/ErrorBoundary.jsx";
 import { AuthProvider } from "./Auth/AuthContext.jsx";
 import { SelectedCompanyProvider } from "./Context/SelectedCompanyContext.jsx";
 import DownloadConfetti from "./components/DownloadConfetti.jsx";
+import { installModalKeyboardGuard } from "./utils/modalKeyboard.js";
 // import ScrollToTop from "./Pages/ScrollToTop.js";
 
 function BackgroundModelWarmup() {
@@ -152,6 +153,11 @@ function GlobalKeyboardController() {
   return null;
 }
 
+function ModalKeyboardController() {
+  useEffect(() => installModalKeyboardGuard(), []);
+  return null;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>
@@ -159,6 +165,7 @@ createRoot(document.getElementById("root")!).render(
         <GeneralContext>
           <GlobalToastController />
           <GlobalKeyboardController />
+          <ModalKeyboardController />
           <BackgroundModelWarmup />
           <DownloadConfetti />
 

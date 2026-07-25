@@ -7,5 +7,5 @@ export default function PublicRoute({ children }) {
   if (loading) return null;
   return user && !isAuthFlowPending()
     ? <Navigate to="/" replace />
-    : children;s
+    : children;
 }

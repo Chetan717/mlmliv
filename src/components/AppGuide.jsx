@@ -4,6 +4,40 @@ import professionalGuide from "../assets/professional-guide.png";
 
 const GUIDE_VERSION = "v1";
 
+const GUIDE_ACTION_HINT_STYLES = `
+  @keyframes mlmliveGuideActionHint {
+    0%, 100% {
+      background-color: #0088DA;
+      transform: scale(1);
+      box-shadow: 0 4px 10px rgba(0, 136, 218, 0.2);
+    }
+    12%, 36%, 60%, 84% {
+      background-color: #dc2626;
+      transform: scale(1.08);
+      box-shadow:
+        0 0 0 5px rgba(220, 38, 38, 0.2),
+        0 8px 22px rgba(220, 38, 38, 0.48);
+    }
+    24%, 48%, 72% {
+      background-color: #991b1b;
+      transform: scale(1.02);
+      box-shadow:
+        0 0 0 2px rgba(220, 38, 38, 0.12),
+        0 5px 14px rgba(153, 27, 27, 0.3);
+    }
+  }
+
+  .mlmlive-guide-action-hint {
+    animation: mlmliveGuideActionHint 1.15s ease-in-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mlmlive-guide-action-hint {
+      animation-duration: 1.8s;
+    }
+  }
+`;
+
 const copy = (enTitle, hiTitle, en, hi, target) => ({
   title: { en: enTitle, hi: hiTitle },
   body: { en, hi },
@@ -263,6 +297,7 @@ export default function AppGuide() {
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
+  const [actionHintKey, setActionHintKey] = useState(0);
 
   useEffect(() => {
     const updateEditorState = () => {
@@ -390,10 +425,22 @@ export default function AppGuide() {
     safeSet("mlmlive-guide-language", nextLanguage);
   }
 
+  function handleBlockedScreenAttempt(event) {
+    const clickedGuideControl =
+      event.target instanceof Element &&
+      Boolean(event.target.closest('[data-mlmlive-guide-card="true"] button'));
+    if (clickedGuideControl) return;
+
+    event.preventDefault();
+    setActionHintKey((value) => value + 1);
+  }
+
   if (guideHidden) return null;
 
   return (
     <>
+      <style>{GUIDE_ACTION_HINT_STYLES}</style>
+
       {!open && (
         <button
           type="button"
@@ -410,7 +457,13 @@ export default function AppGuide() {
       )}
 
       {open && (
-        <div className="fixed inset-0 z-[99980]" role="dialog" aria-modal="true" aria-labelledby="mlm-guide-title">
+        <div
+          className="fixed inset-0 z-[99980]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="mlm-guide-title"
+          onPointerDown={handleBlockedScreenAttempt}
+        >
           {targetRect && (
             <div
               className="fixed rounded-2xl ring-[3px] ring-accent pointer-events-none transition-all duration-300"
@@ -425,6 +478,7 @@ export default function AppGuide() {
           )}
 
           <div
+            data-mlmlive-guide-card="true"
             className="fixed rounded-[24px] bg-background border border-accent/25 shadow-[0_18px_55px_rgba(15,23,42,0.26)] overflow-hidden transition-all duration-300"
             style={{ ...cardStyle, maxHeight: "calc(100dvh - 24px)", overflowY: "auto" }}
           >
@@ -488,9 +542,13 @@ export default function AppGuide() {
                     </button>
                   )}
                   <button
+                    key={`guide-primary-action-${actionHintKey}`}
                     type="button"
                     onClick={nextStep}
-                    className="min-w-[92px] px-4 py-2.5 rounded-xl bg-accent text-white text-[12px] font-bold shadow-md shadow-accent/20"
+                    data-guide-primary-action="true"
+                    className={`min-w-[92px] px-4 py-2.5 rounded-xl bg-accent text-white text-[12px] font-bold shadow-md shadow-accent/20 ${
+                      actionHintKey > 0 ? "mlmlive-guide-action-hint" : ""
+                    }`}
                   >
                     {isLast
                       ? language === "hi" ? "समझ गया" : "Got it"

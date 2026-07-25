@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
-import { inMemoryPersistence, initializeAuth } from "firebase/auth";
+import { browserLocalPersistence, initializeAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,9 +19,11 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize services
 const db = getFirestore(app);
-// Strict session mode: Firebase tokens exist only in memory. Refreshing or
-// reopening the app requires a fresh login.
-const auth = initializeAuth(app, { persistence: inMemoryPersistence });
+// Keep the Firebase refresh token in the browser/WebView's protected app
+// storage so a refresh or app restart does not force another login. The
+// AuthProvider independently enforces a fixed 24-hour maximum session age from
+// Firebase's signed `auth_time` claim.
+const auth = initializeAuth(app, { persistence: browserLocalPersistence });
 const analytics = getAnalytics(app);
 
 // Export

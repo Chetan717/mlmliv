@@ -749,7 +749,10 @@ export default function MeetingForm() {
                 </Modal.Heading>
               </Modal.Header>
 
-              <Modal.Body className="space-y-6 p-5">
+              <Modal.Body
+                data-keyboard-modal-scroll
+                className="space-y-6 p-5"
+              >
                 <div className="rounded-2xl border border-border p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -833,6 +836,9 @@ export default function MeetingForm() {
                               value={companyImageSearch}
                               onChange={(e) => setCompanyImageSearch(e.target.value)}
                               placeholder="Search by name"
+                              aria-label="Search top upline by name"
+                              autoComplete="off"
+                              enterKeyHint="search"
                               className="w-full rounded-full border border-border bg-background py-2.5 pl-10 pr-3 text-[12px] text-foreground outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15"
                             />
                           </div>

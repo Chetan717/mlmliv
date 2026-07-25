@@ -8,6 +8,8 @@ html {
   -moz-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  --app-visual-viewport-height: 100dvh;
+  --app-visual-viewport-top: 0px;
 }
 
 :root,
@@ -168,6 +170,58 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Prevent elastic overscroll showing white gap in WebView */
   overscroll-behavior: none;
+}
+
+/*
+ * Keep modal fields above the mobile keyboard in browsers and RN WebViews.
+ * The controller updates these values from VisualViewport/window resize,
+ * then marks only the modal that currently owns the focused field.
+ */
+[data-keyboard-guard-fullscreen="true"] {
+  inset: auto 0 auto 0 !important;
+  top: var(--app-visual-viewport-top, 0px) !important;
+  bottom: auto !important;
+  height: var(--app-visual-viewport-height, 100dvh) !important;
+  max-height: var(--app-visual-viewport-height, 100dvh) !important;
+  overflow: hidden !important;
+}
+
+[data-keyboard-guard-content="true"] {
+  max-height: calc(var(--app-visual-viewport-height, 100dvh) - 0.75rem) !important;
+  min-height: 0 !important;
+}
+
+[data-keyboard-guard-active="true"] [data-slot="modal-container"] {
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+}
+
+[data-keyboard-guard-active="true"] [data-slot="modal-dialog"] {
+  max-height: calc(100% - 0.75rem) !important;
+  min-height: 0 !important;
+}
+
+[data-keyboard-guard-scroll="true"],
+[data-keyboard-guard-active="true"] [data-slot="modal-body"],
+[data-keyboard-guard-active="true"] [data-keyboard-modal-scroll] {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scroll-padding-block: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* iOS zooms focused fields below 16px, which can move a modal behind the keyboard. */
+@media (max-width: 767px) {
+  [data-keyboard-modal] input,
+  [data-keyboard-modal] textarea,
+  [data-slot="modal-dialog"] input,
+  [data-slot="modal-dialog"] textarea,
+  [data-keyboard-guard-active="true"] input,
+  [data-keyboard-guard-active="true"] textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* Dark mode contrast booster — ensure inherited text is crisp white */

@@ -1,9 +1,8 @@
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
-  inMemoryPersistence,
+  browserLocalPersistence,
   setPersistence,
   signInWithCustomToken,
-  signOut,
 } from "firebase/auth";
 import { app, auth } from "@firebase-config";
 
@@ -23,6 +22,13 @@ const verifyUserFn      = _call("authVerifyUser");
 
 // ─── Exported helpers ─────────────────────────────────────────────────────────
 
+async function signInWithPersistentSession(customToken) {
+  // Persistence must be selected before sign-in. Firebase stores only its
+  // refresh credential; the app never stores the PIN or custom token.
+  await setPersistence(auth, browserLocalPersistence);
+  await signInWithCustomToken(auth, customToken);
+}
+
 /**
  * Login with mobile + PIN.
  * Returns { status, user, mlmProfile }
@@ -32,8 +38,7 @@ export async function login(mobile, pin) {
   const result = await loginFn({ mobile, pin });
   const data   = result.data;
   if (data.customToken) {
-    await setPersistence(auth, inMemoryPersistence);
-    await signInWithCustomToken(auth, data.customToken);
+    await signInWithPersistentSession(data.customToken);
   }
   return data;
 }
@@ -55,8 +60,7 @@ export async function signupVerify(sessionId, otp) {
   const result = await signupVerifyFn({ sessionId, otp });
   const data   = result.data;
   if (data.customToken) {
-    await setPersistence(auth, inMemoryPersistence);
-    await signInWithCustomToken(auth, data.customToken);
+    await signInWithPersistentSession(data.customToken);
   }
   return data;
 }
@@ -69,8 +73,7 @@ export async function verifyUser(sessionId, otp) {
   const result = await verifyUserFn({ sessionId, otp });
   const data   = result.data;
   if (data.customToken) {
-    await setPersistence(auth, inMemoryPersistence);
-    await signInWithCustomToken(auth, data.customToken);
+    await signInWithPersistentSession(data.customToken);
   }
   return data;
 }
