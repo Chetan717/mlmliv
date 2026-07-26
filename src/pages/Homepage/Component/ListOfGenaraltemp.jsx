@@ -30,7 +30,8 @@ const ImageWithSkeleton = React.memo(({ src, alt, className }) => {
         alt={alt}
         className={`${className} ${loaded ? "opacity-100" : "opacity-0"}`}
         style={loaded ? undefined : { transition: "opacity 0.15s" }}
-        decoding="auto"
+        loading="lazy"
+        decoding="async"
         onLoad={() => {
           markImageSeen(src);
           setLoaded(true);
@@ -308,13 +309,6 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     }
   }, [contextSelType]);
 
-  useEffect(() => {
-    if (!templates) return;
-    templates.forEach((group) => {
-      group.templates?.forEach((item) => preloadImage(item.image));
-    });
-  }, [templates]);
-
   const handleViewAll = useCallback(
     (group) => {
       const selttype = {
@@ -549,7 +543,14 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
               : group.type.replaceAll("_", " ");
 
         return (
-          <div key={group.type} className="w-full mb-5">
+          <div
+            key={group.type}
+            className="w-full mb-5"
+            style={{
+              contentVisibility: "auto",
+              containIntrinsicSize: "320px",
+            }}
+          >
             {isCircle && (
               <div className="flex items-center gap-3 mb-3 px-1">
                 <div className="w-1.5 h-6 rounded-full bg-accent" />

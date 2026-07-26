@@ -19,6 +19,7 @@ function BackgroundModelWarmup() {
       connection?: { saveData?: boolean; effectiveType?: string };
       mozConnection?: { saveData?: boolean; effectiveType?: string };
       webkitConnection?: { saveData?: boolean; effectiveType?: string };
+      deviceMemory?: number;
     };
     const connection =
       networkNavigator.connection ||
@@ -27,7 +28,14 @@ function BackgroundModelWarmup() {
 
     // Do not spend mobile data in data-saver/very-slow-network mode. In that
     // case the model starts only when the user actually selects a photo.
-    if (connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || "")) {
+    if (
+      connection?.saveData ||
+      /(^|-)2g$/.test(connection?.effectiveType || "") ||
+      (Number(networkNavigator.deviceMemory) > 0 &&
+        Number(networkNavigator.deviceMemory) <= 2) ||
+      (Number(networkNavigator.hardwareConcurrency) > 0 &&
+        Number(networkNavigator.hardwareConcurrency) <= 2)
+    ) {
       return undefined;
     }
 

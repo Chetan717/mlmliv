@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -6,7 +6,7 @@ import "swiper/css/effect-fade";
 import "./stylec.css";
 import { Pagination, EffectFade, Autoplay } from "swiper/modules";
 import { TTrend_templateService } from "./Services/TTrend_templateService";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useGeneralData } from "../../.././Context/GeneralContext";
 import { Skeleton } from "@heroui/react";
 import defaultImage from "../../../../public/carasol.webp";
@@ -20,6 +20,25 @@ export default function Carosel() {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const swiperRef = useRef(null);
+
+  useEffect(() => {
+    const syncAutoplay = () => {
+      const autoplay = swiperRef.current?.autoplay;
+      if (!autoplay) return;
+      if (pathname === "/" && document.visibilityState !== "hidden") {
+        autoplay.start();
+      } else {
+        autoplay.stop();
+      }
+    };
+
+    syncAutoplay();
+    document.addEventListener("visibilitychange", syncAutoplay);
+    return () =>
+      document.removeEventListener("visibilitychange", syncAutoplay);
+  }, [pathname]);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,6 +94,12 @@ export default function Carosel() {
     return (
       <div className="w-full rounded-2xl overflow-hidden shadow-md border border-border/50 group relative">
         <Swiper
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+            if (pathname !== "/" || document.visibilityState === "hidden") {
+              swiper.autoplay?.stop();
+            }
+          }}
           pagination={{ dynamicBullets: true, clickable: true }}
           effect="fade"
           autoplay={{ delay: 4000, disableOnInteraction: false }}
@@ -106,6 +131,12 @@ export default function Carosel() {
   return (
     <div className="w-full rounded-2xl overflow-hidden shadow-md border border-border/50 group relative">
       <Swiper
+        onSwiper={(swiper) => {
+          swiperRef.current = swiper;
+          if (pathname !== "/" || document.visibilityState === "hidden") {
+            swiper.autoplay?.stop();
+          }
+        }}
         pagination={{ dynamicBullets: true, clickable: true }}
         effect="fade"
         autoplay={{ delay: 4000, disableOnInteraction: false }}

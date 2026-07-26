@@ -5,15 +5,17 @@ import ProtectedRoute from "./Auth/ProtectedR";
 import PublicRoute from "./Auth/PublicRoute";
 import ProtectMlmProfile from "./pages/SelectCompany/ProtectMlmProfile";
 import ProtectSelectComp from "./pages/SelectCompany/ProtectSelectComp";
-import Home from "./pages/Home";
-import AllTemplates from "./pages/Homepage/Component/AllTemplates";
 import Onboarding from "./Onboarding";
 import SplashScreen from "./SplashScreen";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { useAuth } from "./Auth/AuthContext";
 import { useSelectedCompany } from "./Context/SelectedCompanyContext";
-import { getEditorBackTarget } from "./utils/editorNavigation";
-import { runProfileNavigationGuard } from "./utils/profileNavigation";
+import { runAppBackNavigation } from "./utils/appBackNavigation";
+
+const Home = lazy(() => import("./pages/Home"));
+const AllTemplates = lazy(
+  () => import("./pages/Homepage/Component/AllTemplates"),
+);
 
 const Login = lazy(() =>
   import("./Auth/Login").then((m) => ({ default: m.Login })),
@@ -40,7 +42,7 @@ const Myprofile = lazy(() => import("./pages/Profile/Myprofile"));
 const Reporting = lazy(() => import("./pages/Reporting/Reporting"));
 const AskAi = lazy(() => import("./pages/AskAi/AskAi"));
 
-// Preload functions — called eagerly in the background so navigation is instant
+// Route chunks are warmed only during an idle window on capable devices.
 const _preloadEditor = () => import("./pages/Editor/MainEditor");
 const _preloadForm   = () => import("./pages/mainform/components/SalesExecutiveForm");
 
@@ -110,27 +112,68 @@ function PageSpinner() {
   );
 }
 
-function PersistentPages({ pathname, authenticated }) {
+function PersistentPages({ pathname, authenticated, ready }) {
   const isHome    = pathname === "/";
   const isAllTemp = pathname === "/alltemp";
 
-  const [homeReady,    setHomeReady]    = useState(() => isHome && authenticated);
-  const [allTempReady, setAllTempReady] = useState(() => isAllTemp && authenticated);
+  const [homeReady, setHomeReady] = useState(
+    () => isHome && authenticated && ready,
+  );
+  const [allTempReady, setAllTempReady] = useState(
+    () => isAllTemp && authenticated && ready,
+  );
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!authenticated) {
+      setHomeReady(false);
+      setAllTempReady(false);
+      return;
+    }
+    if (!ready) return;
     if (isHome    && !homeReady)    setHomeReady(true);
     if (isAllTemp && !allTempReady) setAllTempReady(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticated, isHome, isAllTemp]);
+  }, [authenticated, isHome, isAllTemp, ready]);
   
   useEffect(() => {
     if (!homeReady) return;
-    const t = setTimeout(() => {
-      _preloadEditor();
-      _preloadForm();
-    }, 800);
-    return () => clearTimeout(t);
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+    const lowResourceDevice =
+      (Number(navigator.deviceMemory) > 0 &&
+        Number(navigator.deviceMemory) <= 2) ||
+      (Number(navigator.hardwareConcurrency) > 0 &&
+        Number(navigator.hardwareConcurrency) <= 2);
+
+    if (
+      connection?.saveData ||
+      /(^|-)2g$/.test(connection?.effectiveType || "") ||
+      lowResourceDevice
+    ) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let timer;
+    let idleId;
+    const preload = () => {
+      if (cancelled || document.visibilityState === "hidden") return;
+      void Promise.allSettled([_preloadEditor(), _preloadForm()]);
+    };
+
+    if (window.requestIdleCallback) {
+      idleId = window.requestIdleCallback(preload, { timeout: 8000 });
+    } else {
+      timer = window.setTimeout(preload, 3500);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [homeReady]);
 
@@ -149,20 +192,25 @@ function PersistentPages({ pathname, authenticated }) {
         zIndex: isKeepAlive ? 1 : -1,
       }}
     >
-      {homeReady && (
-        <div style={{ height: "100%", display: isHome ? "block" : "none" }}>
-          <Layout>
-            <Home />
-          </Layout>
-        </div>
-      )}
-
-      {allTempReady && (
-        <div style={{ height: "100%", display: isAllTemp ? "block" : "none" }}>
-          <Layout>
-            <AllTemplates />
-          </Layout>
-        </div>
+      {(homeReady || allTempReady) && (
+        <Layout>
+          <Suspense fallback={<PageSpinner />}>
+            {homeReady && (
+              <div
+                style={{ height: "100%", display: isHome ? "block" : "none" }}
+              >
+                <Home />
+              </div>
+            )}
+            {allTempReady && (
+              <div
+                style={{ height: "100%", display: isAllTemp ? "block" : "none" }}
+              >
+                <AllTemplates />
+              </div>
+            )}
+          </Suspense>
+        </Layout>
       )}
     </div>
   );
@@ -178,23 +226,32 @@ function App() {
   const location = useLocation();
   const { pathname } = location;
   const [splashDone, setSplashDone] = useState(false);
+  const nativeBackBusyRef = useRef(false);
 
   const showOnboarding =
     !localStorage.getItem("onboardingDone") &&
     !authLoading && !firebaseUser;
 
   useEffect(() => {
-    const handleBackPressed = () => {
-      if (pathname === "/editor") {
-        const backTarget = getEditorBackTarget(undefined, location.state);
-        if (location.state?.editorBackTarget === backTarget) {
-          navigate(-1);
-        } else {
-          navigate(backTarget, { replace: true });
-        }
+    const handleBackPressed = (event) => {
+      if (nativeBackBusyRef.current) {
+        event?.preventDefault?.();
         return;
       }
-      runProfileNavigationGuard(pathname, () => navigate(-1));
+
+      const handled = runAppBackNavigation({
+        pathname,
+        navigationState: location.state,
+        navigate,
+      });
+      if (!handled) return;
+
+      nativeBackBusyRef.current = true;
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+      window.setTimeout(() => {
+        nativeBackBusyRef.current = false;
+      }, 500);
     };
     window.addEventListener("webviewBackPressed", handleBackPressed);
     return () =>
@@ -366,9 +423,8 @@ function App() {
       {/* ── Keep-alive pages: Home + AllTemplates always stay in DOM ── */}
       <PersistentPages
         pathname={pathname}
-        authenticated={
-          !!firebaseUser && !companyLoading && !!selectedCompany
-        }
+        authenticated={!!firebaseUser}
+        ready={!!firebaseUser && !companyLoading && !!selectedCompany}
       />
     </>
   );

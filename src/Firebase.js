@@ -21,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 // Keep the Firebase refresh token in the browser/WebView's protected app
 // storage so a refresh or app restart does not force another login. The
-// AuthProvider independently enforces a fixed 24-hour maximum session age from
+// AuthProvider independently enforces a fixed 7-day maximum session age from
 // Firebase's signed `auth_time` claim.
 const auth = initializeAuth(app, { persistence: browserLocalPersistence });
 const analytics = getAnalytics(app);

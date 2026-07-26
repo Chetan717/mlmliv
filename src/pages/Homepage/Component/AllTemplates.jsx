@@ -41,7 +41,7 @@ function TemplateImage({ src, alt }) {
         className={`w-full h-full object-cover ${loaded ? "opacity-100" : "opacity-0"}`}
         style={{ transition: loaded ? "none" : "opacity 0.15s" }}
         loading="lazy"
-        decoding="auto"
+        decoding="async"
         onLoad={() => {
           markImageSeen(src);
           setLoaded(true);
@@ -52,10 +52,7 @@ function TemplateImage({ src, alt }) {
 }
 
 const getSelType = (selType) => {
-  if (selType?.type) {
-    localStorage.setItem("selType", JSON.stringify(selType));
-    return selType;
-  }
+  if (selType?.type) return selType;
   try {
     const stored = localStorage.getItem("selType");
     return stored ? JSON.parse(stored) : null;
@@ -76,7 +73,6 @@ export default function AllTemplates() {
   const companyName = selectedCompany?.id || "";
 
   const selType = getSelType(contextSelType);
-  const cacheKey = selType?.type || "";
 
   const [tempdata, setTempData] = useState([]);
   const [lastDoc, setLastDoc] = useState(null);
@@ -88,12 +84,44 @@ export default function AllTemplates() {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const lastKeyRef = useRef(null);
+  const fetchingMoreRef = useRef(false);
+
+  useEffect(() => {
+    if (!contextSelType?.type) return;
+    try {
+      localStorage.setItem("selType", JSON.stringify(contextSelType));
+    } catch {}
+  }, [contextSelType]);
+
+  const loadFirstPage = useCallback(
+    async (type, cacheKey) => {
+      try {
+        const {
+          templates,
+          lastDoc: ld,
+          hasMore: more,
+        } = await Alltemplateservice(type, null, 12, companyName);
+        setTempData(templates);
+        setLastDoc(ld);
+        setHasMore(more);
+        setAllTemplatesCache((prev) => ({
+          ...prev,
+          [cacheKey]: { templates, lastDoc: ld, hasMore: more },
+        }));
+      } catch (err) {
+        
+      } finally {
+        setInitialLoad(false);
+      }
+    },
+    [companyName, setAllTemplatesCache],
+  );
 
   useEffect(() => {
     const activeType = getSelType(contextSelType);
     if (!activeType?.type) return;
 
-    const key = activeType.type;
+    const key = `${companyName}::${activeType.type}`;
     if (lastKeyRef.current === key) return;
     lastKeyRef.current = key;
 
@@ -110,36 +138,18 @@ export default function AllTemplates() {
     setLastDoc(null);
     setHasMore(true);
     setInitialLoad(true);
-    loadFirstPage(key);
-  }, [contextSelType]); // eslint-disable-line
-
-  const loadFirstPage = useCallback(
-    async (type) => {
-      try {
-        const {
-          templates,
-          lastDoc: ld,
-          hasMore: more,
-        } = await Alltemplateservice(type, null, 12, companyName);
-        setTempData(templates);
-        setLastDoc(ld);
-        setHasMore(more);
-        setAllTemplatesCache((prev) => ({
-          ...prev,
-          [type]: { templates, lastDoc: ld, hasMore: more },
-        }));
-      } catch (err) {
-        
-      } finally {
-        setInitialLoad(false);
-      }
-    },
-    [setAllTemplatesCache],
-  );
+    void loadFirstPage(activeType.type, key);
+  }, [
+    allTemplatesCache,
+    companyName,
+    contextSelType,
+    loadFirstPage,
+  ]);
 
   const loadMorePage = useCallback(async () => {
     const activeType = getSelType(contextSelType);
-    if (!activeType?.type || !lastDoc) return;
+    if (!activeType?.type || !lastDoc || fetchingMoreRef.current) return;
+    fetchingMoreRef.current = true;
     setFetchingMore(true);
     try {
       const {
@@ -147,22 +157,28 @@ export default function AllTemplates() {
         lastDoc: ld,
         hasMore: more,
       } = await Alltemplateservice(activeType.type, lastDoc, 6, companyName);
-      setTempData((prev) => {
-        const next = [...prev, ...templates];
-        setAllTemplatesCache((c) => ({
-          ...c,
-          [activeType.type]: { templates: next, lastDoc: ld, hasMore: more },
-        }));
-        return next;
-      });
+      const next = [...tempdata, ...templates];
+      const cacheKey = `${companyName}::${activeType.type}`;
+      setTempData(next);
+      setAllTemplatesCache((cached) => ({
+        ...cached,
+        [cacheKey]: { templates: next, lastDoc: ld, hasMore: more },
+      }));
       setLastDoc(ld);
       setHasMore(more);
     } catch (err) {
       
     } finally {
+      fetchingMoreRef.current = false;
       setFetchingMore(false);
     }
-  }, [contextSelType, lastDoc, setAllTemplatesCache]);
+  }, [
+    companyName,
+    contextSelType,
+    lastDoc,
+    setAllTemplatesCache,
+    tempdata,
+  ]);
 
   const handleObserver = useCallback(
     (entries) => {
@@ -226,7 +242,7 @@ export default function AllTemplates() {
       {/* Header */}
       <div className="flex items-center gap-4 px-4 md:px-8 py-4 md:py-6 sticky top-0 bg-background/80 backdrop-blur-xl border-b border-border z-20">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => navigate("/", { replace: true })}
           className="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-black/20 border border-border shadow-sm shrink-0"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />

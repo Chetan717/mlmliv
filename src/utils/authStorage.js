@@ -1,6 +1,7 @@
 import { auth } from "@firebase-config";
 
 const LEGACY_USER_KEY = "usermlm";
+const MANUAL_LOGOUT_KEY = "mlmlive-manual-logout";
 const CACHED_PII_KEYS = [
   LEGACY_USER_KEY,
   "mlmProfile",
@@ -35,6 +36,22 @@ export function hasLegacyAuthStorage() {
 export function clearLegacyAuthStorage() {
   try { localStorage.removeItem(LEGACY_USER_KEY); } catch {}
   try { sessionStorage.removeItem(LEGACY_USER_KEY); } catch {}
+}
+
+export function markManualLogout() {
+  try { localStorage.setItem(MANUAL_LOGOUT_KEY, "1"); } catch {}
+}
+
+export function clearManualLogoutMarker() {
+  try { localStorage.removeItem(MANUAL_LOGOUT_KEY); } catch {}
+}
+
+export function isManualLogoutMarked() {
+  try {
+    return localStorage.getItem(MANUAL_LOGOUT_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 export function clearCachedPii() {

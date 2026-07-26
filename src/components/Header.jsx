@@ -27,8 +27,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { COLLECTIONS } from "../collections";
 import { getLocalLogo } from "../utils/getCompanyLogo";
 import { getUser } from "../utils/authStorage";
-import { getEditorBackTarget } from "../utils/editorNavigation";
-import { runProfileNavigationGuard } from "../utils/profileNavigation";
+import { runAppBackNavigation } from "../utils/appBackNavigation";
 import { auth } from "../Firebase";
 import { toast } from "@heroui/react";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
@@ -196,17 +195,14 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
   // React error #310 (a different number of hooks between renders).
   const handleBack = useCallback(() => {
     if (backBusyRef.current) return;
+    const handled = runAppBackNavigation({
+      pathname: location.pathname,
+      navigationState: location.state,
+      navigate,
+      selectedType: selType,
+    });
+    if (!handled) return;
     backBusyRef.current = true;
-    if (location.pathname === "/editor") {
-      const backTarget = getEditorBackTarget(selType, location.state);
-      if (location.state?.editorBackTarget === backTarget) {
-        navigate(-1);
-      } else {
-        navigate(backTarget, { replace: true });
-      }
-    } else {
-      runProfileNavigationGuard(location.pathname, () => navigate(-1));
-    }
     window.setTimeout(() => { backBusyRef.current = false; }, 450);
   }, [location.pathname, location.state, navigate, selType]);
 

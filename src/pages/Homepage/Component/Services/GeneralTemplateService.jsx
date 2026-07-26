@@ -8,7 +8,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { COLLECTIONS } from "../../../../collections";
-import genaral_template_json from "./genaral_template_firestore_data.json";
+import { getGeneralTemplatesForHome } from "./generalTemplateIndex";
 
 const TYPE_GROUPS = [
   [
@@ -37,6 +37,7 @@ const TYPE_GROUPS = [
     "Capping",
   ],
 ];
+export const TEMPLATE_GROUP_COUNT = TYPE_GROUPS.length;
 
 // In-memory only cache — cleared on every page reload so new data always shows
 // TTL: 5 minutes within a session to avoid redundant fetches during navigation
@@ -65,36 +66,6 @@ const normalizeDoc = (doc) => ({
 // Max templates to fetch per type on the home page
 const HOME_LIMIT = 20;
 
-const getGeneralTemplatesFromJson = (type) => {
-  const allTemplates = Object.entries(genaral_template_json?.data || {}).map(
-    ([id, data]) => ({
-      id,
-      ...data,
-    }),
-  );
-
-  return allTemplates
-    .filter(
-      (template) =>
-        template.MainType === "General" &&
-        template.SelectType === type &&
-        template.Active === true &&
-        template.Launched === true,
-    )
-    .sort((a, b) => (a.serial || 0) - (b.serial || 0))
-    .slice(0, HOME_LIMIT)
-    .map((template) => ({
-      id: template.id,
-      MainType: template.MainType,
-      image: template.Showcase_url,
-      GraphicsLink: template.GraphicsLink || [],
-      type: template.SelectType,
-      Subtype: template.Subtype,
-      ShowCaseForm: template.ShowCaseForm,
-      serial: template.serial,
-    }));
-};
-
 export const fetchGeneralTemplates = async (groupIndex, company) => {
   const cacheKey = `${groupIndex}__${company || ""}`;
 
@@ -116,7 +87,7 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
     const results = await Promise.all(
       selectedTypes.map(async (type) => {
         const [generalTemplates, mlmSnapshot] = await Promise.all([
-          Promise.resolve(getGeneralTemplatesFromJson(type)),
+          Promise.resolve(getGeneralTemplatesForHome(type, HOME_LIMIT)),
           company
             ? getDocs(
                 query(

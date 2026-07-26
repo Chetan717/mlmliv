@@ -11,6 +11,46 @@ import {
 } from "../../utils/companyStorage";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 
+const PROFILE_VERIFY_TTL_MS = 2 * 60 * 1000;
+const verifiedProfileCache = new Map();
+const profileRequestCache = new Map();
+
+async function getVerifiedProfile(uid, mobile) {
+  const key = `${uid}:${mobile}`;
+  const cached = verifiedProfileCache.get(key);
+  if (cached && Date.now() - cached.checkedAt < PROFILE_VERIFY_TTL_MS) {
+    return cached.profile;
+  }
+
+  if (profileRequestCache.has(key)) return profileRequestCache.get(key);
+
+  const request = getDocs(
+    query(
+      collection(db, COLLECTIONS.MLMPROFILES),
+      where("mobile", "==", mobile),
+    ),
+  )
+    .then((snapshot) => {
+      if (snapshot.empty) {
+        verifiedProfileCache.delete(key);
+        return null;
+      }
+      const profileDoc = snapshot.docs[0];
+      const profile = { id: profileDoc.id, ...profileDoc.data() };
+      verifiedProfileCache.set(key, {
+        checkedAt: Date.now(),
+        profile,
+      });
+      return profile;
+    })
+    .finally(() => {
+      profileRequestCache.delete(key);
+    });
+
+  profileRequestCache.set(key, request);
+  return request;
+}
+
 export default function ProtectMlmProfile({ children, requireProfile = false }) {
   const { user, loading } = useAuth();
   const { selectedCompany, loading: companyLoading } = useSelectedCompany();
@@ -31,19 +71,13 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
       }
 
       try {
-        const snapshot = await getDocs(
-          query(
-            collection(db, COLLECTIONS.MLMPROFILES),
-            where("mobile", "==", mobile),
-          ),
-        );
+        const profile = await getVerifiedProfile(user.uid, mobile);
         if (cancelled) return;
-        if (snapshot.empty) {
+        if (!profile) {
           setServerProfileState("missing");
           return;
         }
-        const profileDoc = snapshot.docs[0];
-        saveMlmProfileToStorage({ id: profileDoc.id, ...profileDoc.data() });
+        saveMlmProfileToStorage(profile);
         setServerProfileState("verified");
       } catch (error) {
         

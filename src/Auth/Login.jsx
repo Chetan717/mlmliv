@@ -37,14 +37,14 @@ export function Login() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("session_expired") === "1") {
-      toast.warning("Your secure 24-hour session expired. Please login again.");
-      window.history.replaceState({}, "", "/login");
+      toast.warning("Your secure 7-day session expired. Please login again.");
+      window.history.replaceState(window.history.state, "", "/login");
     } else if (params.get("session_invalid") === "1") {
       toast.warning("Your session is no longer valid. Please login again.");
-      window.history.replaceState({}, "", "/login");
+      window.history.replaceState(window.history.state, "", "/login");
     } else if (params.get("session_migrated") === "1") {
       toast.success("Security update applied. Please login again.");
-      window.history.replaceState({}, "", "/login");
+      window.history.replaceState(window.history.state, "", "/login");
     }
   }, []);
 

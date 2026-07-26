@@ -11,12 +11,11 @@ import React, {
 import {
   fetchGeneralTemplates,
   clearTemplateCache,
+  TEMPLATE_GROUP_COUNT,
 } from "./Homepage/Component/Services/GeneralTemplateService";
 import { useGeneralData } from "../Context/GeneralContext";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
 import { PAGE_REFRESH_EVENT } from "../utils/pageRefresh";
-
-const TOTAL_GROUPS = 4;
 
 function WhatsAppBadge() {
   const [visible, setVisible] = useState(true);
@@ -162,7 +161,10 @@ function Home() {
 
  
   const loadTemplates = useCallback(async () => {
-    if (loadingRef.current || groupIndexRef.current >= TOTAL_GROUPS) return;
+    if (
+      loadingRef.current ||
+      groupIndexRef.current >= TEMPLATE_GROUP_COUNT
+    ) return;
 
     loadingRef.current = true;
     setLoading(true);
@@ -245,11 +247,14 @@ function Home() {
   }, [refreshHomeData]);
 
   useEffect(() => {
-    const scrollEl = document.querySelector(".layout-scroll-container");
+    const scrollEl = document.querySelector(".mlm-main-scroll-container");
     if (!scrollEl) return;
 
     const handleScroll = () => {
-      if (groupIndexRef.current >= TOTAL_GROUPS || loadingRef.current) return;
+      if (
+        groupIndexRef.current >= TEMPLATE_GROUP_COUNT ||
+        loadingRef.current
+      ) return;
       const { scrollTop, scrollHeight, clientHeight } = scrollEl;
       if (scrollHeight - scrollTop <= clientHeight + 200) {
         loadTemplatesRef.current();

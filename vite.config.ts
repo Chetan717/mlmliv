@@ -32,7 +32,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom"],
-          "vendor-konva": ["konva", "react-konva"],
           "vendor-data": [
             "firebase/app",
             "firebase/auth",
@@ -53,7 +52,9 @@ export default defineConfig({
 
     watch: {
       usePolling: true,
-      interval: 10, // checks for changes every 100ms
+      // Fast enough for local feedback without a 10 ms filesystem polling
+      // loop continuously consuming CPU.
+      interval: 500,
     },
   },
   preview: {

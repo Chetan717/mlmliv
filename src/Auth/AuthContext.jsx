@@ -4,6 +4,7 @@ import { auth } from "@firebase-config";
 import {
   clearLegacyAuthStorage,
   clearCachedPii,
+  isManualLogoutMarked,
   setVerifiedUser,
 } from "../utils/authStorage";
 import {
@@ -33,6 +34,14 @@ function mobileFromVerifiedIdentity(firebaseUser, claims) {
   }
 
   return null;
+}
+
+function isTransientRefreshError(error) {
+  const code = String(error?.code || "");
+  return (
+    code.includes("network-request-failed") ||
+    code.includes("timeout")
+  );
 }
 
 export function AuthProvider({ children }) {
@@ -78,6 +87,8 @@ export function AuthProvider({ children }) {
       const target =
         reason === "expired"
           ? "/login?session_expired=1"
+          : reason === "manual"
+            ? "/login"
           : "/login?session_invalid=1";
       if (`${window.location.pathname}${window.location.search}` !== target) {
         window.location.replace(target);
@@ -129,6 +140,14 @@ export function AuthProvider({ children }) {
       }
 
       try {
+        // A manual logout is a denial-only local barrier. It never grants
+        // access, but it prevents a stale persisted credential from restoring
+        // the account until the user explicitly signs in again.
+        if (isManualLogoutMarked()) {
+          await endSession("manual");
+          return;
+        }
+
         // Claims come from a Firebase-verified ID token, never browser storage.
         const tokenResult = await firebaseUser.getIdTokenResult();
         if (
@@ -196,7 +215,12 @@ export function AuthProvider({ children }) {
       lastServerValidationAt = now;
       try {
         await firebaseUser.getIdToken(true);
-      } catch {
+      } catch (error) {
+        // A temporary connectivity failure must not destroy a still-valid
+        // 7-day local session. Protected server reads remain unavailable while
+        // offline, and the next resume retries validation. Explicitly invalid,
+        // disabled, or revoked credentials still end the session immediately.
+        if (isTransientRefreshError(error)) return;
         await endSession("invalid");
       }
     };

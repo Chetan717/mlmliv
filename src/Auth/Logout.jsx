@@ -2,11 +2,19 @@ import { useEffect } from "react";
 import { Spinner } from "@heroui/react";
 import { signOut } from "firebase/auth";
 import { auth } from "@firebase-config";
-import { clearCachedPii, removeUser } from "../utils/authStorage";
+import {
+  clearCachedPii,
+  markManualLogout,
+  removeUser,
+} from "../utils/authStorage";
 import { clearMlmProfileStorage } from "../utils/companyStorage";
 
 export function Logout() {
   useEffect(() => {
+    // Keep a denial-only barrier until the next explicit successful login.
+    // This guarantees that a failed/aborted cleanup cannot silently restore a
+    // Firebase session after the user deliberately pressed Logout.
+    markManualLogout();
     // Keep the UID-bound public company selection for the next login, but
     // remove the user's MLM profile PII from this tab.
     clearMlmProfileStorage();

@@ -5,6 +5,7 @@ import {
   signInWithCustomToken,
 } from "firebase/auth";
 import { app, auth } from "@firebase-config";
+import { clearManualLogoutMarker } from "../utils/authStorage";
 
 const functions = getFunctions(app, "us-central1");
 
@@ -26,6 +27,9 @@ async function signInWithPersistentSession(customToken) {
   // Persistence must be selected before sign-in. Firebase stores only its
   // refresh credential; the app never stores the PIN or custom token.
   await setPersistence(auth, browserLocalPersistence);
+  // This is reached only after the user explicitly submitted valid login/OTP
+  // credentials. Remove the logout barrier immediately before the new sign-in.
+  clearManualLogoutMarker();
   await signInWithCustomToken(auth, customToken);
 }
 

@@ -84,7 +84,7 @@ export default function Sidebar({
     getLocalLogo(selectedCompany?.id) ||
     getLocalLogo(selectedProfile?.companyId) ||
     "";
-  const companyProfileLogo = selectedProfile?.profileImageURLs[0];
+  const companyProfileLogo = selectedProfile?.profileImageURLs?.[0] || "";
   const fullName = selectedProfile?.fullName || "";
   const mobile = selectedProfile?.mobile || "";
 
