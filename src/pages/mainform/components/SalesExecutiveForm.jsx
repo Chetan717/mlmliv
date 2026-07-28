@@ -61,6 +61,7 @@ import { useNavigate } from "react-router";
 import IncomeForm from "./IncomeForm";
 import MeetingForm from "./MeetingForm";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
+import { RANK_PROMOTION_TYPES } from "../../../utils/templateTypeConfig";
 
 import Bike from "../formshow/BIKE.webp";
 import CarPurchase from "../formshow/CAR PURCHASE.webp";
@@ -77,6 +78,9 @@ import Closing from "../formshow/closing.webp";
 import Welcome from "../formshow/welcome.webp";
 
 const storage = getStorage(app);
+const RANK_PROMOTION_FORM_IMAGES = Object.freeze(
+  Object.fromEntries(RANK_PROMOTION_TYPES.map((type) => [type, Rank])),
+);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -346,6 +350,7 @@ export default function SalesExecutiveForm() {
   const isIncome = selll?.type === "Income";
   const isMeeting = selll?.type === "Meeting" || selll?.type === "General_Meeting";
   const isBonanza = selll?.type === "Bonanza";
+  const rankPromotionFormImage = RANK_PROMOTION_FORM_IMAGES[selll?.type];
   const formImage =
     selll?.Subtype === "WELCOME"
       ? Welcome
@@ -369,7 +374,7 @@ export default function SalesExecutiveForm() {
                         ? MeetingImage
                         : selll?.type === "Bonanza"
                           ? GiftOther
-                          : Rank;
+                          : rankPromotionFormImage || Rank;
   const formImageLabel = selll?.Subtype;
 
   const maintypelabel = selll?.type;

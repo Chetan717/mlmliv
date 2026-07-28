@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "@heroui/react";
 import { buildPhotoEnhanceFilter } from "../../../utils/photoEnhance";
+import { isRankPromotionType } from "../../../utils/templateTypeConfig";
 
 // ── Helpers ───────────────────────────────────────────────────────
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -165,7 +166,7 @@ export default function ImageEditorCanvas({
   const isWelcome = selll?.Subtype === "WELCOME";
   const isBonanza = selll?.type === "Bonanza";
   const isAchv = selll?.type === "Achievements";
-  const isRank = selll?.type === "Rank_Promotion";
+  const isRank = isRankPromotionType(selll?.type);
   const isTraining = selll?.type === "Training";
   const constrainCropToImage = !isAchv && !isIncome;
 

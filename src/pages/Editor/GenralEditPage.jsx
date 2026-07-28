@@ -14,6 +14,10 @@ import useImage from "use-image";
 import ListOfTemplates from "./components/ListOfTemplates";
 import AiRetouchModal from "./AiRetouchModal";
 import CaptionModal from "../../components/CaptionModal";
+import {
+  isRankPromotionType,
+  RANK_PROMOTION_TYPES,
+} from "../../utils/templateTypeConfig";
 import facebook from "./sociallogo/facebook.png";
 import featurec from "./sociallogo/featurecoming.webp";
 import instagram from "./sociallogo/insta.png";
@@ -276,7 +280,7 @@ const FadeEdgesFilter = (imageData) => {
   const { data, width, height } = imageData;
   if (width <= 1 || height <= 1) return;
 
-  const bottomBorder = 30;
+  const bottomBorder = 0;
   const sideFade = 0.07; // केवल 7% side area में fade
   const minSideAlpha = 0.4; // sides पर minimum 40% opacity
 
@@ -353,7 +357,7 @@ const FadeLeftFilter = (imageData) => {
 };
 
 const NO_FOOTER_TYPES = new Set([
-  "Rank_Promotion",
+  ...RANK_PROMOTION_TYPES,
   "Bonanza",
   "Welcome_Closing",
   "Achievements",
@@ -739,23 +743,17 @@ function GeneralEditPage({
       const savedAchieve = localStorage.getItem("achieve_form");
       setShowSocial("no");
       if (savedAchieve) setAchievementForm(JSON.parse(savedAchieve));
-    } catch (err) {
-      
-    }
+    } catch (err) {}
 
     try {
       const savedIncome = localStorage.getItem("income_form");
       if (savedIncome) setIncomeFormData(JSON.parse(savedIncome));
-    } catch (err) {
-      
-    }
+    } catch (err) {}
 
     try {
       const savedMeeting = localStorage.getItem("Meeting");
       if (savedMeeting) setMeetingData(JSON.parse(savedMeeting));
-    } catch (err) {
-      
-    }
+    } catch (err) {}
 
     try {
       const raw = localStorage.getItem("SelectedDesignation");
@@ -833,8 +831,8 @@ function GeneralEditPage({
   const isCapping = selll?.type === "Capping";
   const isMeeting =
     selll?.type === "Meeting" || selll?.type === "General_Meeting";
-  const isRank =
-    selll?.type === "Rank_Promotion" || Template_Type === "Training";
+  const isRank_B = Template_Type === "Rank_Promotion_B";
+  const isRank = isRankPromotionType(Template_Type) || isTraining;
   const isMlmToday = selll?.type === "Today_Trending";
 
   const showImageFooter = !NO_FOOTER_TYPES.has(Template_Type);
@@ -968,13 +966,17 @@ function GeneralEditPage({
                   ? isRight
                     ? 180
                     : 0
-                  : isRank
+                  : isRank_B
                     ? isRight
-                      ? 171
-                      : 0
-                    : isRight
-                      ? 190
-                      : 2,
+                      ? 124
+                      : -13
+                    : isRank
+                      ? isRight
+                        ? 171
+                        : 0
+                      : isRight
+                        ? 190
+                        : 2,
       y: isCapping
         ? 202
         : isIncome
@@ -989,9 +991,11 @@ function GeneralEditPage({
                   ? 215
                   : isBonanza
                     ? 200
-                    : isRank
-                      ? 217
-                      : 218,
+                    : isRank_B
+                      ? 210
+                      : isRank
+                        ? 217
+                        : 218,
       width: isIncome
         ? 140
         : isAnyversary
@@ -1004,9 +1008,11 @@ function GeneralEditPage({
                 ? 150
                 : isBonanza
                   ? 150
-                  : isRank
-                    ? 150
-                    : 130,
+                  : isRank_B
+                    ? 210
+                    : isRank
+                      ? 150
+                      : 130,
       height: isIncome
         ? 40
         : isAnyversary
@@ -1019,9 +1025,11 @@ function GeneralEditPage({
                 ? 32
                 : isBonanza
                   ? 95
-                  : isRank
-                    ? 32
-                    : 30,
+                  : isRank_B
+                    ? 75
+                    : isRank
+                      ? 32
+                      : 30,
       scaleX: 1,
       offsetX: 0,
       scaleY: 1,
@@ -1305,7 +1313,6 @@ function GeneralEditPage({
       if (!userSnap.empty)
         setUserData({ id: userSnap.docs[0].id, ...userSnap.docs[0].data() });
     } catch (err) {
-      
     } finally {
       setSubLoading(false);
     }
@@ -1778,7 +1785,6 @@ function GeneralEditPage({
       setExportedUri(uri);
       celebrateDownload();
     } catch (err) {
-      
       showToast("Export failed. Please try again.", "error");
     } finally {
       setExportLoading(false);
@@ -1935,7 +1941,6 @@ function GeneralEditPage({
       celebrateDownload();
       // await deductCredits(VIDEO_CREDIT_COST, "Video downloaded!"); {change for free}
     } catch (err) {
-      
       showToast("Video download failed. Please try again.", "error");
     } finally {
       if (progressTicker) clearInterval(progressTicker);
@@ -2085,7 +2090,6 @@ function GeneralEditPage({
           setAudioHasMore(snap.docs.length === MUSIC_PAGE_SIZE);
           showToast("Music is loading in compatibility mode.", "warning");
         } else {
-          
         }
       } finally {
         setAudioLoading(false);
@@ -2418,7 +2422,6 @@ function GeneralEditPage({
       celebrateDownload();
       // await deductCredits(VIDEO_CREDIT_COST, "Video downloaded!"); {change for free}
     } catch (err) {
-      
       showToast("Video export failed. Please try again.", "error", 5000);
     } finally {
       setMusicExporting(false);
@@ -2807,13 +2810,17 @@ function GeneralEditPage({
                                   ? isRight
                                     ? 4
                                     : 150
-                                  : isRank
+                                  : isRank_B
                                     ? isRight
                                       ? 6
-                                      : 151
-                                    : isRight
-                                      ? 35
-                                      : 127
+                                      : 148
+                                    : isRank
+                                      ? isRight
+                                        ? 6
+                                        : 151
+                                      : isRight
+                                        ? 35
+                                        : 127
                   }
                   y={
                     isCapping
@@ -2832,7 +2839,11 @@ function GeneralEditPage({
                               : 106
                             : isBonanza
                               ? 97
-                              : 96
+                              : isRank_B
+                                ? isRight
+                                  ? 111
+                                  : 104
+                                : 96
                   }
                   width={isCapping ? 130 : isAnyversary ? 175 : 165}
                   height={5}
@@ -2879,13 +2890,17 @@ function GeneralEditPage({
                                   ? isRight
                                     ? 54
                                     : 212
-                                  : isRank
+                                  : isRank_B
                                     ? isRight
-                                      ? 65
-                                      : 215
-                                    : isRight
-                                      ? 98
-                                      : 188
+                                      ? 35
+                                      : 180
+                                    : isRank
+                                      ? isRight
+                                        ? 65
+                                        : 215
+                                      : isRight
+                                        ? 98
+                                        : 188
                   }
                   y={
                     isCapping
@@ -2904,11 +2919,15 @@ function GeneralEditPage({
                               ? isRight
                                 ? 112
                                 : 112
-                              : 112
+                              : isRank_B
+                                ? isRight
+                                  ? 120
+                                  : 115
+                                : 112
                   }
-                  width={50}
+                  width={100}
                   height={5}
-                  text={"FROM/"+`${formcity.toUpperCase() || ""}`}
+                  text={"FROM/" + `${formcity.toUpperCase() || ""}`}
                   fontSize={fs(7)}
                   fill="white"
                   fontStyle="bold"
@@ -3145,21 +3164,33 @@ function GeneralEditPage({
                           : 195
                         : isRight
                           ? charslen?.length === 10
-                            ? 117
+                            ? 134
                             : charslen?.length === 9
-                              ? 138
+                              ? 145
                               : charslen?.length === 8
                                 ? 155
                                 : charslen?.length === 7
-                                  ? 170
+                                  ? 165
                                   : charslen?.length === 6
-                                    ? 190
+                                    ? 170
                                     : 195
-                          : 1.5
+                          : isRank_B
+                            ? charslen?.length === 6
+                              ? 30
+                              : charslen?.length === 7
+                                ? 30
+                                : charslen?.length === 9
+                                  ? 15
+                                  : charslen?.length === 10
+                                    ? 7
+                                    : 30
+                            : 1.5
                   }
-                  y={isIncome ? 132 : isClosing ? 132 : 250}
-                  digitHeight={isIncome ? 26 : isClosing ? 28 : 32}
-                  spacing={1.5}
+                  y={isIncome ? 132 : isClosing ? 132 : isRank_B ? 252 : 250}
+                  digitHeight={
+                    isIncome ? 26 : isClosing ? 28 : isRank_B ? 25 : 32
+                  }
+                  spacing={isRank_B ? 4 : 1.5}
                 />
               )}
 
@@ -3419,9 +3450,9 @@ function GeneralEditPage({
               {isSubGeneralType || meetingData?.hostMode === "none"
                 ? null
                 : (() => {
-                    const fW = isMeeting ? 60 : 100;
-                    const fH = isMeeting ? 70 : 120;
-                    const fY = isMeeting ? 250 : 200;
+                    const fW = isMeeting ? 60 : 95;
+                    const fH = isMeeting ? 70 : 110;
+                    const fY = isMeeting ? 250 : 210;
                     const baseX = isRight
                       ? isMeeting
                         ? 60
@@ -3631,15 +3662,15 @@ function GeneralEditPage({
                   />
                 </Group>
               ) : null}
-
+              {/* original Footer  */}
               {isMeeting || isSubGeneralType ? null : isRight ? (
                 <>
                   {showMobile === "yes" && (
                     <>
                       <Text
                         fontFamily="Roboto"
-                        x={isSubGeneralType2 ? 240 : 252}
-                        y={298}
+                        x={isSubGeneralType2 ? 240 : isRank_B ? 230 : 252}
+                        y={isRank_B ? 294 : 298}
                         width={150}
                         height={5}
                         text="CALL FOR ASSOCIATION"
@@ -3652,8 +3683,8 @@ function GeneralEditPage({
                       />
                       <Text
                         fontFamily="Roboto"
-                        x={isSubGeneralType2 ? 235 : 250}
-                        y={297}
+                        x={isSubGeneralType2 ? 235 : isRank_B ? 230 : 250}
+                        y={isRank_B ? 294 : 297}
                         width={150}
                         height={20}
                         text={`+91${profileMobile}` || "+91XXXXXXXXXX"}
@@ -3666,6 +3697,7 @@ function GeneralEditPage({
                       />
                     </>
                   )}
+
                   {(() => {
                     let iconX = 0;
                     const iconPositions = {};
@@ -3695,7 +3727,13 @@ function GeneralEditPage({
                     return (
                       <Group
                         x={parentCenterX}
-                        y={isSubGeneralType || isSubGeneralType2 ? 295 : 300}
+                        y={
+                          isSubGeneralType || isSubGeneralType2
+                            ? 295
+                            : isRank_B
+                              ? 295
+                              : 300
+                        }
                       >
                         <Text
                           fontFamily="Roboto"
@@ -3738,11 +3776,11 @@ function GeneralEditPage({
                     <>
                       <Text
                         fontFamily="Roboto"
-                        x={30}
-                        y={298}
+                        x={35}
+                        y={isRank_B ? 295 : 298}
                         width={150}
                         height={5}
-                        text="CALL FOR ASSOCIATION"
+                        text="CALL FOR ASSOCIATION" //ORIGINAL CALL
                         fontSize={fs(4.5)}
                         fill="white"
                         fontStyle="bold"
@@ -3752,8 +3790,8 @@ function GeneralEditPage({
                       />
                       <Text
                         fontFamily="Roboto"
-                        x={28}
-                        y={297}
+                        x={33}
+                        y={isRank_B ? 295 : 297}
                         width={150}
                         height={20}
                         text={`+91${profileMobile}` || "+91XXXXXXXXXX"}
@@ -3795,7 +3833,13 @@ function GeneralEditPage({
                     return (
                       <Group
                         x={parentCenterX}
-                        y={isSubGeneralType || isSubGeneralType2 ? 295 : 299}
+                        y={
+                          isSubGeneralType || isSubGeneralType2
+                            ? 295
+                            : isRank_B
+                              ? 296
+                              : 299
+                        }
                       >
                         <Text
                           fontFamily="Roboto"
@@ -3951,7 +3995,13 @@ function GeneralEditPage({
                       return (
                         <Group
                           x={105}
-                          y={isSubGeneralType || isSubGeneralType2 ? 295 : 300}
+                          y={
+                            isSubGeneralType || isSubGeneralType2
+                              ? 295
+                              : isRank_B
+                                ? 290
+                                : 300
+                          }
                         >
                           <Text
                             fontFamily="Roboto"
@@ -3994,7 +4044,7 @@ function GeneralEditPage({
                         <Text
                           fontFamily="Roboto"
                           x={240}
-                          y={298}
+                          y={isRank_B ? 295 : 298}
                           width={150}
                           height={5}
                           text="CALL FOR ASSOCIATION"
@@ -4008,7 +4058,7 @@ function GeneralEditPage({
                         <Text
                           fontFamily="Roboto"
                           x={235}
-                          y={297}
+                          y={isRank_B ? 295 : 297}
                           width={150}
                           height={20}
                           text={`+91${profileMobile}` || "+91XXXXXXXXXX"}
@@ -4047,7 +4097,13 @@ function GeneralEditPage({
                       return (
                         <Group
                           x={0}
-                          y={isSubGeneralType || isSubGeneralType2 ? 295 : 300}
+                          y={
+                            isSubGeneralType || isSubGeneralType2
+                              ? 295
+                              : isRank_B
+                                ? 290
+                                : 300
+                          }
                         >
                           <Text
                             fontFamily="Roboto"

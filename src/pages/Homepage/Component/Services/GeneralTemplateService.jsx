@@ -9,18 +9,18 @@ import {
 } from "firebase/firestore";
 import { COLLECTIONS } from "../../../../collections";
 import { getGeneralTemplatesForHome } from "./generalTemplateIndex";
+import { RANK_PROMOTION_TYPES } from "../../../../utils/templateTypeConfig";
 
 const TYPE_GROUPS = [
   [
     "Today_Trending",
     "Motivational",
-    "Rank_Promotion",
+    ...RANK_PROMOTION_TYPES,
     "Bonanza",
     "Welcome_Closing",
     "Training",
     "Meeting",
     "General_Meeting",
-
     "Good_Morning",
     "Sport",
     "Daily_Life",
@@ -31,7 +31,6 @@ const TYPE_GROUPS = [
     "Devotional_Spiritual",
     "Leader_Quotes",
     "Income",
-
     "ThankYou_Banner_B",
     "ThankYou_Birthday_Anniversary",
     "Capping",
