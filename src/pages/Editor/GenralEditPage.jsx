@@ -2668,8 +2668,8 @@ function GeneralEditPage({
               {isRank ? (
                 <Image
                   image={rankbadge}
-                  x={isRight ? 12 : 145}
-                  y={134}
+                  x={isRank_B ? (isRight ? 10 : 156) : isRight ? 12 : 145}
+                  y={isRank_B ? 148 : 134}
                   width={150}
                   height={60}
                 />
@@ -3669,7 +3669,7 @@ function GeneralEditPage({
                     <>
                       <Text
                         fontFamily="Roboto"
-                        x={isSubGeneralType2 ? 240 : isRank_B ? 230 : 252}
+                        x={isSubGeneralType2 ? 240 : isRank_B ? 233 : 252}
                         y={isRank_B ? 294 : 298}
                         width={150}
                         height={5}

@@ -144,7 +144,6 @@ export default function ImageEditorCanvas({
   enableEnhance = false,
 }) {
   const [currentSrc, setCurrentSrc] = useState(src);
-  const [reopenedOnce, setReopenedOnce] = useState(false);
   const [isDoing, setIsDoing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
   const [encodeProgress, setEncodeProgress] = useState(0);
@@ -567,7 +566,6 @@ export default function ImageEditorCanvas({
     setEnhance(defaultEnhance);
     skinToneRef.current = 0;
     setSkinTone(0);
-    setReopenedOnce(false);
     isDoingRef.current = false;
     setIsDoing(false);
     const { w: cw, h: ch } = canvasSzRef.current;
@@ -842,24 +840,15 @@ export default function ImageEditorCanvas({
 
         setEncodeProgress(100);
         setTimeout(() => {
-          if (isAchv && !reopenedOnce) {
-            setReopenedOnce(true);
-            setCurrentSrc(blob);
-            isDoingRef.current = false;
-            setIsDoing(false);
-            setEncodeProgress(0);
-            onDone(blob);
-          } else {
-            isDoingRef.current = false;
-            setIsDoing(false);
-            setEncodeProgress(0);
-            try {
-              const shouldClose = onDone?.(blob) !== false;
-              if (shouldClose) setOpen(false);
-            } catch (error) {
-              console.error("[ImageEditorCanvas] Done callback failed:", error);
-              toast.danger("Photo could not be applied. Please try again.");
-            }
+          isDoingRef.current = false;
+          setIsDoing(false);
+          setEncodeProgress(0);
+          try {
+            const shouldClose = onDone?.(blob) !== false;
+            if (shouldClose) setOpen(false);
+          } catch (error) {
+            console.error("[ImageEditorCanvas] Done callback failed:", error);
+            toast.danger("Photo could not be applied. Please try again.");
           }
         }, 180);
       },

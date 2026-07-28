@@ -241,6 +241,7 @@ function App() {
 
       const handled = runAppBackNavigation({
         pathname,
+        search: location.search,
         navigationState: location.state,
         navigate,
       });
@@ -256,7 +257,7 @@ function App() {
     window.addEventListener("webviewBackPressed", handleBackPressed);
     return () =>
       window.removeEventListener("webviewBackPressed", handleBackPressed);
-  }, [location.state, navigate, pathname]);
+  }, [location.search, location.state, navigate, pathname]);
 
   if (!splashDone) return <SplashScreen onDone={() => setSplashDone(true)} />;
 

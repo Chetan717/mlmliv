@@ -1,5 +1,9 @@
 import { getEditorBackTarget } from "./editorNavigation.js";
 import { runProfileNavigationGuard } from "./profileNavigation.js";
+import {
+  getBannerSettingsReturn,
+  isBannerSettingsRoute,
+} from "./bannerSettingsNavigation.js";
 
 const HOME_BACK_ROUTES = new Set([
   "/alltemp",
@@ -24,9 +28,17 @@ const ROOT_ROUTES = new Set([
  * A string is a deterministic replacement target, undefined means browser
  * history is safe as a fallback, and null means there is no in-app back route.
  */
-export function getAppBackTarget(pathname, selectedType, navigationState) {
+export function getAppBackTarget(
+  pathname,
+  selectedType,
+  navigationState,
+  search = "",
+) {
   if (pathname === "/editor") {
     return getEditorBackTarget(selectedType, navigationState);
+  }
+  if (isBannerSettingsRoute(pathname, search)) {
+    return getBannerSettingsReturn(navigationState).to;
   }
   if (HOME_BACK_ROUTES.has(pathname)) return "/";
   if (ROOT_ROUTES.has(pathname)) return null;
@@ -43,8 +55,17 @@ export function runAppBackNavigation({
   navigationState,
   navigate,
   selectedType,
+  search,
 }) {
-  const target = getAppBackTarget(pathname, selectedType, navigationState);
+  const bannerSettingsReturn = isBannerSettingsRoute(pathname, search)
+    ? getBannerSettingsReturn(navigationState)
+    : null;
+  const target = getAppBackTarget(
+    pathname,
+    selectedType,
+    navigationState,
+    search,
+  );
   if (target === null) return false;
 
   const proceed = () => {
@@ -52,7 +73,12 @@ export function runAppBackNavigation({
       navigate(-1);
       return;
     }
-    navigate(target, { replace: true });
+    navigate(target, {
+      replace: true,
+      ...(bannerSettingsReturn
+        ? { state: bannerSettingsReturn.state }
+        : {}),
+    });
   };
 
   // The profile page may block the action while unsaved changes are handled.

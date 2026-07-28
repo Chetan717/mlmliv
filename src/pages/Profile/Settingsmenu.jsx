@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useGeneralData } from "../../Context/GeneralContext";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import ChangePin from "./utils/ChangePin";
 import DeleteAcc from "./utils/DeleteAcc";
+import {
+  BANNER_SETTINGS_PATH,
+  createBannerSettingsNavigationState,
+} from "../../utils/bannerSettingsNavigation";
 
 /* ── Inline SVG Icon ──────────────────────────────────────────── */
 const Icon = ({ d, size = 17, className = "" }) => (
@@ -74,6 +78,7 @@ export default function SettingsMenu() {
   const [chngePin, setChngePin]   = useState(false);
   const [deleteAcc, setDeleteAcc] = useState(false);
   const navigate                  = useNavigate();
+  const location                  = useLocation();
   const { theme, toggleTheme }    = useGeneralData();
   const isDark                    = theme === "dark";
 
@@ -94,7 +99,15 @@ export default function SettingsMenu() {
 
         {/* ── HELP & SUPPORT ── */}
         <SectionHeader title="Help & Support" />
-        <MenuRow onClick={() => navigate("/mlmprofile?mode=settings")} icon={GearIcon}     label="Banner Settings" />
+        <MenuRow
+          onClick={() =>
+            navigate(BANNER_SETTINGS_PATH, {
+              state: createBannerSettingsNavigationState(location),
+            })
+          }
+          icon={GearIcon}
+          label="Banner Settings"
+        />
         <Divider />
         <MenuRow onClick={() => window.open("https://youtube.com/@mlmboosterapp?si=4AQiHvcR8x6CmOHX","_blank")} icon={CircleQIcon}  label="Learn How to Use App" />
         <Divider />

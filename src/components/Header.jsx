@@ -36,6 +36,10 @@ import {
   consumeRefreshAttempt,
   refreshLimitMessage,
 } from "../utils/pageRefresh";
+import {
+  BANNER_SETTINGS_PATH,
+  createBannerSettingsNavigationState,
+} from "../utils/bannerSettingsNavigation";
 
 const REFRESH_TARGETS = {
   "/": "home",
@@ -197,6 +201,7 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
     if (backBusyRef.current) return;
     const handled = runAppBackNavigation({
       pathname: location.pathname,
+      search: location.search,
       navigationState: location.state,
       navigate,
       selectedType: selType,
@@ -204,7 +209,13 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
     if (!handled) return;
     backBusyRef.current = true;
     window.setTimeout(() => { backBusyRef.current = false; }, 450);
-  }, [location.pathname, location.state, navigate, selType]);
+  }, [
+    location.pathname,
+    location.search,
+    location.state,
+    navigate,
+    selType,
+  ]);
 
   if (location.pathname === "/profile") return null;
 
@@ -419,7 +430,11 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
 
           {isEditor && (
             <button
-              onClick={() => navigate("/mlmprofile?mode=settings")}
+              onClick={() =>
+                navigate(BANNER_SETTINGS_PATH, {
+                  state: createBannerSettingsNavigationState(location),
+                })
+              }
               className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-foreground/8 active:scale-95 transition-all"
               title="Banner Settings"
             >

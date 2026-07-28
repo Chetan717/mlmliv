@@ -42,22 +42,23 @@ export default function AchievementForm({ onSaved }) {
     }
   }, []);
 
-  const openEditorFor =
-    (target, index = null) =>
-    (img) => {
-      setEditingImage(img);
-      setEditingType(target);
-      setOnImageDone(() => (resultBlob) => {
-        if (target === "main") {
-          setMainImage(resultBlob);
-          if (errors.mainImage) setErrors((prev) => { const e = { ...prev }; delete e.mainImage; return e; });
-        } else if (target === "feature" && index != null)
-          setFeatures((prev) => prev.map((p, i) => (i === index ? resultBlob : p)));
-        setEditingImage(null);
-        setOpen(false);
-      });
-      setOpen(true);
-    };
+  const handleMainImageReady = (image) => {
+    setMainImage(image);
+    setErrors((prev) => {
+      if (!prev.mainImage) return prev;
+      const next = { ...prev };
+      delete next.mainImage;
+      return next;
+    });
+  };
+
+  const handleFeatureImageReady = (index, image) => {
+    setFeatures((prev) =>
+      prev.map((feature, featureIndex) =>
+        featureIndex === index ? image : feature,
+      ),
+    );
+  };
 
   const validate = () => {
     const e = {};
@@ -95,7 +96,7 @@ export default function AchievementForm({ onSaved }) {
       <div>
         <p className="text-[11px] font-semibold text-foreground/60 mb-2">Achievement Image <span className="text-danger">*</span></p>
         <ImageUploadWithBgRemove
-          onImageReady={(img) => openEditorFor("main")(img)}
+          onImageReady={handleMainImageReady}
           setEditingImage={setEditingImage}
           setOnImageDone={setOnImageDone}
           currentImage={mainImage}
@@ -174,7 +175,7 @@ export default function AchievementForm({ onSaved }) {
           {[0, 1, 2].map((i) => (
             <div key={i} className="flex-1">
               <ImageUploadWithBgRemove
-                onImageReady={(img) => openEditorFor("feature", i)(img)}
+                onImageReady={(img) => handleFeatureImageReady(i, img)}
                 setEditingImage={setEditingImage}
                 setOnImageDone={setOnImageDone}
                 currentImage={features[i]}
@@ -222,7 +223,7 @@ export default function AchievementForm({ onSaved }) {
             <Modal.Dialog className="w-full max-w-lg bg-transparent shadow-none">
               <ImageEditorCanvas
                 src={editingImage}
-                onDone={(blob) => { if (onImageDone) onImageDone(blob); }}
+                onDone={(blob) => onImageDone?.(blob)}
                 onCancel={() => { setEditingImage(null); setOpen(false); }}
                 setOpen={setOpen}
                 editingType={editingType}

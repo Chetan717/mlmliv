@@ -29,6 +29,7 @@ import { saveMlmProfileToStorage } from "../../utils/companyStorage";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 import { PAGE_REFRESH_EVENT } from "../../utils/pageRefresh";
 import RemoveBgLoadingOverlay from "../mainform/components/RemoveBgLoadingOverlay";
+import { getBannerSettingsReturn } from "../../utils/bannerSettingsNavigation";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
@@ -1209,7 +1210,11 @@ export default function MLMProfilePage() {
       if (continueAfterSave) {
         continueAfterSave();
       } else if (isSettingsMode) {
-        navigate("/editor");
+        const returnRoute = getBannerSettingsReturn(location.state);
+        navigate(returnRoute.to, {
+          replace: true,
+          state: returnRoute.state,
+        });
       } else {
         navigate("/");
       }
