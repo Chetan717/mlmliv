@@ -7824,7 +7824,7 @@ function GeneralEditPage({
                     GURU_SLOT_SIZE - GURU_SLOT_PADDING * 2;
                   const GURU_COLUMN_GAP = 6;
                   const GURU_ROW_GAP = 4;
-                  const GURU_START_Y = lengthSlot <= 4 ? 70 : 40;
+                  const GURU_START_Y = lengthSlot <= 4 ? 80 : 40;
 
                   // Keep positions stable while the individual images load.
 
