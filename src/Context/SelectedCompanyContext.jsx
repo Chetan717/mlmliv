@@ -21,6 +21,10 @@ import {
 import { db } from "@firebase-config";
 import { useAuth } from "../Auth/AuthContext";
 import { COLLECTIONS } from "../collections";
+import {
+  clearMlmProfileStorage,
+  saveMlmProfileToStorage,
+} from "../utils/companyStorage";
 
 export const COMPANY_SELECTION_COLLECTION = "userCompanySelections";
 
@@ -70,16 +74,34 @@ export function SelectedCompanyProvider({ children }) {
         ? selectionSnapshot.data()?.companyId
         : null;
 
-      // Secure migration for existing accounts: derive the company from the
-      // server profile, never from browser storage.
-      if (!companyId && identity?.mobileNo) {
+      // Profile details intentionally live in sessionStorage only, so closing
+      // the app clears the browser copy. Rehydrate it from Firestore before
+      // Home/Templates become interactive; otherwise an existing account is
+      // incorrectly sent to the Update Profile page on its first template tap.
+      let verifiedProfile = null;
+      if (identity?.mobileNo) {
         const profileSnapshot = await getDocs(
           query(
             collection(db, COLLECTIONS.MLMPROFILES),
             where("mobile", "==", identity.mobileNo),
           ),
         );
-        companyId = profileSnapshot.docs[0]?.data()?.companyId || null;
+        const profileDoc = profileSnapshot.docs[0];
+        if (profileDoc) {
+          verifiedProfile = {
+            id: profileDoc.id,
+            ...profileDoc.data(),
+          };
+          saveMlmProfileToStorage(verifiedProfile);
+        } else {
+          clearMlmProfileStorage();
+        }
+      }
+
+      // Secure migration for existing accounts: derive the company from the
+      // server profile, never from browser storage.
+      if (!companyId && verifiedProfile) {
+        companyId = verifiedProfile.companyId || null;
         if (companyId) {
           try {
             await setDoc(selectionRef, {

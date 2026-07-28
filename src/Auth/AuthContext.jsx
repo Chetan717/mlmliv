@@ -21,11 +21,15 @@ const AuthContext = createContext({
 });
 
 function mobileFromVerifiedIdentity(firebaseUser, claims) {
+  const uidMobileMatch = String(firebaseUser?.uid || "").match(
+    /^mobile_(\d{10})$/,
+  );
   const candidates = [
     firebaseUser?.phoneNumber,
     claims?.mobileNo,
     claims?.mobile,
     claims?.phone_number,
+    uidMobileMatch?.[1],
   ];
 
   for (const candidate of candidates) {
