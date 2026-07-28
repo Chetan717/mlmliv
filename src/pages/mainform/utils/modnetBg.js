@@ -9,6 +9,7 @@
 
 let runtimePromise = null;
 let sessionPromise = null;
+const MODEL_ASSET_VERSION = "modnet-2026-07";
 
 function abortError() {
   return new DOMException("Background removal cancelled", "AbortError");
@@ -19,10 +20,14 @@ function throwIfAborted(signal) {
 }
 
 function assetUrl(fileName) {
-  return new URL(
+  const url = new URL(
     `${import.meta.env.BASE_URL}modnet/${fileName}`,
     window.location.href,
-  ).href;
+  );
+  // Cache files permanently on the device while keeping future model updates
+  // safe: bump this version whenever any MODNet/ORT asset changes.
+  url.searchParams.set("v", MODEL_ASSET_VERSION);
+  return url.href;
 }
 
 async function loadRuntime() {

@@ -12,70 +12,6 @@ import DownloadConfetti from "./components/DownloadConfetti.jsx";
 import { installModalKeyboardGuard } from "./utils/modalKeyboard.js";
 // import ScrollToTop from "./Pages/ScrollToTop.js";
 
-function BackgroundModelWarmup() {
-  useEffect(() => {
-    let cancelled = false;
-    const networkNavigator = navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-      mozConnection?: { saveData?: boolean; effectiveType?: string };
-      webkitConnection?: { saveData?: boolean; effectiveType?: string };
-      deviceMemory?: number;
-    };
-    const connection =
-      networkNavigator.connection ||
-      networkNavigator.mozConnection ||
-      networkNavigator.webkitConnection;
-
-    // Do not spend mobile data in data-saver/very-slow-network mode. In that
-    // case the model starts only when the user actually selects a photo.
-    if (
-      connection?.saveData ||
-      /(^|-)2g$/.test(connection?.effectiveType || "") ||
-      (Number(networkNavigator.deviceMemory) > 0 &&
-        Number(networkNavigator.deviceMemory) <= 2) ||
-      (Number(networkNavigator.hardwareConcurrency) > 0 &&
-        Number(networkNavigator.hardwareConcurrency) <= 2)
-    ) {
-      return undefined;
-    }
-
-    const warmUp = () => {
-      if (cancelled) return;
-      import("./pages/mainform/utils/removeBg.js")
-        .then(({ preloadBgModel }) => preloadBgModel())
-        .catch(() => {
-          // Silent by design: selecting a photo retries and shows a useful
-          // message if the one-time model download is still unavailable.
-        });
-    };
-
-    const browserWindow = window as unknown as {
-      requestIdleCallback?: (
-        callback: () => void,
-        options?: { timeout: number },
-      ) => number;
-      cancelIdleCallback?: (id: number) => void;
-      setTimeout: (callback: () => void, timeout: number) => number;
-      clearTimeout: (id: number) => void;
-    };
-    let timer: number | undefined;
-    let idleId: number | undefined;
-    if (browserWindow.requestIdleCallback) {
-      idleId = browserWindow.requestIdleCallback(warmUp, { timeout: 10000 });
-    } else {
-      timer = browserWindow.setTimeout(warmUp, 5000);
-    }
-
-    return () => {
-      cancelled = true;
-      if (idleId !== undefined) browserWindow.cancelIdleCallback?.(idleId);
-      if (timer !== undefined) browserWindow.clearTimeout(timer);
-    };
-  }, []);
-
-  return null;
-}
-
 function GlobalToastController() {
   useEffect(() => {
     const queue = toast.getQueue();
@@ -174,7 +110,6 @@ createRoot(document.getElementById("root")!).render(
           <GlobalToastController />
           <GlobalKeyboardController />
           <ModalKeyboardController />
-          <BackgroundModelWarmup />
           <DownloadConfetti />
 
           <Toast.Provider

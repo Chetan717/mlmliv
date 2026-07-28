@@ -5086,8 +5086,6 @@ import threedn from "./sociallogo/3d2n.webp";
 import fourdn from "./sociallogo/4d3n.webp";
 import familly from "./sociallogo/family.webp";
 import { Button, isRTL, Spinner } from "@heroui/react";
-import ffmpegCoreURL from "@ffmpeg/core?url";
-import ffmpegWasmURL from "@ffmpeg/core/wasm?url";
 import { getLocalLogo } from "@/utils/getCompanyLogo";
 import spdoneimg from "./closinglogo/Sp.webp";
 import {
@@ -7318,8 +7316,10 @@ function GeneralEditPage({
           const bump = Math.round(Math.min(Math.max(p, 0), 1) * 40) + 50;
           setProgressTarget((prev) => Math.max(prev, bump));
         });
+        // The 32 MB codec is fetched only when the user exports a video with
+        // music. Keeping it off the Vercel build prevents normal app traffic
+        // and deployments from carrying the FFmpeg WASM binary.
         const sources = [
-          { label: "local", core: ffmpegCoreURL, wasm: ffmpegWasmURL },
           {
             label: "jsdelivr",
             core: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js",

@@ -9,7 +9,6 @@ import {
   clearTemplateCache,
 } from "./Component/Services/GeneralTemplateService";
 import { useGeneralData } from "../../Context/GeneralContext";
-import profileCreate from "../../../public/prcrete.png";
 import { hasMlmProfileInStorage } from "../../utils/companyStorage";
 import {
   isDirectEditorTemplate,
@@ -21,6 +20,7 @@ const CACHE_TTL_MS    = 5 * 60 * 1000;
 const PTR_THRESHOLD   = 72;
 const PTR_MAX         = 100;
 const SEEN_SERIAL_KEY = "mlm_seen_max_serial";
+const profileCreate = "/prcrete.webp";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function getInitialState() {

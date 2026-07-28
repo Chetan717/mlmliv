@@ -8,7 +8,7 @@ import {
   ExternalLinkIcon,
   Skeleton,
 } from "@heroui/react";
-import subcric from "./plan.png";
+import subcric from "./plan.webp";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { db } from "@firebase-config";

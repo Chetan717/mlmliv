@@ -42,10 +42,6 @@ const Myprofile = lazy(() => import("./pages/Profile/Myprofile"));
 const Reporting = lazy(() => import("./pages/Reporting/Reporting"));
 const AskAi = lazy(() => import("./pages/AskAi/AskAi"));
 
-// Route chunks are warmed only during an idle window on capable devices.
-const _preloadEditor = () => import("./pages/Editor/MainEditor");
-const _preloadForm   = () => import("./pages/mainform/components/SalesExecutiveForm");
-
 const progressStyle = `
   @keyframes routeBarFill {
     0%   { transform: scaleX(0);   opacity: 1; }
@@ -135,48 +131,6 @@ function PersistentPages({ pathname, authenticated, ready }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, isHome, isAllTemp, ready]);
   
-  useEffect(() => {
-    if (!homeReady) return;
-    const connection =
-      navigator.connection ||
-      navigator.mozConnection ||
-      navigator.webkitConnection;
-    const lowResourceDevice =
-      (Number(navigator.deviceMemory) > 0 &&
-        Number(navigator.deviceMemory) <= 2) ||
-      (Number(navigator.hardwareConcurrency) > 0 &&
-        Number(navigator.hardwareConcurrency) <= 2);
-
-    if (
-      connection?.saveData ||
-      /(^|-)2g$/.test(connection?.effectiveType || "") ||
-      lowResourceDevice
-    ) {
-      return undefined;
-    }
-
-    let cancelled = false;
-    let timer;
-    let idleId;
-    const preload = () => {
-      if (cancelled || document.visibilityState === "hidden") return;
-      void Promise.allSettled([_preloadEditor(), _preloadForm()]);
-    };
-
-    if (window.requestIdleCallback) {
-      idleId = window.requestIdleCallback(preload, { timeout: 8000 });
-    } else {
-      timer = window.setTimeout(preload, 3500);
-    }
-
-    return () => {
-      cancelled = true;
-      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
-      if (timer !== undefined) window.clearTimeout(timer);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [homeReady]);
-
   if (!homeReady && !allTempReady) return null;
 
   const isKeepAlive = isHome || isAllTemp;

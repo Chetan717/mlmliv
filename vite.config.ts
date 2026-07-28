@@ -20,7 +20,6 @@ export default defineConfig({
     exclude: [
       "@ffmpeg/ffmpeg",
       "@ffmpeg/util",
-      "@ffmpeg/core",
       "@imgly/background-removal",
     ],
   },

@@ -101,7 +101,7 @@ function base64ToBlob(dataUrl) {
 
 function parseAchieverName(savedAchiever = {}) {
   const rawTitle = String(savedAchiever.title || "").trim().toLowerCase().replace(/\./g, "");
-  const hasValidTitle = ["mr", "mrs", "dr" , "miss" ].includes(rawTitle);
+  const hasValidTitle = ["mr", "mrs", "dr"].includes(rawTitle);
   const title = rawTitle === "mrs" ? "Mrs." : rawTitle === "dr" ? "Dr." : "Mr.";
   let name = savedAchiever.name || "";
 
@@ -646,11 +646,11 @@ export default function SalesExecutiveForm() {
       selectedDate: isTraining ? formatTrainingDateText(trainingDates) : "",
       achiever: {
         ...achiever,
-        title: ["Mr.", "Mrs.", "Dr.","miss"].includes(achiever.title)
+        title: ["Mr.", "Mrs.", "Dr."].includes(achiever.title)
           ? achiever.title
           : "Mr.",
         achieverName:
-          `${["Mr.", "Mrs.", "Dr." , "miss"].includes(achiever.title) ? achiever.title : "Mr."} ${achiever.name || ""}`.trim(),
+          `${["Mr.", "Mrs.", "Dr."].includes(achiever.title) ? achiever.title : "Mr."} ${achiever.name || ""}`.trim(),
         // If image is already a base64 string (restored), keep it; else convert Blob
         image: achiever.image ? await toBase64(achiever.image) : null,
       },
@@ -833,7 +833,7 @@ export default function SalesExecutiveForm() {
                         outline: "none",
                       }}
                     >
-                      {["Mr.", "Mrs.", "Dr.","miss"].map((opt) => (
+                      {["Mr.", "Mrs.", "Dr."].map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
                         </option>

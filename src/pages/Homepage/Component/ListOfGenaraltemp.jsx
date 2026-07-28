@@ -8,10 +8,11 @@ import {
   seenImages,
   isNewTemplate,
 } from "./templateCacheUtils";
-import profileCreate from "../../../../public/prcrete.png";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
+
+const profileCreate = "/prcrete.webp";
 
 const ImageWithSkeleton = React.memo(({ src, alt, className }) => {
   const alreadySeen = seenImages.has(src);
