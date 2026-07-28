@@ -169,5 +169,19 @@
          "size": "rectangle"
        }
      ]
+   },
+   {
+     "ID": "1bwY1MtW7k9o17FKOhPF",
+     "name": "EARTHVEDA GLOBAL",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785216168343_1mhzz0.webp?alt=media&token=73217a2e-fcad-402a-b8be-9df1d01b5127",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785216214669_45mkrh.webp?alt=media&token=45edc16f-b0d8-4f87-93f1-011244ab7eae",
+         "size": "rectangle"
+       }
+     ]
    }
 ]
