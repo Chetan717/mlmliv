@@ -8052,8 +8052,8 @@ function GeneralEditPage({
                                       : 180
                                     : isRank
                                       ? isRight
-                                        ? 65
-                                        : 215
+                                        ? 35
+                                        : 185
                                       : isRight
                                         ? 98
                                         : 188
