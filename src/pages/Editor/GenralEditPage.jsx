@@ -1571,7 +1571,7 @@
 //         nodes.push(
 //           <Text
 //             key={`amt-${i}-${ch}`}
-//             fontFamily="Roboto"
+//             fontFamily="Montserrat"
 //             x={curX}
 //             y={y + yOffset}
 //             text={ch}
@@ -2785,7 +2785,7 @@
 //               isMlmToday ||
 //               isSubGeneralType2 ? null : (
 //                 <Text
-//                   fontFamily="Roboto"
+//                   fontFamily="Montserrat"
 //                   x={
 //                     isCapping
 //                       ? isRight
@@ -2865,7 +2865,7 @@
 //               isMlmToday ||
 //               isSubGeneralType2 ? null : (
 //                 <Text
-//                   fontFamily="Roboto"
+//                   fontFamily="Montserrat"
 //                   x={
 //                     isCapping
 //                       ? isRight
@@ -3085,7 +3085,7 @@
 
 //               {isTraining ? (
 //                 <Text
-//                   fontFamily="Roboto"
+//                   fontFamily="Montserrat"
 //                   x={isRight ? 178 : 8}
 //                   y={231}
 //                   width={150}
@@ -3102,7 +3102,7 @@
 
 //               {isAchievement ? (
 //                 <Text
-//                   fontFamily="Roboto"
+//                   fontFamily="Montserrat"
 //                   x={110}
 //                   y={232}
 //                   width={130}
@@ -3119,7 +3119,7 @@
 
 //               {isIncome ? (
 //                 <Text
-//                   fontFamily="Roboto"
+//                   fontFamily="Montserrat"
 //                   x={isRight ? 60 : 165}
 //                   y={isRight ? 195 : 197}
 //                   width={130}
@@ -3262,7 +3262,7 @@
 //               {isMeeting ? (
 //                 <>
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={isRight ? -13 : 135}
 //                     y={175}
 //                     width={200}
@@ -3276,7 +3276,7 @@
 //                     align="center"
 //                   />
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={isRight ? -13 : 135}
 //                     y={190}
 //                     width={200}
@@ -3296,7 +3296,7 @@
 //                 isRight ? (
 //                   <Group x={50} y={210}>
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={0}
 //                       y={1}
 //                       text={meetingData?.date}
@@ -3308,7 +3308,7 @@
 //                       align="start"
 //                     />
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={0}
 //                       y={21}
 //                       text={meetingData?.time}
@@ -3323,7 +3323,7 @@
 //                 ) : (
 //                   <Group x={190} y={210}>
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={0}
 //                       y={3}
 //                       text={meetingData?.date}
@@ -3335,7 +3335,7 @@
 //                       align="end"
 //                     />
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={0}
 //                       y={21}
 //                       text={meetingData?.time}
@@ -3353,7 +3353,7 @@
 //               {meetingData?.hostMode === "add" && isMeeting ? (
 //                 <Group X={isRight ? 5 : 100} Y={0.9}>
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={20}
 //                     y={285.5}
 //                     width={180}
@@ -3367,7 +3367,7 @@
 //                     align="center"
 //                   />
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={20}
 //                     y={295}
 //                     width={180}
@@ -3382,7 +3382,7 @@
 //                   />
 //                   {showMobile === "yes" ? (
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={20}
 //                       y={303}
 //                       width={180}
@@ -3484,7 +3484,7 @@
 //               {isMeeting ? (
 //                 isRight ? (
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={12}
 //                     y={40}
 //                     width={180}
@@ -3499,7 +3499,7 @@
 //                   />
 //                 ) : (
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={125}
 //                     y={40}
 //                     width={180}
@@ -3548,7 +3548,7 @@
 //                         height={25}
 //                       />
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={isRight ? 35 : 45}
 //                         y={8}
 //                         text={meetingData?.platformInput}
@@ -3576,7 +3576,7 @@
 //                         height={25}
 //                       />
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={isRight ? 35 : 45}
 //                         y={4}
 //                         text={meetingData?.meetingId}
@@ -3588,7 +3588,7 @@
 //                         align="start"
 //                       />
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={isRight ? 35 : 45}
 //                         y={15}
 //                         text={meetingData?.meetingPassword}
@@ -3605,7 +3605,7 @@
 //                   <Group x={isRight ? 140 : 15} y={285}>
 //                     <Image image={locl} x={0} y={0} width={25} height={25} />
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={30}
 //                       y={5}
 //                       text={meetingData?.address1}
@@ -3618,7 +3618,7 @@
 //                       align="center"
 //                     />
 //                     <Text
-//                       fontFamily="Roboto"
+//                       fontFamily="Montserrat"
 //                       x={30}
 //                       y={15}
 //                       text={meetingData?.address2}
@@ -3639,7 +3639,7 @@
 //               showMobile === "yes" ? (
 //                 <Group x={isRight ? 0 : 240} y={298}>
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={3}
 //                     y={0}
 //                     text={"For More Details Contact On :-"}
@@ -3652,7 +3652,7 @@
 //                     align="center"
 //                   />
 //                   <Text
-//                     fontFamily="Roboto"
+//                     fontFamily="Montserrat"
 //                     x={12}
 //                     y={6}
 //                     text={`+91${profileMobile}` || "+91XXXXXXXXXX"}
@@ -3671,7 +3671,7 @@
 //                   {showMobile === "yes" && (
 //                     <>
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={isSubGeneralType2 ? 240 : isRank_B ? 233 : 252}
 //                         y={isRank_B ? 294 : 298}
 //                         width={150}
@@ -3685,7 +3685,7 @@
 //                         onTap={() => setIsOpenFtr(true)}
 //                       />
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={isSubGeneralType2 ? 235 : isRank_B ? 230 : 250}
 //                         y={isRank_B ? 294 : 297}
 //                         width={150}
@@ -3739,7 +3739,7 @@
 //                         }
 //                       >
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={23}
 //                           y={0}
 //                           width={200}
@@ -3755,7 +3755,7 @@
 //                           onTap={() => setIsOpenFtr(true)}
 //                         />
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={25}
 //                           y={10.5}
 //                           width={200}
@@ -3778,7 +3778,7 @@
 //                   {showMobile === "yes" && (
 //                     <>
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={35}
 //                         y={isRank_B ? 295 : 298}
 //                         width={150}
@@ -3792,7 +3792,7 @@
 //                         onTap={() => setIsOpenFtr(true)}
 //                       />
 //                       <Text
-//                         fontFamily="Roboto"
+//                         fontFamily="Montserrat"
 //                         x={33}
 //                         y={isRank_B ? 295 : 297}
 //                         width={150}
@@ -3845,7 +3845,7 @@
 //                         }
 //                       >
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={15}
 //                           y={0}
 //                           width={200}
@@ -3860,7 +3860,7 @@
 //                           onTap={() => setIsOpenFtr(true)}
 //                         />
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={15}
 //                           y={showSocial === "no" ? 10.5 : 9.5}
 //                           width={200}
@@ -3914,7 +3914,7 @@
 //                                   />
 //                                 )}
 //                                 <Text
-//                                   fontFamily="Roboto"
+//                                   fontFamily="Montserrat"
 //                                   x={textStartX}
 //                                   y={0}
 //                                   width={100 - textStartX}
@@ -3943,7 +3943,7 @@
 //                     {showMobile === "yes" && (
 //                       <>
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={35}
 //                           y={298}
 //                           width={150}
@@ -3957,7 +3957,7 @@
 //                           onTap={() => setIsOpenFtr(true)}
 //                         />
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={30}
 //                           y={297}
 //                           width={150}
@@ -4007,7 +4007,7 @@
 //                           }
 //                         >
 //                           <Text
-//                             fontFamily="Roboto"
+//                             fontFamily="Montserrat"
 //                             x={23}
 //                             y={0}
 //                             width={200}
@@ -4022,7 +4022,7 @@
 //                             onTap={() => setIsOpenFtr(true)}
 //                           />
 //                           <Text
-//                             fontFamily="Roboto"
+//                             fontFamily="Montserrat"
 //                             x={25}
 //                             y={10.5}
 //                             width={200}
@@ -4045,7 +4045,7 @@
 //                     {showMobile === "yes" && (
 //                       <>
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={240}
 //                           y={isRank_B ? 295 : 298}
 //                           width={150}
@@ -4059,7 +4059,7 @@
 //                           onTap={() => setIsOpenFtr(true)}
 //                         />
 //                         <Text
-//                           fontFamily="Roboto"
+//                           fontFamily="Montserrat"
 //                           x={235}
 //                           y={isRank_B ? 295 : 297}
 //                           width={150}
@@ -4109,7 +4109,7 @@
 //                           }
 //                         >
 //                           <Text
-//                             fontFamily="Roboto"
+//                             fontFamily="Montserrat"
 //                             x={-10}
 //                             y={0}
 //                             width={200}
@@ -4124,7 +4124,7 @@
 //                             onTap={() => setIsOpenFtr(true)}
 //                           />
 //                           <Text
-//                             fontFamily="Roboto"
+//                             fontFamily="Montserrat"
 //                             x={-10}
 //                             y={showSocial === "no" ? 10.5 : 9.5}
 //                             width={200}
@@ -4178,7 +4178,7 @@
 //                                     />
 //                                   )}
 //                                   <Text
-//                                     fontFamily="Roboto"
+//                                     fontFamily="Montserrat"
 //                                     x={textStartX}
 //                                     y={0}
 //                                     width={100 - textStartX}
@@ -6042,8 +6042,8 @@ function GeneralEditPage({
                     : 0
                   : isRank_B
                     ? isRight
-                      ? 100
-                      : -34
+                      ? 120
+                      : -40
                     : isRank
                       ? isRight
                         ? 171
@@ -6066,7 +6066,7 @@ function GeneralEditPage({
                   : isBonanza
                     ? 200
                     : isRank_B
-                      ? 210
+                      ? 205
                       : isRank
                         ? 217
                         : 218,
@@ -6100,7 +6100,7 @@ function GeneralEditPage({
                 : isBonanza
                   ? 95
                   : isRank_B
-                    ? 90
+                    ? 98
                     : isRank
                       ? 32
                       : 30,
@@ -6642,7 +6642,7 @@ function GeneralEditPage({
         nodes.push(
           <Text
             key={`amt-${i}-${ch}`}
-            fontFamily="Roboto"
+            fontFamily="Montserrat"
             x={curX}
             y={y + yOffset}
             text={ch}
@@ -7577,10 +7577,10 @@ function GeneralEditPage({
   const profileNameFontSize = isSubGeneralType
     ? 11
     : (ActualProfilename?.length ?? 0) <= 20
-      ? 9.5
+      ? 9
       : (ActualProfilename?.length ?? 0) < 25
-        ? 8.5
-        : 7.5;
+        ? 8
+        : 7;
   const companyNameFrt =
     mlmProfile?.companyName === `${`ANVIK INTERNATIONAL`}`
       ? "ANVIK"
@@ -7739,15 +7739,6 @@ function GeneralEditPage({
                   y={165}
                   width={135}
                   height={33}
-                />
-              ) : null}
-              {isRank ? (
-                <Image
-                  image={rankbadge}
-                  x={isRank_B ? (isRight ? 10 : 156) : isRight ? 12 : 145}
-                  y={isRank_B ? 148 : 134}
-                  width={150}
-                  height={60}
                 />
               ) : null}
 
@@ -7947,7 +7938,7 @@ function GeneralEditPage({
               isMlmToday ||
               isSubGeneralType2 ? null : (
                 <Text
-                  fontFamily="Roboto"
+                  fontFamily="Montserrat"
                   x={
                     isCapping
                       ? isRight
@@ -7977,8 +7968,8 @@ function GeneralEditPage({
                                     : 150
                                   : isRank_B
                                     ? isRight
-                                      ? 6
-                                      : 148
+                                      ? 4
+                                      : 146
                                     : isRank
                                       ? isRight
                                         ? 6
@@ -8006,8 +7997,8 @@ function GeneralEditPage({
                               ? 97
                               : isRank_B
                                 ? isRight
-                                  ? 111
-                                  : 104
+                                  ? 103
+                                  : 103
                                 : 96
                   }
                   width={isCapping ? 130 : isAnyversary ? 175 : 165}
@@ -8027,7 +8018,7 @@ function GeneralEditPage({
               isMlmToday ||
               isSubGeneralType2 ? null : (
                 <Text
-                  fontFamily="Roboto"
+                  fontFamily="Montserrat"
                   x={
                     isCapping
                       ? isRight
@@ -8086,8 +8077,8 @@ function GeneralEditPage({
                                 : 112
                               : isRank_B
                                 ? isRight
-                                  ? 120
-                                  : 115
+                                  ? 114
+                                  : 114
                                 : 112
                   }
                   width={100}
@@ -8206,6 +8197,15 @@ function GeneralEditPage({
                 />
               )}
 
+              {isRank ? (
+                <Image
+                  image={rankbadge}
+                  x={isRank_B ? (isRight ? 4 : 146) : isRight ? 12 : 145}
+                  y={isRank_B ? 148 : 134}
+                  width={170}
+                  height={55}
+                />
+              ) : null}
               {isBonanza ? (
                 <Image
                   x={isRight ? 100 : 170}
@@ -8247,7 +8247,7 @@ function GeneralEditPage({
 
               {isTraining ? (
                 <Text
-                  fontFamily="Roboto"
+                  fontFamily="Montserrat"
                   x={isRight ? 178 : 8}
                   y={231}
                   width={150}
@@ -8264,7 +8264,7 @@ function GeneralEditPage({
 
               {isAchievement ? (
                 <Text
-                  fontFamily="Roboto"
+                  fontFamily="Montserrat"
                   x={110}
                   y={232}
                   width={130}
@@ -8281,7 +8281,7 @@ function GeneralEditPage({
 
               {isIncome ? (
                 <Text
-                  fontFamily="Roboto"
+                  fontFamily="Montserrat"
                   x={isRight ? 60 : 165}
                   y={isRight ? 195 : 197}
                   width={130}
@@ -8329,33 +8329,33 @@ function GeneralEditPage({
                           : 195
                         : isRight
                           ? charslen?.length === 10
-                            ? 134
+                            ? 137
                             : charslen?.length === 9
-                              ? 145
+                              ? 148
                               : charslen?.length === 8
-                                ? 155
+                                ? 157
                                 : charslen?.length === 7
-                                  ? 165
+                                  ? 168
                                   : charslen?.length === 6
-                                    ? 170
-                                    : 195
+                                    ? 175
+                                    : 198
                           : isRank_B
                             ? charslen?.length === 6
-                              ? 30
+                              ? 29
                               : charslen?.length === 7
-                                ? 30
+                                ? 29
                                 : charslen?.length === 9
-                                  ? 15
+                                  ? 14
                                   : charslen?.length === 10
-                                    ? 7
-                                    : 30
+                                    ? 6
+                                    : 29
                             : 1.5
                   }
-                  y={isIncome ? 132 : isClosing ? 132 : isRank_B ? 252 : 250}
+                  y={isIncome ? 132 : isClosing ? 132 : isRank_B ? 245.5 : 250}
                   digitHeight={
                     isIncome ? 26 : isClosing ? 28 : isRank_B ? 25 : 32
                   }
-                  spacing={isRank_B ? 4 : 1.5}
+                  spacing={isRank_B ? (charslen?.length === 6 ? 7 : 3.5) : 1.5}
                 />
               )}
 
@@ -8424,7 +8424,7 @@ function GeneralEditPage({
               {isMeeting ? (
                 <>
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={isRight ? -13 : 135}
                     y={175}
                     width={200}
@@ -8438,7 +8438,7 @@ function GeneralEditPage({
                     align="center"
                   />
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={isRight ? -13 : 135}
                     y={190}
                     width={200}
@@ -8458,7 +8458,7 @@ function GeneralEditPage({
                 isRight ? (
                   <Group x={50} y={210}>
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={0}
                       y={1}
                       text={meetingData?.date}
@@ -8470,7 +8470,7 @@ function GeneralEditPage({
                       align="start"
                     />
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={0}
                       y={21}
                       text={meetingData?.time}
@@ -8485,7 +8485,7 @@ function GeneralEditPage({
                 ) : (
                   <Group x={190} y={210}>
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={0}
                       y={3}
                       text={meetingData?.date}
@@ -8497,7 +8497,7 @@ function GeneralEditPage({
                       align="end"
                     />
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={0}
                       y={21}
                       text={meetingData?.time}
@@ -8515,7 +8515,7 @@ function GeneralEditPage({
               {meetingData?.hostMode === "add" && isMeeting ? (
                 <Group X={isRight ? 5 : 100} Y={0.9}>
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={20}
                     y={285.5}
                     width={180}
@@ -8529,7 +8529,7 @@ function GeneralEditPage({
                     align="center"
                   />
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={20}
                     y={295}
                     width={180}
@@ -8544,7 +8544,7 @@ function GeneralEditPage({
                   />
                   {showMobile === "yes" ? (
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={20}
                       y={303}
                       width={180}
@@ -8615,7 +8615,7 @@ function GeneralEditPage({
               {isSubGeneralType || meetingData?.hostMode === "none"
                 ? null
                 : (() => {
-                    const fW = isMeeting ? 60 : 95;
+                    const fW = isMeeting ? 60 : 96;
                     const fH = isMeeting ? 70 : 110;
                     const fY = isMeeting ? 250 : 210;
                     const baseX = isRight
@@ -8643,10 +8643,11 @@ function GeneralEditPage({
                       />
                     );
                   })()}
+
               {isMeeting ? (
                 isRight ? (
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={12}
                     y={40}
                     width={180}
@@ -8661,7 +8662,7 @@ function GeneralEditPage({
                   />
                 ) : (
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={125}
                     y={40}
                     width={180}
@@ -8710,7 +8711,7 @@ function GeneralEditPage({
                         height={25}
                       />
                       <Text
-                        fontFamily="Roboto"
+                        fontFamily="Montserrat"
                         x={isRight ? 35 : 45}
                         y={8}
                         text={meetingData?.platformInput}
@@ -8738,7 +8739,7 @@ function GeneralEditPage({
                         height={25}
                       />
                       <Text
-                        fontFamily="Roboto"
+                        fontFamily="Montserrat"
                         x={isRight ? 35 : 45}
                         y={4}
                         text={meetingData?.meetingId}
@@ -8750,7 +8751,7 @@ function GeneralEditPage({
                         align="start"
                       />
                       <Text
-                        fontFamily="Roboto"
+                        fontFamily="Montserrat"
                         x={isRight ? 35 : 45}
                         y={15}
                         text={meetingData?.meetingPassword}
@@ -8767,7 +8768,7 @@ function GeneralEditPage({
                   <Group x={isRight ? 140 : 15} y={285}>
                     <Image image={locl} x={0} y={0} width={25} height={25} />
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={30}
                       y={5}
                       text={meetingData?.address1}
@@ -8780,7 +8781,7 @@ function GeneralEditPage({
                       align="center"
                     />
                     <Text
-                      fontFamily="Roboto"
+                      fontFamily="Montserrat"
                       x={30}
                       y={15}
                       text={meetingData?.address2}
@@ -8801,7 +8802,7 @@ function GeneralEditPage({
               showMobile === "yes" ? (
                 <Group x={isRight ? 0 : 240} y={298}>
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={3}
                     y={0}
                     text={"For More Details Contact On :-"}
@@ -8814,7 +8815,7 @@ function GeneralEditPage({
                     align="center"
                   />
                   <Text
-                    fontFamily="Roboto"
+                    fontFamily="Montserrat"
                     x={12}
                     y={6}
                     text={`+91${profileMobile}` || "+91XXXXXXXXXX"}
@@ -8833,7 +8834,7 @@ function GeneralEditPage({
                   {showMobile === "yes" && (
                     <>
                       <Text
-                        fontFamily="Roboto"
+                        fontFamily="Montserrat"
                         x={isSubGeneralType2 ? 240 : isRank_B ? 233 : 252}
                         y={isRank_B ? 294 : 298}
                         width={150}
@@ -8847,7 +8848,7 @@ function GeneralEditPage({
                         onTap={() => setIsOpenFtr(true)}
                       />
                       <Text
-                        fontFamily="Roboto"
+                        fontFamily="Montserrat"
                         x={isSubGeneralType2 ? 235 : isRank_B ? 230 : 250}
                         y={isRank_B ? 294 : 297}
                         width={150}
@@ -8901,7 +8902,7 @@ function GeneralEditPage({
                         }
                       >
                         <Text
-                          fontFamily="Roboto"
+                          fontFamily="Montserrat"
                           x={23}
                           y={0}
                           width={200}
@@ -8917,7 +8918,7 @@ function GeneralEditPage({
                           onTap={() => setIsOpenFtr(true)}
                         />
                         <Text
-                          fontFamily="Roboto"
+                          fontFamily="Montserrat"
                           x={25}
                           y={10.5}
                           width={200}
@@ -8940,8 +8941,8 @@ function GeneralEditPage({
                   {showMobile === "yes" && (
                     <>
                       <Text
-                        fontFamily="Roboto"
-                        x={35}
+                        fontFamily="Montserrat"
+                        x={isRank_B ? 38 : 31}
                         y={isRank_B ? 295 : 298}
                         width={150}
                         height={5}
@@ -8954,8 +8955,8 @@ function GeneralEditPage({
                         onTap={() => setIsOpenFtr(true)}
                       />
                       <Text
-                        fontFamily="Roboto"
-                        x={33}
+                        fontFamily="Montserrat"
+                        x={isRank_B ? 36 : 28}
                         y={isRank_B ? 295 : 297}
                         width={150}
                         height={20}
@@ -9007,8 +9008,8 @@ function GeneralEditPage({
                         }
                       >
                         <Text
-                          fontFamily="Roboto"
-                          x={15}
+                          fontFamily="Montserrat"
+                          x={isRank_B ? 16.5 : 19.5}
                           y={0}
                           width={200}
                           height={2}
@@ -9022,8 +9023,8 @@ function GeneralEditPage({
                           onTap={() => setIsOpenFtr(true)}
                         />
                         <Text
-                          fontFamily="Roboto"
-                          x={15}
+                          fontFamily="Montserrat"
+                          x={isRank_B ? 16.5 : 19.5}
                           y={showSocial === "no" ? 10.5 : 9.5}
                           width={200}
                           height={2}
@@ -9076,7 +9077,7 @@ function GeneralEditPage({
                                   />
                                 )}
                                 <Text
-                                  fontFamily="Roboto"
+                                  fontFamily="Montserrat"
                                   x={textStartX}
                                   y={0}
                                   width={100 - textStartX}
@@ -9105,7 +9106,7 @@ function GeneralEditPage({
                     {showMobile === "yes" && (
                       <>
                         <Text
-                          fontFamily="Roboto"
+                          fontFamily="Montserrat"
                           x={35}
                           y={298}
                           width={150}
@@ -9119,7 +9120,7 @@ function GeneralEditPage({
                           onTap={() => setIsOpenFtr(true)}
                         />
                         <Text
-                          fontFamily="Roboto"
+                          fontFamily="Montserrat"
                           x={30}
                           y={297}
                           width={150}
@@ -9169,7 +9170,7 @@ function GeneralEditPage({
                           }
                         >
                           <Text
-                            fontFamily="Roboto"
+                            fontFamily="Montserrat"
                             x={23}
                             y={0}
                             width={200}
@@ -9184,7 +9185,7 @@ function GeneralEditPage({
                             onTap={() => setIsOpenFtr(true)}
                           />
                           <Text
-                            fontFamily="Roboto"
+                            fontFamily="Montserrat"
                             x={25}
                             y={10.5}
                             width={200}
@@ -9207,7 +9208,7 @@ function GeneralEditPage({
                     {showMobile === "yes" && (
                       <>
                         <Text
-                          fontFamily="Roboto"
+                          fontFamily="Montserrat"
                           x={240}
                           y={isRank_B ? 295 : 298}
                           width={150}
@@ -9221,7 +9222,7 @@ function GeneralEditPage({
                           onTap={() => setIsOpenFtr(true)}
                         />
                         <Text
-                          fontFamily="Roboto"
+                          fontFamily="Montserrat"
                           x={235}
                           y={isRank_B ? 295 : 297}
                           width={150}
@@ -9271,7 +9272,7 @@ function GeneralEditPage({
                           }
                         >
                           <Text
-                            fontFamily="Roboto"
+                            fontFamily="Montserrat"
                             x={-10}
                             y={0}
                             width={200}
@@ -9286,7 +9287,7 @@ function GeneralEditPage({
                             onTap={() => setIsOpenFtr(true)}
                           />
                           <Text
-                            fontFamily="Roboto"
+                            fontFamily="Montserrat"
                             x={-10}
                             y={showSocial === "no" ? 10.5 : 9.5}
                             width={200}
@@ -9340,7 +9341,7 @@ function GeneralEditPage({
                                     />
                                   )}
                                   <Text
-                                    fontFamily="Roboto"
+                                    fontFamily="Montserrat"
                                     x={textStartX}
                                     y={0}
                                     width={100 - textStartX}
