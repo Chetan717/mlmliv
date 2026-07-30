@@ -5140,6 +5140,128 @@ const getPortraitFriendlySquareCrop = (image) => {
   };
 };
 
+const readStoredJson = (storageType, key) => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const storage =
+      storageType === "session" ? window.sessionStorage : window.localStorage;
+    const raw = storage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeImageSources = (sources) => {
+  const uniqueSources = [];
+  const seen = new Set();
+
+  for (const value of sources) {
+    if (typeof value !== "string") continue;
+    const source = value.trim();
+    if (
+      !source ||
+      /^(null|undefined|\[object Object\])$/i.test(source) ||
+      seen.has(source)
+    ) {
+      continue;
+    }
+    seen.add(source);
+    uniqueSources.push(source);
+  }
+
+  return uniqueSources;
+};
+
+function useResilientCanvasImage(sources, maxRetriesPerSource = 1) {
+  const sourceKey = useMemo(() => sources.join("\u0001"), [sources]);
+  const [loadedImage, setLoadedImage] = useState(null);
+  const [status, setStatus] = useState(
+    sources.length > 0 ? "loading" : "idle",
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    let retryTimer = null;
+    let activeImage = null;
+    let sourceIndex = 0;
+    let retryCount = 0;
+
+    if (sources.length === 0 || typeof window === "undefined") {
+      setLoadedImage(null);
+      setStatus("idle");
+      return undefined;
+    }
+
+    setLoadedImage(null);
+    setStatus("loading");
+
+    const loadCurrentSource = () => {
+      if (cancelled) return;
+
+      const source = sources[sourceIndex];
+      const image = new window.Image();
+      activeImage = image;
+
+      // Remote images must be CORS-safe so Konva export never taints the canvas.
+      if (/^https?:\/\//i.test(source)) {
+        image.crossOrigin = "anonymous";
+      }
+      image.decoding = "async";
+
+      image.onload = () => {
+        if (cancelled || activeImage !== image) return;
+        setLoadedImage(image);
+        setStatus("loaded");
+      };
+
+      image.onerror = () => {
+        if (cancelled || activeImage !== image) return;
+
+        image.onload = null;
+        image.onerror = null;
+
+        if (retryCount < maxRetriesPerSource) {
+          retryCount += 1;
+          setStatus("retrying");
+          retryTimer = window.setTimeout(
+            loadCurrentSource,
+            250 * retryCount,
+          );
+          return;
+        }
+
+        sourceIndex += 1;
+        retryCount = 0;
+
+        if (sourceIndex < sources.length) {
+          setStatus("loading");
+          retryTimer = window.setTimeout(loadCurrentSource, 0);
+        } else {
+          setLoadedImage(null);
+          setStatus("failed");
+        }
+      };
+
+      image.src = source;
+    };
+
+    loadCurrentSource();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer !== null) window.clearTimeout(retryTimer);
+      if (activeImage) {
+        activeImage.onload = null;
+        activeImage.onerror = null;
+      }
+    };
+  }, [maxRetriesPerSource, sourceKey]);
+
+  return [loadedImage, status];
+}
+
 const isIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -5727,8 +5849,12 @@ function GeneralEditPage({
     return () => ro.disconnect();
   }, []);
 
-  const [mlmForm, setMlmForm] = useState(null);
-  const [mlmProfile, setMlmProfile] = useState(null);
+  const [mlmForm, setMlmForm] = useState(() =>
+    readStoredJson("local", "mlmform"),
+  );
+  const [mlmProfile, setMlmProfile] = useState(() =>
+    readStoredJson("session", "mlmProfile"),
+  );
   const [selected, setSelected] = useState(null);
   const [isImageSelected, setIsImageSelected] = useState(false);
   const [selectedImageType, setSelectedImageType] = useState(null);
@@ -5742,7 +5868,9 @@ function GeneralEditPage({
   const [exportedUri, setExportedUri] = useState(null);
   const [achievementForm, setAchievementForm] = useState(null);
   const [incomeFormData, setIncomeFormData] = useState(null);
-  const [meetingData, setMeetingData] = useState(null);
+  const [meetingData, setMeetingData] = useState(() =>
+    readStoredJson("local", "Meeting"),
+  );
   const [showSocial, setShowSocial] = useState("no");
   const [footerImgFlip, setFooterImgFlip] = useState(false);
   const [showTopupline] = useState(
@@ -6694,12 +6822,37 @@ function GeneralEditPage({
   const [Imagetop15] = useImage(topuplineURLs?.[14] || "", "anonymous");
 
   const [ImageChief] = useImage(meetingData?.chiefImage || "", "anonymous");
-  const [ImageProfile] = useImage(
-    mlmForm?.promoter?.name
-      ? `${mlmForm.promoter.image}`
-      : `${middaleImage || ""}`,
-    "anonymous",
+  const profileImageSources = useMemo(
+    () =>
+      normalizeImageSources([
+        // Meeting host data always belongs to the logged-in MLM profile.
+        // For other form types, prefer the selected promoter photo when valid.
+        !isMeeting && mlmForm?.promoter?.name
+          ? mlmForm?.promoter?.image
+          : null,
+        middaleImage,
+        ...(Array.isArray(mlmProfile?.profileImageURLs)
+          ? mlmProfile.profileImageURLs
+          : []),
+      ]),
+    [
+      isMeeting,
+      middaleImage,
+      mlmForm?.promoter?.image,
+      mlmForm?.promoter?.name,
+      mlmProfile?.profileImageURLs,
+    ],
   );
+  const [ImageProfile] = useResilientCanvasImage(profileImageSources);
+
+  useEffect(() => {
+    if (!ImageProfile) return undefined;
+
+    const frameId = window.requestAnimationFrame(() => {
+      profileImageRef.current?.getLayer()?.batchDraw();
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [ImageProfile, footerImgFlip, isMeeting, isRight, isSubGeneralType]);
 
   const [amountPatternId, setAmountPatternId] = useState("gold1");
   const [isAmountModalOpen, setIsAmountModalOpen] = useState(false);
@@ -8612,7 +8765,9 @@ function GeneralEditPage({
                   />
                 )
               ) : null}
-              {isSubGeneralType || meetingData?.hostMode === "none"
+              {isSubGeneralType ||
+              (isMeeting && meetingData?.hostMode === "none") ||
+              !ImageProfile
                 ? null
                 : (() => {
                     const fW = isMeeting ? 60 : 96;
@@ -8631,6 +8786,7 @@ function GeneralEditPage({
                     const curOffsetX = curScaleX === -1 ? fW : 0;
                     return (
                       <Image
+                        ref={profileImageRef}
                         image={ImageProfile}
                         x={leftEdge}
                         y={fY}
