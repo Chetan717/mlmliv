@@ -5177,9 +5177,7 @@ const normalizeImageSources = (sources) => {
 function useResilientCanvasImage(sources, maxRetriesPerSource = 1) {
   const sourceKey = useMemo(() => sources.join("\u0001"), [sources]);
   const [loadedImage, setLoadedImage] = useState(null);
-  const [status, setStatus] = useState(
-    sources.length > 0 ? "loading" : "idle",
-  );
+  const [status, setStatus] = useState(sources.length > 0 ? "loading" : "idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -5225,10 +5223,7 @@ function useResilientCanvasImage(sources, maxRetriesPerSource = 1) {
         if (retryCount < maxRetriesPerSource) {
           retryCount += 1;
           setStatus("retrying");
-          retryTimer = window.setTimeout(
-            loadCurrentSource,
-            250 * retryCount,
-          );
+          retryTimer = window.setTimeout(loadCurrentSource, 250 * retryCount);
           return;
         }
 
@@ -6170,7 +6165,7 @@ function GeneralEditPage({
                     : 0
                   : isRank_B
                     ? isRight
-                      ? 120
+                      ? 135
                       : -40
                     : isRank
                       ? isRight
@@ -6194,9 +6189,9 @@ function GeneralEditPage({
                   : isBonanza
                     ? 200
                     : isRank_B
-                      ? 205
+                      ? 215
                       : isRank
-                        ? 217
+                        ? 217 
                         : 218,
       width: isIncome
         ? 140
@@ -6211,7 +6206,7 @@ function GeneralEditPage({
                 : isBonanza
                   ? 150
                   : isRank_B
-                    ? 240
+                    ? 225
                     : isRank
                       ? 150
                       : 130,
@@ -6228,7 +6223,7 @@ function GeneralEditPage({
                 : isBonanza
                   ? 95
                   : isRank_B
-                    ? 98
+                    ? 60
                     : isRank
                       ? 32
                       : 30,
@@ -6827,9 +6822,7 @@ function GeneralEditPage({
       normalizeImageSources([
         // Meeting host data always belongs to the logged-in MLM profile.
         // For other form types, prefer the selected promoter photo when valid.
-        !isMeeting && mlmForm?.promoter?.name
-          ? mlmForm?.promoter?.image
-          : null,
+        !isMeeting && mlmForm?.promoter?.name ? mlmForm?.promoter?.image : null,
         middaleImage,
         ...(Array.isArray(mlmProfile?.profileImageURLs)
           ? mlmProfile.profileImageURLs
@@ -8122,7 +8115,7 @@ function GeneralEditPage({
                                   : isRank_B
                                     ? isRight
                                       ? 4
-                                      : 146
+                                      : 145
                                     : isRank
                                       ? isRight
                                         ? 6
@@ -8150,8 +8143,8 @@ function GeneralEditPage({
                               ? 97
                               : isRank_B
                                 ? isRight
-                                  ? 103
-                                  : 103
+                                  ? 102.7
+                                  : 102.7
                                 : 96
                   }
                   width={isCapping ? 130 : isAnyversary ? 175 : 165}
@@ -8230,8 +8223,8 @@ function GeneralEditPage({
                                 : 112
                               : isRank_B
                                 ? isRight
-                                  ? 114
-                                  : 114
+                                  ? 113.7
+                                  : 113.7
                                 : 112
                   }
                   width={100}
@@ -8482,33 +8475,51 @@ function GeneralEditPage({
                           : 195
                         : isRight
                           ? charslen?.length === 10
-                            ? 137
+                            ? 150
                             : charslen?.length === 9
                               ? 148
                               : charslen?.length === 8
-                                ? 157
+                                ? 140
                                 : charslen?.length === 7
-                                  ? 168
+                                  ? 154
                                   : charslen?.length === 6
-                                    ? 175
-                                    : 198
+                                    ? 168
+                                    : 181
                           : isRank_B
                             ? charslen?.length === 6
-                              ? 29
+                              ? 25
                               : charslen?.length === 7
-                                ? 29
+                                ? 14
                                 : charslen?.length === 9
-                                  ? 14
+                                  ? 7
                                   : charslen?.length === 10
-                                    ? 6
-                                    : 29
+                                    ? 10
+                                    : 22
                             : 1.5
                   }
-                  y={isIncome ? 132 : isClosing ? 132 : isRank_B ? 245.5 : 250}
+                  y={isIncome ? 132 : isClosing ? 132 : isRank_B ? 237.5 : 250}
                   digitHeight={
-                    isIncome ? 26 : isClosing ? 28 : isRank_B ? 25 : 32
+                    isIncome
+                      ? 26
+                      : isClosing
+                        ? 28
+                        : charslen?.length === 10
+                          ? 26
+                          : isRank_B
+                            ? 27
+                            : 32
                   }
-                  spacing={isRank_B ? (charslen?.length === 6 ? 7 : 3.5) : 1.5}
+                  spacing={
+                    isRank_B
+                      ? charslen?.length === 6
+                        ? 7
+                        : charslen?.length === 10
+                          ? 1.5
+                          : charslen?.length === 7
+                            ? 7
+                            : 3.5
+                      : 1.5
+                  }
                 />
               )}
 
