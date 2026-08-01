@@ -58,7 +58,7 @@ import num8 from "./amount_numberImage/8.png";
 import num9 from "./amount_numberImage/9.png";
 import numComma from "./amount_numberImage/coma.png";
 import numRupee from "./amount_numberImage/Rupee.png";
-import numSlash from "./amount_numberImage/Slash.png";
+import numSlash from "./amount_numberImage/lash.png";
 import { COLLECTIONS } from "../../collections";
 import { celebrateDownload } from "../../utils/downloadCelebration";
 import { getAchieverDisplayName } from "./utils/canvasDataUtils";
