@@ -17,7 +17,7 @@ test("Banner Settings opened from Editor returns to the same Editor state", () =
     hash: "#canvas",
     state: editorState,
   });
-
+// gjghghj
   assert.deepEqual(getBannerSettingsReturn(settingsState), {
     to: "/editor?template=rank#canvas",
     state: editorState,
