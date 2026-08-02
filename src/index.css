@@ -122,6 +122,7 @@ html {
   --shadow-elevated: 0 4px 24px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(0, 0, 0, 0.30);
 }
 
+/* Keep HeroUI inline fallbacks and the app's semantic tokens in sync. */
 html {
   font-size: 14px;
 }
@@ -170,6 +171,97 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Prevent elastic overscroll showing white gap in WebView */
   overscroll-behavior: none;
+}
+
+/* ── Theme-safe native and library form controls ────────────────────────── */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/*
+ * Keep the dark-theme fallback that makes legacy button/tab labels visible,
+ * but do not override component-owned colours in the light theme.  This rule
+ * is intentionally dark-scoped because an unscoped, unlayered button colour
+ * wins over Tailwind/HeroUI text-colour utilities.
+ */
+:is(.dark, [data-theme="dark"]) button {
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  color: var(--field-foreground);
+  caret-color: var(--field-foreground);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+
+:is(.dark, [data-theme="dark"]) :is(input, select, textarea) {
+  color: var(--field-foreground);
+  -webkit-text-fill-color: var(--field-foreground);
+}
+
+:is(.dark, [data-theme="dark"])
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(.bg-transparent),
+    select,
+    textarea:not(.bg-transparent)
+  ) {
+  background-color: var(--field-background);
+  border-color: var(--border);
+}
+
+:is(.dark, [data-theme="dark"]) :is(input, textarea)::placeholder {
+  color: var(--field-placeholder);
+  -webkit-text-fill-color: var(--field-placeholder);
+  opacity: 1;
+}
+
+:is(.dark, [data-theme="dark"]) :is(option, optgroup) {
+  background-color: var(--overlay);
+  color: var(--overlay-foreground);
+}
+
+:is(.dark, [data-theme="dark"])
+  :is(input[type="date"], input[type="datetime-local"], input[type="time"], select) {
+  color-scheme: dark;
+}
+
+:is(.dark, [data-theme="dark"])
+  :is(input:disabled, input[readonly], select:disabled, textarea:disabled) {
+  color: var(--muted-foreground);
+  -webkit-text-fill-color: var(--muted-foreground);
+  opacity: 1;
+}
+
+:is(.dark, [data-theme="dark"]) input:-webkit-autofill,
+:is(.dark, [data-theme="dark"]) input:-webkit-autofill:hover,
+:is(.dark, [data-theme="dark"]) input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--field-foreground);
+  caret-color: var(--field-foreground);
+  -webkit-box-shadow: 0 0 0 1000px var(--field-background) inset;
+  box-shadow: 0 0 0 1000px var(--field-background) inset;
+}
+
+/* HeroUI portals are mounted outside page containers, so enforce the active
+   theme on their own surfaces as well. */
+:is(.dark, [data-theme="dark"])
+  :is([data-slot="select-trigger"], [data-slot="select-popover"], [data-slot="popover-dialog"], [data-slot="modal-dialog"]) {
+  color: var(--overlay-foreground);
+}
+
+:is(.dark, [data-theme="dark"])
+  :is([data-slot="select-popover"], [data-slot="popover-dialog"], [data-slot="modal-dialog"]) {
+  background-color: var(--overlay);
+  border-color: var(--border);
 }
 
 /*
@@ -534,7 +626,7 @@ h6,
 }
 
 [data-slot="toast"] {
-  background-color: #fff;
+  background-color: var(--overlay);
 
   color: var(--foreground) !important;
 

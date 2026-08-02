@@ -341,7 +341,7 @@ const filtered = useMemo(() => {
                           )}
                         </div>
                         {img.name && (
-                          <div className="px-1.5 py-1 bg-white  border-t border-gray-100 ">
+                          <div className="px-1.5 py-1 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
                             <p className="text-[9px] font-semibold text-gray-700 dark:text-gray-300 truncate text-center leading-tight">
                               {img.name}
                             </p>

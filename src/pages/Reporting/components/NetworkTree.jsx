@@ -116,9 +116,9 @@ function NodeReportModal({ node, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[88vh] flex flex-col">
+      <div className="bg-card dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[88vh] flex flex-col">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white dark:bg-gray-900 rounded-t-2xl shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-card dark:bg-gray-900 rounded-t-2xl shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[14px] font-bold shrink-0"
               style={{ background: "linear-gradient(135deg,#0088DA,#4f6fcf)" }}>
@@ -184,7 +184,7 @@ function NodeReportModal({ node, onClose }) {
                     { label: "SP",     value: totals?.sp     ?? 0, color: "#43a047" },
                     { label: "NAC",    value: totals?.nac    ?? 0, color: "#ff7043" },
                   ].map((s) => (
-                    <div key={s.label} className="rounded-xl border border-border bg-white dark:bg-gray-800 p-2 text-center">
+                    <div key={s.label} className="rounded-xl border border-border bg-card dark:bg-gray-800 p-2 text-center">
                       <p className="text-[18px] font-black" style={{ color: s.color }}>{s.value}</p>
                       <p className="text-[8px] text-muted-foreground leading-tight">{s.label}</p>
                     </div>
@@ -334,7 +334,7 @@ export default function NetworkTree({ profile }) {
         <NodeReportModal node={reportNode} onClose={() => setReportNode(null)} />
       )}
 
-      <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <button
           onClick={() => setShowTree((s) => !s)}
           className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 transition-colors"

@@ -63,7 +63,7 @@ export default function SearchablePicker({
   };
 
   return (
-    <div className="relative bg-white dark:bg-gray-900" ref={ref}>
+    <div className="relative bg-card dark:bg-gray-900" ref={ref}>
       <button
         type="button"
         onClick={toggleOpen}
@@ -88,7 +88,7 @@ export default function SearchablePicker({
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-border rounded-xl shadow-xl overflow-hidden">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card dark:bg-gray-900 border border-border rounded-xl shadow-xl overflow-hidden">
           <div className="p-2 border-b border-border/50">
             <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-2.5 py-1.5">
               <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -138,7 +138,7 @@ export default function SearchablePicker({
           </div>
 
           {(totalPages > 1 || filtered.length > 0) && (
-            <div className="flex items-center justify-between px-3 py-2 border-t border-border/50 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between px-3 py-2 border-t border-border/50 bg-card dark:bg-gray-900">
               <span className="text-[10px] text-muted-foreground">
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""}
               </span>

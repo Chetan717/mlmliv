@@ -4618,7 +4618,9 @@ function GeneralEditPage({
         >
           <div
             style={{
-              background: "#fff",
+              background: "var(--overlay)",
+              color: "var(--overlay-foreground)",
+              border: "1px solid var(--border)",
               borderRadius: 24,
               padding: 20,
               width: "92%",
@@ -4645,7 +4647,7 @@ function GeneralEditPage({
                   background: "transparent",
                   fontSize: 22,
                   cursor: "pointer",
-                  color: "#334155",
+                  color: "var(--muted-foreground)",
                 }}
               >
                 ×
@@ -4671,10 +4673,11 @@ function GeneralEditPage({
                     border:
                       option.id === amountPatternId
                         ? "2px solid #2563eb"
-                        : "1px solid #d1d5db",
+                        : "1px solid var(--border)",
                     borderRadius: 16,
                     padding: 10,
-                    background: "white",
+                    background: "var(--surface-secondary)",
+                    color: "var(--surface-secondary-foreground)",
                     textAlign: "left",
                   }}
                 >
@@ -4693,7 +4696,7 @@ function GeneralEditPage({
                       marginTop: 10,
                       fontSize: 13,
                       fontWeight: 600,
-                      color: "#111827",
+                      color: "var(--surface-secondary-foreground)",
                     }}
                   >
                     {option.name}

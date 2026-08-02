@@ -95,7 +95,7 @@ export default function MemberGraph({ memberProfile }) {
     setActiveMetrics((prev) => prev.includes(k) ? prev.filter((m) => m !== k) : [...prev, k]);
 
   return (
-    <div className="rounded-2xl border border-border bg-white shadow-sm p-4">
+    <div className="rounded-2xl border border-border bg-card shadow-sm p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-accent" />

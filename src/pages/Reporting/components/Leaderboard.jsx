@@ -122,7 +122,7 @@ function LeaderRow({ member, rank, isMe }) {
         ? "border-accent/40 bg-accent/5"
         : rank === 0
           ? "border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800"
-          : "border-border bg-white"
+          : "border-border bg-card"
     }`}>
       <RankBadge rank={rank} />
       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-[12px] font-bold shrink-0 ${avatarColor}`}>
@@ -202,7 +202,7 @@ export default function Leaderboard({ profile }) {
   return (
     <div className="px-4 py-5 space-y-4 max-w-2xl mx-auto">
 
-      <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#f59e0b,#eab308,#f97316)" }} />
         <div className="p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -224,7 +224,7 @@ export default function Leaderboard({ profile }) {
       </div>
 
       {/* Sort Filter Pills */}
-      <div className="rounded-2xl border border-border bg-white shadow-sm p-3">
+      <div className="rounded-2xl border border-border bg-card shadow-sm p-3">
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">Sort by Maximum</p>
         <div className="flex flex-wrap gap-1.5">
           {SORT_OPTIONS.map((opt) => (
@@ -243,7 +243,7 @@ export default function Leaderboard({ profile }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-white shadow-sm p-4 space-y-3">
+      <div className="rounded-2xl border border-border bg-card shadow-sm p-4 space-y-3">
         <div className="flex items-center gap-2 mb-0.5">
           <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
           <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Date Range</p>

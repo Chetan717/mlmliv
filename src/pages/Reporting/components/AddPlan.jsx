@@ -9,8 +9,8 @@ export function WorkModal({ open, onClose, title, subtitle, icon, children }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[88vh] flex flex-col">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white dark:bg-gray-900 rounded-t-2xl shrink-0">
+      <div className="bg-card dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[88vh] flex flex-col">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-card dark:bg-gray-900 rounded-t-2xl shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(14,36,92,0.08)" }}>
               {icon}
@@ -34,7 +34,7 @@ export function WorkButton({ icon, label, subtitle, count, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl border border-border bg-white shadow-sm hover:bg-muted/30 active:scale-[0.98] transition-all"
+      className="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl border border-border bg-card shadow-sm hover:bg-muted/30 active:scale-[0.98] transition-all"
     >
       <div className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(14,36,92,0.08)" }}>
@@ -187,7 +187,7 @@ export default function AddPlan({ memberProfile, onClose }) {
 
 export function SectionCard({ icon, title, subtitle, count, open, setOpen, children }) {
   return (
-    <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       <button onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 transition-colors">
         <div className="flex items-center gap-2.5">

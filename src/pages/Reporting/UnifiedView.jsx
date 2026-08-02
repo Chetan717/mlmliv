@@ -99,7 +99,7 @@ function MemberFilterPicker({ members, selected, onSelect, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-0 sm:px-4" onClick={onClose}>
-      <div className="bg-white w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-card w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-border/60">
           <div>
             <p className="font-bold text-foreground text-[14px]">Filter by Member</p>
@@ -277,7 +277,7 @@ function TeamGraph({ myId }) {
           onClose={() => setPickerOpen(false)}
         />
       )}
-      <div className="rounded-2xl border border-border bg-white shadow-sm p-4">
+      <div className="rounded-2xl border border-border bg-card shadow-sm p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-accent" />
@@ -438,7 +438,7 @@ function PendingRequestCard({ request, onApprove, onDeny }) {
           </p>
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-900 px-4 pb-3 pt-2 space-y-2.5">
+      <div className="bg-card dark:bg-gray-900 px-4 pb-3 pt-2 space-y-2.5">
         <p className="text-[10px] text-amber-700 dark:text-amber-300 leading-relaxed bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
           If you <strong>Confirm</strong>, you will appear in their network tree and they can view your team reports.
         </p>
@@ -737,7 +737,7 @@ function AddToTeamSection({ profile, onRequestSent }) {
   const inMyTeam        = memberInfo && memberInfo.managerId === myId;
 
   return (
-    <div className="rounded-2xl border border-border bg-white shadow-sm p-4 space-y-3">
+    <div className="rounded-2xl border border-border bg-card shadow-sm p-4 space-y-3">
       <div className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
           style={{ background: "linear-gradient(135deg,#0088DA,#4f6fcf)" }}>
@@ -955,7 +955,7 @@ function DashboardContent({ profile, selfProfile, myId, currentRequest, handleAp
       <TeamGraph myId={myId} />
 
       {/* My Report — collapsible, collapsed by default */}
-      {/* <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+      {/* <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <button
           onClick={() => setReportOpen((o) => !o)}
           className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 transition-colors"
@@ -1037,7 +1037,7 @@ export default function UnifiedView({ profile: initialProfile, activeTab }) {
       <div className="px-4 py-5 space-y-4 max-w-2xl mx-auto">
 
         {/* Invite section */}
-        <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#0088DA,#4f6fcf)" }} />
           <div className="px-4 py-3.5 flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -1057,7 +1057,7 @@ export default function UnifiedView({ profile: initialProfile, activeTab }) {
         />
 
         {/* Current team members with unassign */}
-        <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: "linear-gradient(135deg,#ef4444,#b91c1c)" }}>
@@ -1085,7 +1085,7 @@ export default function UnifiedView({ profile: initialProfile, activeTab }) {
     return (
       <>
         <div className="px-4 py-5 space-y-3 max-w-2xl mx-auto">
-          <div className="rounded-2xl border border-border bg-white shadow-sm p-4">
+          <div className="rounded-2xl border border-border bg-card shadow-sm p-4">
             <p className="font-bold text-foreground text-[14px]">Add Work Reporting</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">Tap any section to open and fill your report</p>
           </div>
@@ -1124,7 +1124,7 @@ export default function UnifiedView({ profile: initialProfile, activeTab }) {
     return (
       <div className="px-4 py-5 space-y-4 max-w-2xl mx-auto">
         {/* Header card */}
-        <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#0088DA,#4f6fcf)" }} />
           <div className="px-4 py-3.5 flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"

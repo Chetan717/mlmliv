@@ -198,7 +198,7 @@ function DeleteConfirmModal({ userMobile, onConfirm, onCancel, deleting }) {
                 inputMobile.length > 0
                   ? isMatch
                     ? "border-green-400 focus:ring-green-300 bg-green-50"
-                    : "border-red-300 focus:ring-red-200 bg-red-50"
+                    : "border-red-300 dark:border-red-500/60 focus:ring-red-200 bg-red-50 dark:bg-red-500/10"
                   : "border-danger/50 focus:ring-danger/20"
               }`}
           />
@@ -1468,7 +1468,7 @@ export default function MLMProfilePage() {
                   onChange={(e) => setField("salutation", e.target.value)}
                   className="border border-border rounded-xl px-3 py-2.5 text-[13px] bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
                 >
-                  {["Mr", "Mrs", "Ms", "Dr"].map((s) => (
+                  {["Mr", "Mrs", "Miss", "Ms", "Dr"].map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
@@ -1484,7 +1484,7 @@ export default function MLMProfilePage() {
                   }}
                   max={30}
                   maxLength={30}
-                  className={`flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.name ? "border-red-400 bg-red-50" : "border-border"}`}
+                  className={`flex-1 border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.name ? "border-red-400 bg-red-50 dark:bg-red-500/10" : "border-border bg-background"}`}
                 />
               </div>
               {errors.name && (
@@ -1524,7 +1524,7 @@ export default function MLMProfilePage() {
                   setField("designation", e.target.value);
                   clearError("designation");
                 }}
-                className={`w-full border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 bg-red-50" : "border-border"}`}
+                className={`w-full border rounded-lg px-3 py-2 text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 dark:bg-red-500/10" : "border-border"}`}
               >
                 <option value="">Select designation…</option>
                 {designations.length > 0 ? (
@@ -1559,7 +1559,7 @@ export default function MLMProfilePage() {
                   clearError("designation");
                 }}
                 maxLength={40}
-                className={`w-full border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 bg-red-50" : "border-border"}`}
+                className={`w-full border rounded-lg px-3 py-2 text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 dark:bg-red-500/10" : "border-border"}`}
               />
 
               {errors.designation && (
@@ -1805,7 +1805,7 @@ export default function MLMProfilePage() {
 
           {/* ── ERROR FEEDBACK ────────────────────────────────── */}
           {saveError && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-3 text-sm text-red-700 dark:text-red-300">
               {saveError}
             </div>
           )}

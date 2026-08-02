@@ -28,8 +28,8 @@ export default function SplashScreen({ onDone }) {
         position: "fixed",
         inset: 0,
         zIndex: 99999,
-        background: "#ffffff",
         display: "flex",
+        background: "#ffffff",
         alignItems: "center",
         justifyContent: "center",
         transition: "opacity 0.4s ease",
@@ -41,8 +41,8 @@ export default function SplashScreen({ onDone }) {
         ref={videoRef}
         src={videologo}
         autoPlay
-        muted         
-        playsInline   
+        muted
+        playsInline
         loop
         preload="auto"
         style={{ width: 300, height: 300, objectFit: "contain" }}

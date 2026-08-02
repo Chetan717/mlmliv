@@ -81,6 +81,13 @@ const storage = getStorage(app);
 const RANK_PROMOTION_FORM_IMAGES = Object.freeze(
   Object.fromEntries(RANK_PROMOTION_TYPES.map((type) => [type, Rank])),
 );
+const ACHIEVER_TITLE_OPTIONS = Object.freeze(["Mr.", "Mrs.", "Miss", "Dr."]);
+const ACHIEVER_TITLE_BY_KEY = Object.freeze({
+  mr: "Mr.",
+  mrs: "Mrs.",
+  miss: "Miss",
+  dr: "Dr.",
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -101,16 +108,17 @@ function base64ToBlob(dataUrl) {
 
 function parseAchieverName(savedAchiever = {}) {
   const rawTitle = String(savedAchiever.title || "").trim().toLowerCase().replace(/\./g, "");
-  const hasValidTitle = ["mr", "mrs", "dr"].includes(rawTitle);
-  const title = rawTitle === "mrs" ? "Mrs." : rawTitle === "dr" ? "Dr." : "Mr.";
+  const title = ACHIEVER_TITLE_BY_KEY[rawTitle] || "Mr.";
+  const hasValidTitle = Boolean(ACHIEVER_TITLE_BY_KEY[rawTitle]);
   let name = savedAchiever.name || "";
 
   if (!hasValidTitle && savedAchiever.achieverName) {
     const raw = savedAchiever.achieverName.trim();
-    const match = raw.match(/^(Mr\.?|Mrs\.?|Dr\.?)\s*(.*)$/i);
+    const match = raw.match(/^(Mr\.?|Mrs\.?|Miss|Dr\.?)\s*(.*)$/i);
     if (match) {
+      const matchedTitleKey = match[1].toLowerCase().replace(/\./g, "");
       return {
-        title: match[1].endsWith(".") ? match[1] : `${match[1]}.`,
+        title: ACHIEVER_TITLE_BY_KEY[matchedTitleKey] || "Mr.",
         name: match[2] || "",
       };
     }
@@ -646,11 +654,11 @@ export default function SalesExecutiveForm() {
       selectedDate: isTraining ? formatTrainingDateText(trainingDates) : "",
       achiever: {
         ...achiever,
-        title: ["Mr.", "Mrs.", "Dr."].includes(achiever.title)
+        title: ACHIEVER_TITLE_OPTIONS.includes(achiever.title)
           ? achiever.title
           : "Mr.",
         achieverName:
-          `${["Mr.", "Mrs.", "Dr."].includes(achiever.title) ? achiever.title : "Mr."} ${achiever.name || ""}`.trim(),
+          `${ACHIEVER_TITLE_OPTIONS.includes(achiever.title) ? achiever.title : "Mr."} ${achiever.name || ""}`.trim(),
         // If image is already a base64 string (restored), keep it; else convert Blob
         image: achiever.image ? await toBase64(achiever.image) : null,
       },
@@ -816,24 +824,24 @@ export default function SalesExecutiveForm() {
                             `${key || "Mr."} ${p.name || ""}`.trim(),
                         }));
                       }}
-                      className="border border-[#e2e8f0]"
+                      className="border border-border bg-[var(--field-background)] text-foreground"
                       style={{
                         width: "100%",
                         height: 36,
                         fontSize: 13,
                         fontWeight: 600,
-                        border: "2px solid #e2e8f0",
+                        border: "2px solid var(--border)",
                         borderRadius: 10,
 
                         // padding: "0 8px",
-                        background: "var(--heroui-background, #fff)",
-                        color: "var(--heroui-foreground, #000000)",
+                        background: "var(--field-background)",
+                        color: "var(--field-foreground)",
                         appearance: "auto",
                         cursor: "pointer",
                         outline: "none",
                       }}
                     >
-                      {["Mr.", "Mrs.", "Dr."].map((opt) => (
+                      {ACHIEVER_TITLE_OPTIONS.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
                         </option>
@@ -849,11 +857,11 @@ export default function SalesExecutiveForm() {
                         height: 36,
                         fontSize: 13,
                         fontWeight: 600,
-                        border: "1px solid #e2e8f0",
+                        border: "1px solid var(--border)",
                         borderRadius: 10,
                         // padding: "0 8px",
-                        background: "var(--heroui-background, #fff)",
-                        color: "var(--heroui-foreground, #000000)",
+                        background: "var(--field-background)",
+                        color: "var(--field-foreground)",
                         appearance: "auto",
                         cursor: "pointer",
                         outline: "none",
@@ -887,11 +895,11 @@ export default function SalesExecutiveForm() {
                       height: 36,
                       fontSize: 13,
                       fontWeight: 600,
-                      border: "1px solid #e2e8f0",
+                      border: "1px solid var(--border)",
                       borderRadius: 10,
                       // padding: "0 8px",
-                      background: "var(--heroui-background, #fff)",
-                      color: "var(--heroui-foreground, #000000)",
+                      background: "var(--field-background)",
+                      color: "var(--field-foreground)",
                       appearance: "auto",
                       cursor: "pointer",
                       outline: "none",
@@ -975,11 +983,11 @@ export default function SalesExecutiveForm() {
                         height: 36,
                         fontSize: 13,
                         fontWeight: 600,
-                        border: "1px solid #e2e8f0",
+                        border: "1px solid var(--border)",
                         borderRadius: 10,
                         // padding: "0 8px",
-                        background: "var(--heroui-background, #fff)",
-                        color: "var(--heroui-foreground, #000000)",
+                        background: "var(--field-background)",
+                        color: "var(--field-foreground)",
                         appearance: "auto",
                         cursor: "pointer",
                         outline: "none",

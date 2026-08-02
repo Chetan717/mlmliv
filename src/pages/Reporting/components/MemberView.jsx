@@ -157,7 +157,7 @@ export default function MemberView({ profile, activeTab }) {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white dark:bg-gray-900 border border-border rounded-2xl shadow-xl p-5 max-w-sm w-full">
+          <div className="bg-card dark:bg-gray-900 border border-border rounded-2xl shadow-xl p-5 max-w-sm w-full">
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/30 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5 text-red-500" />
@@ -198,7 +198,7 @@ export default function MemberView({ profile, activeTab }) {
       )}
 
       {(!hasManagerId || hasSendDeleteApproval) && (
-        <div className="rounded-2xl border border-border bg-white shadow-sm p-4 space-y-3">
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-4 space-y-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(14,36,92,0.08)" }}>
               <Link className="w-4 h-4 text-accent" />
@@ -291,7 +291,7 @@ export default function MemberView({ profile, activeTab }) {
 
     return (
       <div className="px-4 py-5 space-y-4 max-w-2xl mx-auto">
-        <div className="rounded-2xl border border-border bg-white shadow-sm p-4">
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-4">
           <div className="flex items-center gap-2.5 mb-1">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: "linear-gradient(135deg,#0088DA,#0088DA)" }}>

@@ -46,7 +46,7 @@ export default function AddGuest({ memberProfile }) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#0088DA,#4f6fcf)" }} />
 
       <div className="px-4 pt-4 pb-2 flex items-center gap-3">

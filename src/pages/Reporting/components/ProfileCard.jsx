@@ -12,7 +12,7 @@ export default function ProfileCard({ profile }) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       <div className="h-2 w-full" style={{ background: "linear-gradient(90deg,#0088da,#0088DA,#4f6fcf)" }} />
       <div className="p-4">
         <div className="flex items-center gap-3 mb-4">

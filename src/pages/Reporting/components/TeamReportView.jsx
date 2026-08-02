@@ -48,7 +48,7 @@ function MemberPickerModal({ members, loading, onSelect, onClose }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4"
       onClick={onClose}>
-      <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden"
+      <div className="bg-card w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}>
 
         {/* Header */}
@@ -100,7 +100,7 @@ function MemberPickerModal({ members, loading, onSelect, onClose }) {
                 return (
                   <button key={m.id || mid}
                     onClick={() => onSelect(m)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/8 bg-white  text-left group">
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/8 bg-card  text-left group">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[12px] font-bold shrink-0"
                       style={{ background: "linear-gradient(135deg,#0088DA,#4f6fcf)" }}>
                       {m.name?.[0]?.toUpperCase() || "?"}
@@ -255,7 +255,7 @@ export default function TeamReportView({ managerProfile }) {
       {pdfModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4"
           onClick={() => setPdfModal(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-xs p-6 space-y-4"
+          <div className="bg-card dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-xs p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center"
@@ -286,7 +286,7 @@ export default function TeamReportView({ managerProfile }) {
         </div>
       )}
 
-      <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         {/* Card Header */}
         <div className="px-4 py-3.5 flex items-center gap-2.5 border-b border-border/50">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -452,7 +452,7 @@ export default function TeamReportView({ managerProfile }) {
                       </>
                     );
                   })}
-                  <tr style={{ background:"#e8f0fe" }}>
+                  <tr style={{ background: "var(--surface-secondary)" }}>
                     <td className="px-2 py-2 border border-border" />
                     <td className="px-2 py-2 border border-border font-bold text-[10px] text-left">TOTAL</td>
                     <td className="px-2 py-2 text-center border border-border font-bold">{totals?.plan   || 0}</td>

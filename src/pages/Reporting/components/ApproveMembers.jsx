@@ -154,7 +154,7 @@ export default function ApproveMembers({ managerProfile }) {
       `}</style>
 
       <div
-        className={`rounded-2xl border bg-white shadow-sm overflow-hidden transition-colors duration-300 ${
+        className={`rounded-2xl border bg-card shadow-sm overflow-hidden transition-colors duration-300 ${
           hasPending
             ? "border-red-300 dark:border-red-700"
             : "border-border"
@@ -301,7 +301,7 @@ export default function ApproveMembers({ managerProfile }) {
       {/* ── Approved Members Modal ─────────────────────────── */}
       {showApprovedModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col">
+          <div className="bg-card dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(14,36,92,0.08)" }}>

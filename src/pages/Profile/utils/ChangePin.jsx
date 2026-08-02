@@ -38,7 +38,7 @@ function NumPad({ onPress, disabled }) {
             key={i}
             onClick={() => !disabled && onPress(key)}
             disabled={disabled}
-            className={`h-[52px] rounded-2xl font-bold text-[18px] text-black transition-all duration-150 active:scale-95 select-none
+            className={`h-[52px] rounded-2xl font-bold text-[18px] text-foreground transition-all duration-150 active:scale-95 select-none
               ${key === "⌫"
                 ? "bg-danger/10 text-danger hover:bg-danger/20"
                 : "bg-accent/6 hover:bg-accent/12 text-accent"
@@ -174,8 +174,8 @@ function ChangePin({ show, setChngePin }) {
               ) : (
                 <>
                   <div className="mb-5">
-                    <h2 className="text-[18px] font-display font-bold text-black">Change PIN</h2>
-                    <p className="text-[13px] text-black/80 mt-0.5">You will be logged out after changing</p>
+                    <h2 className="text-[18px] font-display font-bold text-foreground">Change PIN</h2>
+                    <p className="text-[13px] text-muted-foreground mt-0.5">You will be logged out after changing</p>
                   </div>
 
                   <div className="flex items-center gap-1.5 mb-5">

@@ -96,7 +96,7 @@ export default function ManagerView({ profile, activeTab }) {
   if (activeTab === "add-work") {
     return (
       <div className="px-4 py-5 space-y-4 max-w-2xl mx-auto">
-        <div className="rounded-2xl border border-border bg-white shadow-sm p-4">
+        <div className="rounded-2xl border border-border bg-card shadow-sm p-4">
           <div className="flex items-center gap-2.5 mb-1">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: "linear-gradient(135deg,#0088DA,#0088DA)" }}>

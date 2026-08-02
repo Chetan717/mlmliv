@@ -110,7 +110,7 @@ export default function MemberReportView({ memberProfile }) {
       {pdfModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4"
           onClick={() => setPdfModal(false)}>
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-xs p-6 space-y-4"
+          <div className="bg-card dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-xs p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center"
@@ -141,7 +141,7 @@ export default function MemberReportView({ memberProfile }) {
         </div>
       )}
 
-      <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="px-4 py-3.5 flex items-center gap-2.5 border-b border-border/50">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center"
             style={{ background: "rgba(14,36,92,0.08)" }}>
@@ -292,7 +292,7 @@ export default function MemberReportView({ memberProfile }) {
                       </>
                     );
                   })}
-                  <tr style={{ background: "#e8f0fe" }}>
+                  <tr style={{ background: "var(--surface-secondary)" }}>
                     <td className="px-2 py-2 border border-border" />
                     <td className="px-2 py-2 border border-border font-bold text-[10px] text-left">TOTAL</td>
                     <td className="px-2 py-2 text-center border border-border font-bold">{totals?.plan || 0}</td>
@@ -331,7 +331,7 @@ function PopoverCount({ value, items = [], label }) {
         {value}
       </button>
       {open && (
-        <div className="absolute z-30 left-1/2 -translate-x-1/2 top-5 bg-white border border-border rounded-xl shadow-2xl p-2 min-w-[150px] max-w-[200px] text-left space-y-1"
+        <div className="absolute z-30 left-1/2 -translate-x-1/2 top-5 bg-card border border-border rounded-xl shadow-2xl p-2 min-w-[150px] max-w-[200px] text-left space-y-1"
           onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-1">
             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Details</p>
