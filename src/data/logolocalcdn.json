@@ -197,5 +197,34 @@
          "size": "square"
        }
      ]
+   },
+   {
+     "ID": "glGgBlRK98BcPYPHHOIR",
+     "name": "VSTAR WELLNESS",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785737863652_j8enn7.webp?alt=media&token=1f387927-6e56-4c81-a595-2617732a632f",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785737876332_ty88dp.webp?alt=media&token=bc8af528-89ef-4109-9af1-df7358432cce",
+         "size": "square"
+       }
+     ]
+   },
+   {
+     "ID": "V1HD8TAipj1SoqrVRKbw",
+     "name": "GLOBE VEDA",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785734612343_nwq13o.webp?alt=media&token=b4b3254e-ae8f-4f8d-98b3-9a750f850c2b",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785734633965_69dqoa.webp?alt=media&token=f503180a-ef9b-4efc-9005-47b1487c01cf",
+         "size": "rectangle"
+       }
+     ]
    }
+
 ]
