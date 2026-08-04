@@ -1,75 +1,175 @@
 import { Button } from "@heroui/react";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useGeneralData } from "../../Context/GeneralContext";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { db } from "@firebase-config";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router";
-import { Search, MessageCircle } from "lucide-react";
+import { RefreshCw, Search, X } from "lucide-react";
 import { COLLECTIONS } from "../../collections";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
+import { getCompanyLogoUrl } from "../../utils/getCompanyLogo";
+import {
+  COMPANY_BATCH_SIZE,
+  filterCompaniesByName,
+  getCompanyBatch,
+  getNextCompanyCount,
+  normalizeCompanySearch,
+} from "./companyListUtils";
+
+const COMPANY_CACHE_TTL_MS = 5 * 60 * 1000;
+let companyDirectoryCache = null;
+let companyDirectoryRequest = null;
+
+const normalizeCompany = (companyDoc) => {
+  const data = companyDoc.data();
+  const name = data?.name || "";
+  return {
+    id: companyDoc.id,
+    name,
+    searchKey: normalizeCompanySearch(name),
+    address: data?.address || "",
+    owner: data?.owner || "",
+    designation: data?.profile || [],
+    logos: data?.logos || [],
+    topuplines: data?.topuplines || [],
+    Plans: data?.Plans || [],
+    profile: data?.profile || [],
+    active: data?.active ?? false,
+    launched: data?.launched ?? false,
+  };
+};
+
+async function fetchCompanyDirectory({ force = false } = {}) {
+  const now = Date.now();
+  if (
+    !force &&
+    companyDirectoryCache &&
+    now - companyDirectoryCache.loadedAt < COMPANY_CACHE_TTL_MS
+  ) {
+    return companyDirectoryCache.companies;
+  }
+
+  // React StrictMode and quick remounts share one Firestore request.
+  if (companyDirectoryRequest) return companyDirectoryRequest;
+
+  const request = getDocs(collection(db, COLLECTIONS.MLMCOMP))
+    .then((snapshot) => {
+      const companies = snapshot.docs
+        .map(normalizeCompany)
+        .filter((company) => company.active && company.launched)
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, {
+          sensitivity: "base",
+          numeric: true,
+        }));
+      companyDirectoryCache = { companies, loadedAt: Date.now() };
+      return companies;
+    })
+    .finally(() => {
+      if (companyDirectoryRequest === request) companyDirectoryRequest = null;
+    });
+
+  companyDirectoryRequest = request;
+  return request;
+}
 
 export default function SelectComp() {
   const navigate = useNavigate();
-  const { theme, theame_color } = useGeneralData();
   const { selectCompany } = useSelectedCompany();
 
   const [companies, setCompanies] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [visibleCount, setVisibleCount] = useState(COMPANY_BATCH_SIZE);
   const [savingSelection, setSavingSelection] = useState(false);
+  const loadMoreRef = useRef(null);
+  const mountedRef = useRef(false);
+  const requestVersionRef = useRef(0);
+  const deferredSearch = useDeferredValue(search);
 
-  const normalizeCompany = (doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      name: data?.name || "",
-      address: data?.address || "",
-      owner: data?.owner || "",
-      designation: data?.profile || [],
-      logos: data?.logos || [],
-      topuplines: data?.topuplines || [],
-      Plans: data?.Plans || [],
-      profile: data?.profile || [],
-      active: data?.active ?? false,
-      launched: data?.launched ?? false,
-    };
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchCompanies = async () => {
-      setLoading(true);
-      try {
-        const snapshot = await getDocs(collection(db, COLLECTIONS.MLMCOMP));
-        if (!cancelled) {
-          const data = snapshot.docs
-            .map((doc) => normalizeCompany(doc))
-            .filter((c) => c.active === true && c.launched === true);
-          setCompanies(data);
-        }
-      } catch (error) {
-        
-      } finally {
-        if (!cancelled) setLoading(false);
+  const loadCompanies = useCallback(async ({ force = false } = {}) => {
+    const requestVersion = ++requestVersionRef.current;
+    setLoading(true);
+    setLoadError("");
+    try {
+      const data = await fetchCompanyDirectory({ force });
+      if (!mountedRef.current || requestVersion !== requestVersionRef.current) {
+        return;
       }
-    };
-
-    fetchCompanies();
-
-    return () => {
-      cancelled = true;
-    };
+      setCompanies(data);
+      setSelectedCompany((current) => {
+        if (!current) return null;
+        return data.find((company) => company.id === current.id) || null;
+      });
+    } catch (error) {
+      if (!mountedRef.current || requestVersion !== requestVersionRef.current) {
+        return;
+      }
+      setLoadError("Unable to load companies. Please check your connection and retry.");
+    } finally {
+      if (mountedRef.current && requestVersion === requestVersionRef.current) {
+        setLoading(false);
+      }
+    }
   }, []);
 
+  useEffect(() => {
+    mountedRef.current = true;
+    void loadCompanies();
+    return () => {
+      mountedRef.current = false;
+      requestVersionRef.current += 1;
+    };
+  }, [loadCompanies]);
+
   const filteredCompanies = useMemo(() => {
-    if (!search.trim()) return companies;
-    const q = search.toLowerCase();
-    return companies.filter((item) =>
-      item.name.toLowerCase().includes(q)
+    return filterCompaniesByName(companies, deferredSearch);
+  }, [companies, deferredSearch]);
+
+  const visibleCompanies = useMemo(
+    () => getCompanyBatch(filteredCompanies, visibleCount),
+    [filteredCompanies, visibleCount],
+  );
+  const hasMore = visibleCompanies.length < filteredCompanies.length;
+
+  useEffect(() => {
+    setVisibleCount(COMPANY_BATCH_SIZE);
+    setSelectedCompany((current) => {
+      if (!current) return null;
+      return filteredCompanies.some((company) => company.id === current.id)
+        ? current
+        : null;
+    });
+  }, [filteredCompanies]);
+
+  useEffect(() => {
+    if (!hasMore || !loadMoreRef.current) return;
+    const sentinel = loadMoreRef.current;
+    const scrollRoot = sentinel.closest(".mlm-main-scroll-container");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        setVisibleCount((current) =>
+          getNextCompanyCount(current, filteredCompanies.length),
+        );
+      },
+      { root: scrollRoot, rootMargin: "320px 0px", threshold: 0.01 },
     );
-  }, [search, companies]);
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [filteredCompanies.length, hasMore]);
+
+  const handleRefresh = useCallback(async () => {
+    if (loading) return;
+    await loadCompanies({ force: true });
+  }, [loadCompanies, loading]);
 
   const handleSelect = useCallback((company) => {
     setSelectedCompany((prev) =>
@@ -95,7 +195,7 @@ export default function SelectComp() {
 
   const getLogo = (company) => {
     return (
-      company?.logos?.find((l) => l?.link?.trim())?.link ||
+      getCompanyLogoUrl(company) ||
       "https://ui-avatars.com/api/?background=random&color=fff&name=" +
         encodeURIComponent(company.name)
     );
@@ -107,31 +207,77 @@ export default function SelectComp() {
 
       <div className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 md:py-12 flex flex-col relative z-10">
 
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-display font-bold text-foreground mb-2">Select Your Company</h1>
-          <p className="text-muted-foreground font-medium">Choose your MLM organization to get started</p>
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-3xl font-bold text-foreground font-display">Select Your Company</h1>
+          <p className="font-medium text-muted-foreground">Choose your MLM organization to get started</p>
         </div>
 
         <div className="w-full max-w-xl mx-auto mb-10">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+          <div className="flex items-stretch gap-2">
+            <div className="relative group min-w-0 flex-1">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+              </div>
+              <input
+                type="text"
+                className="w-full h-14 pl-12 pr-12 rounded-2xl border border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm font-medium text-foreground text-base placeholder:text-muted-foreground"
+                placeholder="Search companies by name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoComplete="off"
+                inputMode="search"
+                aria-label="Search companies by name"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear company search"
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              className="w-full h-14 pl-12 pr-4 rounded-2xl border border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm font-medium text-foreground text-base placeholder:text-muted-foreground"
-              placeholder="Search companies by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={loading}
+              aria-label="Refresh company list"
+              title="Refresh company list"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-accent shadow-sm transition-all hover:bg-accent/10 active:scale-90 disabled:cursor-wait disabled:opacity-60"
+            >
+              <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+            </button>
           </div>
+          {!loading && companies.length > 0 && (
+            <p className="mt-2 px-1 text-right text-[11px] font-medium text-muted-foreground">
+              {filteredCompanies.length} {filteredCompanies.length === 1 ? "company" : "companies"}
+            </p>
+          )}
+          {loadError && companies.length > 0 && (
+            <p className="mt-2 px-1 text-center text-xs font-medium text-danger">
+              Refresh failed. Showing the last available company list.
+            </p>
+          )}
         </div>
 
         <div className="flex-1 w-full pb-5">
-          {loading ? (
+          {loading && companies.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-10 h-10 border-4 border-muted border-t-accent rounded-full animate-spin" />
               <p className="text-sm text-muted-foreground font-medium">Loading companies...</p>
+            </div>
+          ) : loadError && companies.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <p className="max-w-sm text-sm font-medium text-danger">{loadError}</p>
+              <button
+                type="button"
+                onClick={() => loadCompanies({ force: true })}
+                className="mt-4 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-white"
+              >
+                Retry
+              </button>
             </div>
           ) : filteredCompanies.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -143,12 +289,14 @@ export default function SelectComp() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-              {filteredCompanies.map((item) => {
+              {visibleCompanies.map((item, index) => {
                 const isSelected = selectedCompany?.id === item.id;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={item.id}
                     onClick={() => handleSelect(item)}
+                    aria-pressed={isSelected}
                     className={`relative flex flex-col items-center gap-3 p-4 rounded-[24px] cursor-pointer transition-all duration-300 transform active:scale-95 border bg-white dark:bg-black/20 ${
                       isSelected
                         ? "ring-1 ring-accent ring-offset-2 dark:ring-offset-background shadow-lg scale-105 z-10"
@@ -160,6 +308,16 @@ export default function SelectComp() {
                         className="w-full h-full object-contain rounded-xl"
                         src={getLogo(item)}
                         alt={item.name}
+                        loading={index < 6 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index < 4 ? "high" : "auto"}
+                        onError={(event) => {
+                          if (event.currentTarget.dataset.fallback === "1") return;
+                          event.currentTarget.dataset.fallback = "1";
+                          event.currentTarget.src =
+                            "https://ui-avatars.com/api/?background=0e245c&color=fff&name=" +
+                            encodeURIComponent(item.name || "Company");
+                        }}
                       />
                     </div>
 
@@ -176,9 +334,19 @@ export default function SelectComp() {
                         </svg>
                       </div>
                     )}
-                  </div>
+                  </button>
                 );
               })}
+            </div>
+          )}
+
+          {hasMore && (
+            <div
+              ref={loadMoreRef}
+              className="flex h-16 items-center justify-center"
+              aria-label="Loading more companies"
+            >
+              <div className="h-6 w-6 animate-spin rounded-full border-[3px] border-muted border-t-accent" />
             </div>
           )}
         </div>
@@ -193,7 +361,7 @@ export default function SelectComp() {
       Want to add your company? Contact Us
     </p>
     <a
-      href="https://wa.me/919229885383"
+      href="https://wa.me/919341947815"
       target="_blank"
       rel="noopener noreferrer"
       className="mt-1 inline-flex items-center gap-2 h-10 px-5 rounded-xl font-bold text-sm text-white"

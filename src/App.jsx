@@ -316,7 +316,7 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute>
-                <ProtectMlmProfile requireProfile>
+                <ProtectMlmProfile>
                   <Layout>
                     <Myprofile />
                   </Layout>

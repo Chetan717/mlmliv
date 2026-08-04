@@ -39,7 +39,7 @@ const NAV_ITEMS = [
     icon: Comments,
     label: "Customer Support",
     id: "customerSupport",
-    link: "https://wa.me/919229885383",
+    link: "https://wa.me/919341947815",
   },
   {
     icon: ScalesBalanced,

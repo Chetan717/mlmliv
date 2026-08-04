@@ -2,6 +2,7 @@ import { auth } from "@firebase-config";
 
 const LEGACY_USER_KEY = "usermlm";
 const MANUAL_LOGOUT_KEY = "mlmlive-manual-logout";
+export const VERIFIED_USER_CHANGED_EVENT = "mlmlive:verified-user-changed";
 const CACHED_PII_KEYS = [
   LEGACY_USER_KEY,
   "mlmProfile",
@@ -14,6 +15,11 @@ const CACHED_PII_KEYS = [
 ];
 let verifiedUser = null;
 let authFlowPending = false;
+
+const notifyVerifiedUserChanged = () => {
+  if (typeof window === "undefined") return;
+  try { window.dispatchEvent(new CustomEvent(VERIFIED_USER_CHANGED_EVENT)); } catch {}
+};
 
 export function setAuthFlowPending(value) {
   authFlowPending = !!value;
@@ -75,6 +81,7 @@ export function setVerifiedUser(identity) {
       ? { ...verifiedUser, ...next }
       : next,
   );
+  notifyVerifiedUserChanged();
 }
 
 export function getUser() {
@@ -94,4 +101,5 @@ export function setUser(data) {
 export function removeUser() {
   verifiedUser = null;
   clearLegacyAuthStorage();
+  notifyVerifiedUserChanged();
 }

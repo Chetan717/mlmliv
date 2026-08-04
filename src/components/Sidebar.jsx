@@ -1,7 +1,6 @@
 import {
   Person,
   Gem,
-  Timestamps,
   Comments,
   ScalesBalanced,
   Video,
@@ -10,12 +9,17 @@ import {
   Xmark,
   ChevronRight,
 } from "@gravity-ui/icons";
-import { Sparkles } from "lucide-react";
+import { PencilLine } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useGeneralData } from "../Context/GeneralContext";
-import { getLocalLogo } from "@/utils/getCompanyLogo";
+import { getCompanyLogoUrl } from "@/utils/getCompanyLogo";
 import { runProfileNavigationGuard } from "../utils/profileNavigation";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
+import {
+  getMlmProfileFromStorage,
+  MLM_PROFILE_CHANGED_EVENT,
+} from "../utils/companyStorage";
 const NAV_ITEMS = [
   // {
   //   icon: Sparkles,
@@ -24,10 +28,10 @@ const NAV_ITEMS = [
   //   link: "/ask-ai",
   // },
   {
-    icon: Timestamps,
-    label: "My Company Profile",
+    icon: Person,
+    label: "My Profile",
     id: "MyMLMProfile",
-    link: "/mlmprofile",
+    link: "/profile",
   },
   {
     icon: Gem,
@@ -40,7 +44,7 @@ const NAV_ITEMS = [
     icon: Comments,
     label: "Customer Support",
     id: "customerSupport",
-    link: "https://wa.me/919229885383",
+    link: "https://wa.me/919341947815",
   },
   {
     icon: ScalesBalanced,
@@ -73,18 +77,26 @@ export default function Sidebar({
   const { theme } = useGeneralData();
   const { selectedCompany } = useSelectedCompany();
 
-  let selectedProfile = null;
-  try {
-    selectedProfile = JSON.parse(sessionStorage.getItem("mlmProfile") || "null");
-  } catch {}
+  const [selectedProfile, setSelectedProfile] = useState(() =>
+    getMlmProfileFromStorage(),
+  );
+
+  useEffect(() => {
+    const syncProfile = () => setSelectedProfile(getMlmProfileFromStorage());
+    window.addEventListener(MLM_PROFILE_CHANGED_EVENT, syncProfile);
+    return () =>
+      window.removeEventListener(MLM_PROFILE_CHANGED_EVENT, syncProfile);
+  }, []);
 
   const companyName =
     selectedCompany?.name || selectedProfile?.companyName || "MLM LIVE";
-  const companyLogo =
-    getLocalLogo(selectedCompany?.id) ||
-    getLocalLogo(selectedProfile?.companyId) ||
-    "";
-  const companyProfileLogo = selectedProfile?.profileImageURLs?.[0] || "";
+  const companyLogo = getCompanyLogoUrl(
+    selectedCompany || {
+      id: selectedProfile?.companyId,
+      name: selectedProfile?.companyName,
+      logos: selectedProfile?.logoURLs,
+    },
+  );
   const fullName = selectedProfile?.fullName || "";
   const mobile = selectedProfile?.mobile || "";
 
@@ -147,9 +159,10 @@ export default function Sidebar({
             <div className="w-18 h-18 rounded-full 0.5  shadow-xl flex items-center justify-center shrink-0 overflow-hidden bg-white ">
               {companyLogo ? (
                 <img
-                  src={companyProfileLogo|| companyLogo[0]?.link || ""}
-                  alt="Logo"
-                  className="w-full h-full object-contain"
+                  src={companyLogo}
+                  alt={`${companyName} logo`}
+                  className="w-full h-full object-contain p-1"
+                  decoding="async"
                 />
               ) : (
                 <span className="text-accent font-bold text-xl">M</span>
@@ -159,9 +172,20 @@ export default function Sidebar({
             <div
               className={`flex flex-col min-w-0 transition-all duration-300 ${collapsed ? "md:opacity-0 md:w-0 md:overflow-hidden" : "opacity-100"}`}
             >
-              <h2 className="text-white font-display font-bold text-[17px] leading-tight truncate w-36">
-                {companyName === "ANVIK INTERNATIONAL" ? "ANVIK" : companyName}
-              </h2>
+              <div className="flex w-36 items-center gap-1.5">
+                <h2 className="min-w-0 flex-1 truncate text-[17px] font-bold leading-tight text-white font-display">
+                  {companyName === "ANVIK INTERNATIONAL" ? "ANVIK" : companyName}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => handleNav("/mlmprofile")}
+                  aria-label="Edit company profile"
+                  title="Edit company profile"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/15 text-white transition-colors hover:bg-white/25"
+                >
+                  <PencilLine className="h-3.5 w-3.5" />
+                </button>
+              </div>
               {fullName && (
                 <div
                   className="mt-0.5 w-36 overflow-hidden text-white/75 text-[15px] font-medium"

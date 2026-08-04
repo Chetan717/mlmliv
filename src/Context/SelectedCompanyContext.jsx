@@ -16,15 +16,18 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { db } from "@firebase-config";
 import { useAuth } from "../Auth/AuthContext";
 import { COLLECTIONS } from "../collections";
 import {
+  clearCompanyScopedStorage,
   clearMlmProfileStorage,
   saveMlmProfileToStorage,
 } from "../utils/companyStorage";
+import { invalidateVerifiedMlmProfileCache } from "../utils/mlmProfileVerification";
 
 export const COMPANY_SELECTION_COLLECTION = "userCompanySelections";
 
@@ -47,6 +50,7 @@ export function SelectedCompanyProvider({ children }) {
   const { user, identity, loading: authLoading } = useAuth();
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [loading, setLoading] = useState(true);
+  const selectionRequestVersionRef = useRef(0);
 
   useEffect(() => {
     // One-way migration: remove the old browser copy regardless of login
@@ -56,9 +60,12 @@ export function SelectedCompanyProvider({ children }) {
   }, []);
 
   const loadSelection = useCallback(async () => {
+    const requestVersion = ++selectionRequestVersionRef.current;
     if (!user) {
-      setSelectedCompany(null);
-      setLoading(false);
+      if (requestVersion === selectionRequestVersionRef.current) {
+        setSelectedCompany(null);
+        setLoading(false);
+      }
       return null;
     }
 
@@ -120,14 +127,19 @@ export function SelectedCompanyProvider({ children }) {
       }
 
       const company = await readCompany(companyId);
-      setSelectedCompany(company);
+      if (requestVersion === selectionRequestVersionRef.current) {
+        setSelectedCompany(company);
+      }
       return company;
     } catch (error) {
-      
-      setSelectedCompany(null);
+      if (requestVersion === selectionRequestVersionRef.current) {
+        setSelectedCompany(null);
+      }
       throw error;
     } finally {
-      setLoading(false);
+      if (requestVersion === selectionRequestVersionRef.current) {
+        setLoading(false);
+      }
     }
   }, [identity?.mobileNo, user]);
 
@@ -162,6 +174,7 @@ export function SelectedCompanyProvider({ children }) {
 
       const verifiedCompany = await readCompany(company.id);
       if (!verifiedCompany) throw new Error("Selected company was not found.");
+      selectionRequestVersionRef.current += 1;
       setSelectedCompany(verifiedCompany);
       return verifiedCompany;
     },
@@ -171,6 +184,7 @@ export function SelectedCompanyProvider({ children }) {
   const clearCompanySelection = useCallback(async () => {
     if (!user?.uid) throw new Error("Authenticated user is required.");
     await deleteDoc(doc(db, COMPANY_SELECTION_COLLECTION, user.uid));
+    selectionRequestVersionRef.current += 1;
     setSelectedCompany(null);
   }, [user]);
 
@@ -185,6 +199,12 @@ export function SelectedCompanyProvider({ children }) {
       batch.delete(doc(db, COLLECTIONS.MLMPROFILES, profileId));
       batch.delete(doc(db, COMPANY_SELECTION_COLLECTION, user.uid));
       await batch.commit();
+
+      // Keep the authenticated Firebase session, but remove every draft/cache
+      // tied to the deleted company before Select Company can render.
+      selectionRequestVersionRef.current += 1;
+      invalidateVerifiedMlmProfileCache();
+      clearCompanyScopedStorage();
       setSelectedCompany(null);
     },
     [user],

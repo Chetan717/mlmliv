@@ -1256,12 +1256,9 @@ export default function MLMProfilePage() {
     try {
       await deleteProfileAndCompanySelection(existingDocId);
 
-      localStorage.removeItem("mlmProfile");
-      sessionStorage.removeItem("mlmProfile");
       toast.success("Profile deleted successfully.");
       setShowDeleteModal(false);
-
-      setTimeout(() => navigate("/logout"), 800);
+      navigate("/selectcomp", { replace: true });
     } catch (err) {
       
       toast.danger("Failed to delete profile. Please try again.");

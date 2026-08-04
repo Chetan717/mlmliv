@@ -179,17 +179,19 @@ export default function AskAi() {
               </span>
               MLM LIVE AI
             </div>
-            <h1 className="font-display text-3xl font-bold sm:text-4xl">
+            {/* <h1 className="font-display text-3xl font-bold sm:text-4xl">
               <span className="bg-gradient-to-r from-[#087fd1] via-[#7257d9] to-[#d84f9b] bg-clip-text text-transparent">
                 Hello, how can I help?
               </span>
-            </h1>
+            </h1> */}
             <p className="mt-2 text-sm text-muted-foreground">
-              Upload a prescription and get a clear reading of the visible text.
+              {/* Upload a prescription and get a clear reading of the visible text. */}
+              Ai Feature Comming Soon. Please check back later
+              for updates.
             </p>
           </div>
 
-          <div
+          {/* <div
             data-guide="ask-ai-credits"
             className="flex items-center gap-3 rounded-2xl border border-border bg-card/90 px-4 py-3 shadow-[var(--shadow-card)] backdrop-blur"
           >
@@ -208,10 +210,10 @@ export default function AskAi() {
                 </span>
               </p>
             </div>
-          </div>
+          </div> */}
         </header>
 
-        <div className="mt-7 grid gap-5 lg:grid-cols-[0.88fr_1.12fr]">
+        {/* <div className="mt-7 grid gap-5 lg:grid-cols-[0.88fr_1.12fr]">
           <section
             data-guide="ask-ai-upload"
             className="rounded-[28px] border border-border bg-card/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur sm:p-5"
@@ -478,7 +480,7 @@ export default function AskAi() {
               </div>
             )}
           </section>
-        </div>
+        </div> */}
       </div>
     </main>
   );

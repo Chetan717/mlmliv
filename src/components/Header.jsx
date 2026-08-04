@@ -21,12 +21,17 @@ import {
   Trophy,
   GitBranch,
   UserPlus,
+  PencilLine,
 } from "lucide-react";
 import { db } from "../Firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { COLLECTIONS } from "../collections";
-import { getLocalLogo } from "../utils/getCompanyLogo";
-import { getUser } from "../utils/authStorage";
+import { getCompanyLogoUrl } from "../utils/getCompanyLogo";
+import {
+  getUser,
+  VERIFIED_USER_CHANGED_EVENT,
+} from "../utils/authStorage";
+import { MLM_PROFILE_CHANGED_EVENT } from "../utils/companyStorage";
 import { runAppBackNavigation } from "../utils/appBackNavigation";
 import { auth } from "../Firebase";
 import { toast } from "@heroui/react";
@@ -47,9 +52,15 @@ const REFRESH_TARGETS = {
   "/mlmprofile": "mlm-profile",
 };
 function getStoredUserName() {
-  const mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile") || "{}");
-  const userMlm = getUser() || {};
-  return mlmProfile?.name || userMlm?.name || "";
+  try {
+    const mlmProfile = JSON.parse(
+      sessionStorage.getItem("mlmProfile") || "{}",
+    );
+    const userMlm = getUser() || {};
+    return mlmProfile?.fullName || mlmProfile?.name || userMlm?.name || "";
+  } catch {
+    return getUser()?.name || "";
+  }
 }
 const PAGE_TITLES = {
   "/subscription": "My Subscription",
@@ -83,10 +94,7 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
 
   const [userName, setUserName] = useState(() => getStoredUserName());
   const companyName = selectedCompany?.name || "";
-  const companyLogo =
-    getLocalLogo(selectedCompany?.id) ||
-    selectedCompany?.logos?.find((logo) => logo?.link?.trim())?.link ||
-    "";
+  const companyLogo = getCompanyLogoUrl(selectedCompany);
   const [refreshing, setRefreshing] = useState(false);
   const [showReportingMenu, setShowReportingMenu] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
@@ -122,7 +130,14 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
   }, [isReporting]);
 
   useEffect(() => {
-    setUserName(getStoredUserName());
+    const syncUserName = () => setUserName(getStoredUserName());
+    syncUserName();
+    window.addEventListener(MLM_PROFILE_CHANGED_EVENT, syncUserName);
+    window.addEventListener(VERIFIED_USER_CHANGED_EVENT, syncUserName);
+    return () => {
+      window.removeEventListener(MLM_PROFILE_CHANGED_EVENT, syncUserName);
+      window.removeEventListener(VERIFIED_USER_CHANGED_EVENT, syncUserName);
+    };
   }, []);
 
   useEffect(() => {
@@ -355,16 +370,17 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
             <ChevronLeft className="w-5 h-5" />
           </button>
         ) : (
-          <button
-            onClick={handleMenuClick}
-            aria-label="Menu"
-            className="relative w-9 h-9 flex items-center justify-center rounded-full text-foreground hover:bg-foreground/8 active:scale-95 transition-all flex-shrink-0"
-          >
-            <ListUl className="w-5 h-5" />
-            {isReporting && hasPendingInvites && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-background" />
-            )}
-          </button>
+          // <button
+          //   onClick={handleMenuClick}
+          //   aria-label="Menu"
+          //   className="relative w-9 h-9 flex items-center justify-center rounded-full text-foreground hover:bg-foreground/8 active:scale-95 transition-all flex-shrink-0"
+          // >
+          //   <ListUl className="w-5 h-5" />
+          //   {isReporting && hasPendingInvites && (
+          //     <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-background" />
+          //   )}
+          // </button> 
+        null
         )}
 
         <div className="flex-1 min-w-0 flex items-center">
@@ -387,13 +403,39 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
                 </p>
               )}
             </div>
-          ) : isHome && ( userName) ? (
-            <div className="flex items-center gap-2">
-              {userName && (
-                <span className="text-[14px] font-bold text-foreground capitalize truncate font-display">
-                  {userName}
+          ) : isHome && (userName || companyName) ? (
+            <div className="flex min-w-0 items-center gap-2">
+              <div
+                className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-white shadow-sm"
+                title={companyName}
+              >
+                <span className="text-xs font-bold text-accent">
+                  {companyName.trim().charAt(0).toUpperCase() || "C"}
                 </span>
-              )}
+                {companyLogo && (
+                  <img
+                    src={companyLogo}
+                    alt={`${companyName || "Selected company"} logo`}
+                    className="absolute inset-0 h-full w-full bg-white object-contain p-0.5"
+                    decoding="async"
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
+                  />
+                )}
+              </div>
+              <span className="min-w-0 truncate text-[11px] font-bold capitalize  font-display">
+                {userName || companyName}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate("/mlmprofile")}
+                aria-label="Edit company profile"
+                title="Edit company profile"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-accent/20 bg-accent/10 text-accent transition-all hover:bg-accent/20 active:scale-90 dark:text-white"
+              >
+                <PencilLine className="h-3.5 w-3.5" />
+              </button>
             </div>
           ) : isEditor ? (
             <h1 className="text-[15px] font-display font-bold text-foreground">

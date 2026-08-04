@@ -111,9 +111,9 @@ export default function SettingsMenu() {
         <Divider />
         <MenuRow onClick={() => window.open("https://youtube.com/@mlmboosterapp?si=4AQiHvcR8x6CmOHX","_blank")} icon={CircleQIcon}  label="Learn How to Use App" />
         <Divider />
-        <MenuRow onClick={() => window.open("tel:9229885383")}                  icon={PersonIcon}   label="Customer Care" />
+        <MenuRow onClick={() => window.open("tel:+919341947815")}                 icon={PersonIcon}   label="Customer Care" />
         <Divider />
-        <MenuRow onClick={() => window.open("https://wa.me/919229885383","_blank")} icon={CommentIcon} label="Chat with an Expert" />
+        <MenuRow onClick={() => window.open("https://wa.me/919341947815","_blank")} icon={CommentIcon} label="Chat with an Expert" />
 
         {/* ── SECURITY ── */}
         <SectionHeader title="Security" />

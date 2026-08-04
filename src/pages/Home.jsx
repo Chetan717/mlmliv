@@ -51,7 +51,7 @@ function WhatsAppBadge() {
       </button>
 
       <a
-        href="https://wa.me/919229885383"
+        href="https://wa.me/919341947815"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2 rounded-2xl shadow-2xl overflow-hidden"

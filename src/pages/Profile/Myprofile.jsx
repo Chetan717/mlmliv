@@ -14,23 +14,60 @@ import SettingsMenu from "./Settingsmenu";
 import { PencilLine, ArrowLeft, LogOut, Check } from "lucide-react";
 import { COLLECTIONS } from "../../collections";
 import { getUser, setUser } from "../../utils/authStorage";
+import { useAuth } from "../../Auth/AuthContext";
+import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
+import {
+  getMlmProfileFromStorage,
+  MLM_PROFILE_CHANGED_EVENT,
+} from "../../utils/companyStorage";
+
+const hasCompanyProfile = (profile) =>
+  !!(
+    profile &&
+    (profile.id || profile.companyId || profile.fullName || profile.mobile)
+  );
+
+const formatProfileName = (value) =>
+  String(value || "").replace(/^([A-Za-z]+)\.(?=\S)/, "$1. ").trim();
+
+const formatMobile = (value) => {
+  const raw = String(value || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+91 ${digits}`;
+  if (digits.length === 12 && digits.startsWith("91")) {
+    return `+91 ${digits.slice(2)}`;
+  }
+  return raw;
+};
 
 function Myprofile() {
+  const { identity } = useAuth();
+  const { selectedCompany } = useSelectedCompany();
   const [userData, setUserData]     = useState(null);
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState(() =>
+    getMlmProfileFromStorage(),
+  );
   const [editOpen, setEditOpen]     = useState(false);
   const [newName, setNewName]       = useState("");
   const [loading, setLoading]       = useState(false);
   const navigate                    = useNavigate();
 
   useEffect(() => {
-    const parsed = getUser();
+    // getUser() may contain the login response's name even when an older
+    // Firebase token has not received that optional claim yet.
+    const parsed = getUser() || identity;
     if (parsed) {
       setUserData(parsed);
-      setNewName(parsed.name);
+      setNewName(parsed.name || "");
     }
-    const rawProfile = sessionStorage.getItem("mlmProfile");
-    if (rawProfile) setProfileData(JSON.parse(rawProfile));
+  }, [identity]);
+
+  useEffect(() => {
+    const syncProfile = () => setProfileData(getMlmProfileFromStorage());
+    syncProfile();
+    window.addEventListener(MLM_PROFILE_CHANGED_EVENT, syncProfile);
+    return () =>
+      window.removeEventListener(MLM_PROFILE_CHANGED_EVENT, syncProfile);
   }, []);
 
   const handleEditSave = async () => {
@@ -56,9 +93,30 @@ function Myprofile() {
     }
   };
 
+  const isCompanyProfile = hasCompanyProfile(profileData);
+  const displayName = isCompanyProfile
+    ? formatProfileName(profileData.fullName || profileData.name)
+    : userData?.name || "MLM LIVE User";
+  const displayMobile = isCompanyProfile
+    ? profileData.mobile || profileData.mobileNo
+    : userData?.mobileNo || userData?.mobile;
+  const displayCompanyName = isCompanyProfile
+    ? profileData.companyName || selectedCompany?.name || ""
+    : "";
   const profileImageURL =
-    profileData?.profileImageURLs?.[0] ||
-    `https://ui-avatars.com/api/?background=0e245c&color=fff&name=${encodeURIComponent(userData?.name || "User")}&bold=true`;
+    (isCompanyProfile && profileData?.profileImageURLs?.[0]) ||
+    userData?.photoURL ||
+    userData?.photo ||
+    `https://ui-avatars.com/api/?background=0e245c&color=fff&name=${encodeURIComponent(displayName || "User")}&bold=true`;
+
+  const handleProfileEdit = () => {
+    if (isCompanyProfile) {
+      navigate("/mlmprofile");
+      return;
+    }
+    setNewName(userData?.name || "");
+    setEditOpen(true);
+  };
 
   if (!userData) return (
     <div className="flex h-full items-center justify-center bg-background">
@@ -74,7 +132,7 @@ function Myprofile() {
         onOpenChange={(open) => {
           if (!open) {
             setEditOpen(false);
-            setNewName(userData.name);
+            setNewName(userData?.name || "");
           }
         }}
       >
@@ -118,7 +176,7 @@ function Myprofile() {
                   <button
                     onClick={() => {
                       setEditOpen(false);
-                      setNewName(userData.name);
+                      setNewName(userData?.name || "");
                     }}
                     className="flex-1 h-12 rounded-xl font-semibold text-[14px] bg-muted/30 hover:bg-muted/50 text-foreground transition-colors"
                   >
@@ -129,7 +187,7 @@ function Myprofile() {
                     disabled={
                       loading ||
                       !newName.trim() ||
-                      newName.trim() === userData.name
+                      newName.trim() === (userData?.name || "")
                     }
                     className="flex-1 h-12 rounded-xl font-bold text-[14px] bg-accent hover:bg-accent/90 text-white shadow-lg shadow-accent/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
@@ -166,32 +224,44 @@ function Myprofile() {
 
           {/* Avatar row */}
           <div className="relative z-10 flex items-end gap-4">
-            <div className="relative group">
-              <div className="w-20 h-20 rounded-2xl border-2 border-white/30 shadow-xl overflow-hidden bg-white flex items-center justify-center">
+            <button
+              type="button"
+              onClick={handleProfileEdit}
+              aria-label={
+                isCompanyProfile ? "Edit company profile" : "Edit account name"
+              }
+              className="relative group shrink-0 rounded-2xl text-left"
+            >
+              <div className="w-20 h-25 rounded-2xl border-2 border-white/30 shadow-xl overflow-hidden bg-white flex items-center justify-center">
                 <img
                   src={profileImageURL}
-                  alt={userData.name}
+                  alt={displayName}
                   className="w-full h-full object-contain"
                 />
               </div>
               <div className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                 <PencilLine className="w-5 h-5 text-white" />
               </div>
-            </div>
-            <div className="pb-1 flex-1 min-w-0">
-              <h2 className="text-[20px] font-display font-bold text-white capitalize truncate">
-                {userData.name}
+            </button>
+            <div className="pb-1  min-w-0">
+              <h2 className="text-[16px] font-bold text-white capitalize ">
+                {displayName}
               </h2>
-              <p className="text-white/65 text-[13px] font-mono mt-0.5">
-                +91 {userData.mobileNo}
+              {displayCompanyName && (
+                <p className="mt-0.5 truncate text-[12px] font-semibold text-white/85">
+                  {displayCompanyName}
+                </p>
+              )}
+              <p className="mt-0.5 text-[13px] font-mono text-white/65">
+                {formatMobile(displayMobile)}
               </p>
             </div>
             <button
-              onClick={() => setEditOpen(true)}
-              className="flex-shrink-0 flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-[12px] font-semibold px-4 py-2 rounded-full transition-colors mb-1"
+              onClick={handleProfileEdit}
+              className="flex-shrink-0 flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-[12px] font-semibold px-4 py-2 rounded-full transition-colors mb-8"
             >
               <PencilLine className="w-3.5 h-3.5" />
-              Edit
+              {isCompanyProfile ? "Edit" : "Edit"}
             </button>
           </div>
         </div>

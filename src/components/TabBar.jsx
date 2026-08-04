@@ -13,23 +13,23 @@ const TABS = [
     path: "/",
     Icon: ({ className }) => <House className={className} />,
   },
-  // {
-  //   label: "Ask AI",
-  //   path: "/ask-ai",
-  //   Icon: ({ className }) => <Sparkles className={className} />,
-  // },
   {
-    label: "Subscription",
-    path: "/subscription",
-    Icon: ({ className }) => <Gem className={className} />,
+    label: "Ask AI",
+    path: "/ask-ai",
+    Icon: ({ className }) => <Sparkles className={className} />,
   },
+  // {
+  //   label: "Subscription",
+  //   path: "/subscription",
+  //   Icon: ({ className }) => <Gem className={className} />,
+  // },
   // {
   //   label: "Report",
   //   path: "/reporting",
   //   Icon: ({ className }) => <BarChart3 className={className} />,
   // },
   {
-    label: "Profile",
+    label: "My Profile",
     path: "/profile",
     Icon: ({ className }) => <Person className={className} />,
   },
@@ -94,7 +94,7 @@ export default function TabBar() {
           const isActive =
             location.pathname === path ||
             (path === "/" && location.pathname === "");
-
+const isAi = path === "/ask-ai";
           const isReporting  = path === "/reporting";
           const isHome       = path === "/";
           const showBadge    = (isReporting && badgeCount > 0) || (isHome && hasNewTemplates);
