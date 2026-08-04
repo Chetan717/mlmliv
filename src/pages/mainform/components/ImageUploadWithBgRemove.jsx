@@ -126,7 +126,7 @@ export default function ImageUploadWithBgRemove({
     setOpen(false);
 
     (async () => {
-      let finalImage = croppedBlob;
+      let finalImage = null;
       let completed = false;
       try {
         const processed = await removeBg(
@@ -149,7 +149,7 @@ export default function ImageUploadWithBgRemove({
           controller.signal.aborted ||
           processingId !== processingIdRef.current
         ) return;
-        finalImage = processed || croppedBlob;
+        finalImage = processed;
         completed = true;
         toast.success("Background removed successfully! ✨");
       } catch (err) {
@@ -160,9 +160,17 @@ export default function ImageUploadWithBgRemove({
         ) return;
         
         console.error("[removeBg] Image processing failed:", err, err?.cause);
-        toast.danger("Background removal failed. You can still finish the crop.");
-        finalImage = croppedBlob;
-        completed = true;
+        toast.danger(
+          "Clean background removal पूरा नहीं हुआ. Internet check करके Done दबाकर Retry करें.",
+        );
+
+        // Never let the opaque/original photo enter the final Done flow. Keep
+        // the same crop ready so the user can retry the professional model.
+        const retryPreview = URL.createObjectURL(croppedBlob);
+        setEnhanceEnabled?.(false);
+        setEditingImage(retryPreview);
+        setOnImageDone(() => removeBackgroundAfterCrop);
+        setOpen(true);
       } finally {
         if (processingId === processingIdRef.current) {
           abortRef.current = null;
@@ -212,7 +220,7 @@ export default function ImageUploadWithBgRemove({
     // faster without uploading the selected photo anywhere.
     if (!skipBackgroundRemoval) {
       void preloadBgModel().catch(() => {
-        // removeBg() performs the normal retry/fallback and shows any error.
+        // removeBg() performs a same-quality clean retry and shows any error.
       });
     }
 

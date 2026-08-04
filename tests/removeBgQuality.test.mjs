@@ -7,13 +7,24 @@ import {
   cleanPortraitMatte,
   getInferenceSize,
   getSafeOutputSize,
+  MODNET_QUALITY_SETTINGS,
 } from "../src/pages/mainform/utils/modnetBg.js";
+import {
+  REMOVE_BG_QUALITY,
+} from "../src/pages/mainform/utils/removeBg.js";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const read = (relativePath) =>
   readFileSync(join(projectRoot, relativePath), "utf8");
 
 test("quality inference keeps enough detail and caps panoramic images", () => {
+  assert.deepEqual(MODNET_QUALITY_SETTINGS, {
+    inferenceReferenceSize: 640,
+    maxInferenceSide: 1024,
+    maxOutputSide: 2048,
+    maxOutputPixels: 2048 * 1536,
+    detailPassMaxBoxRatio: 0.55,
+  });
   assert.deepEqual(getInferenceSize(800, 800), { width: 640, height: 640 });
   assert.deepEqual(getInferenceSize(4000, 1000), {
     width: 1024,
@@ -70,13 +81,22 @@ test("portrait matte preserves weak ear detail but rejects detached background",
   assert.equal(cleaned[24 * width + 4], 0, "detached background must be removed");
 });
 
-test("every Remove-BG path uses the quality engine with a local fallback", () => {
+test("all runtimes require the same continuous-alpha portrait model", () => {
   const removeBg = read("src/pages/mainform/utils/removeBg.js");
-  assert.match(removeBg, /model:\s*"medium"/);
-  assert.match(removeBg, /removeWithImgly/);
-  assert.match(removeBg, /removeWithModNet/);
-  assert.match(removeBg, /removeBgWithMediaPipe/);
-  assert.match(removeBg, /did not create transparency/);
+  assert.deepEqual(REMOVE_BG_QUALITY, {
+    engine: "modnet-continuous-portrait-matte",
+    model: "modnet-portrait",
+    continuousAlpha: true,
+    lowQualityFallback: false,
+    originalPhotoFallback: false,
+  });
+  assert.match(removeBg, /removeWithProfessionalMatte/);
+  assert.match(removeBg, /removeBackgroundWithModNet/);
+  assert.doesNotMatch(
+    removeBg,
+    /removeBgWithMediaPipe|removeWithImgly|@imgly\/background-removal/,
+  );
+  assert.match(removeBg, /resetModNetEngine\(\{ freshAssets: true \}\)/);
 
   for (const path of [
     "src/pages/mainform/components/ImageUploadWithBgRemove.jsx",
@@ -85,6 +105,21 @@ test("every Remove-BG path uses the quality engine with a local fallback", () =>
   ]) {
     assert.match(read(path), /mainform\/utils\/removeBg|\.\.\/utils\/removeBg/);
   }
+});
+
+test("failed removal never advances the original photo to final Done", () => {
+  const single = read(
+    "src/pages/mainform/components/ImageUploadWithBgRemove.jsx",
+  );
+  const multiple = read("src/pages/mainform/components/MultiImagePicker.jsx");
+  const profile = read("src/pages/Form/Mlmprofilemodal.jsx");
+
+  assert.doesNotMatch(single, /processed\s*\|\|\s*croppedBlob/);
+  assert.doesNotMatch(single, /finalImage\s*=\s*croppedBlob/);
+  assert.match(single, /setOnImageDone\(\(\) => removeBackgroundAfterCrop\)/);
+  assert.doesNotMatch(multiple, /processed\s*\|\|\s*blob/);
+  assert.match(multiple, /setCropStage\("initial"\)/);
+  assert.doesNotMatch(profile, /blob\s*=\s*blob\s*\|\|\s*file/);
 });
 
 test("Income achiever photo uses the shared Remove-BG flow", () => {

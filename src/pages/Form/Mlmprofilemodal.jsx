@@ -774,7 +774,6 @@ export default function MLMProfilePage() {
         controller.signal,
       );
       if (controller.signal.aborted) return;
-      blob = blob || file;
       toast.success("Background removed successfully! ✨");
       setEditorSrc(URL.createObjectURL(blob));
       setEditorContext("topup");
@@ -880,7 +879,6 @@ export default function MLMProfilePage() {
         controller.signal,
       );
       if (controller.signal.aborted) return;
-      blob = blob || file;
       toast.success("Background removed successfully! ✨");
       setEditorSrc(URL.createObjectURL(blob));
       setEditingProfileIndex("new");

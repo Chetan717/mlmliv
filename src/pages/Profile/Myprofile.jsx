@@ -261,7 +261,7 @@ function Myprofile() {
               className="flex-shrink-0 flex items-center gap-1.5 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-[12px] font-semibold px-4 py-2 rounded-full transition-colors mb-8"
             >
               <PencilLine className="w-3.5 h-3.5" />
-              {isCompanyProfile ? "Edit" : "Edit"}
+              {isCompanyProfile ? "Edit Profile" : "Edit Name"}
             </button>
           </div>
         </div>

@@ -138,15 +138,18 @@ export default function MultiImagePicker({
         );
         if (controller.signal.aborted) return;
         toast.success("Background removed successfully! ✨");
-        setEditingImage(URL.createObjectURL(processed || blob));
+        setEditingImage(URL.createObjectURL(processed));
         setCropStage("final");
         toast("Adjust the final crop, then tap Done.");
       } catch (err) {
         if (err?.name === "AbortError" || controller.signal.aborted) return;
         
-        toast.danger("Background removal failed. You can still finish the crop.");
-        setEditingImage(URL.createObjectURL(blob));
-        setCropStage("final");
+        toast.danger(
+          "Clean background removal पूरा नहीं हुआ. Internet check करके Done दबाकर Retry करें.",
+        );
+        // Keep the item on its initial stage. The original/background image is
+        // never accepted into the final list as a successful Remove-BG result.
+        setCropStage("initial");
       } finally {
         abortRef.current = null;
         setBgLoading(false);

@@ -9,7 +9,9 @@
 
 let runtimePromise = null;
 let sessionPromise = null;
-const MODEL_ASSET_VERSION = "modnet-2026-07";
+let assetRevision = 0;
+let forceFreshModelFetch = false;
+const MODEL_ASSET_VERSION = "modnet-2026-08-quality";
 const INFERENCE_REFERENCE_SIZE = 640;
 const MAX_INFERENCE_SIDE = 1024;
 const MAX_OUTPUT_SIDE = 2048;
@@ -17,6 +19,16 @@ const MAX_OUTPUT_PIXELS = 2048 * 1536;
 const STRONG_FOREGROUND_ALPHA = 0.32;
 const WEAK_EDGE_ALPHA = 0.006;
 const EDGE_RECOVERY_DISTANCE = 12;
+const DETAIL_PASS_MAX_BOX_RATIO = 0.55;
+const MIN_TRANSPARENT_RATIO = 0.005;
+
+export const MODNET_QUALITY_SETTINGS = Object.freeze({
+  inferenceReferenceSize: INFERENCE_REFERENCE_SIZE,
+  maxInferenceSide: MAX_INFERENCE_SIDE,
+  maxOutputSide: MAX_OUTPUT_SIDE,
+  maxOutputPixels: MAX_OUTPUT_PIXELS,
+  detailPassMaxBoxRatio: DETAIL_PASS_MAX_BOX_RATIO,
+});
 
 function abortError() {
   return new DOMException("Background removal cancelled", "AbortError");
@@ -34,6 +46,7 @@ function assetUrl(fileName) {
   // Cache files permanently on the device while keeping future model updates
   // safe: bump this version whenever any MODNet/ORT asset changes.
   url.searchParams.set("v", MODEL_ASSET_VERSION);
+  if (assetRevision > 0) url.searchParams.set("retry", String(assetRevision));
   return url.href;
 }
 
@@ -62,8 +75,10 @@ async function loadRuntime() {
 }
 
 async function fetchModel(onProgress) {
+  const cacheMode = forceFreshModelFetch ? "reload" : "force-cache";
+  forceFreshModelFetch = false;
   const response = await fetch(assetUrl("modnet.onnx"), {
-    cache: "force-cache",
+    cache: cacheMode,
   });
   if (!response.ok) {
     throw new Error(`Portrait model download failed (${response.status}).`);
@@ -586,7 +601,7 @@ function getDetailRegion(globalMatte, sourceWidth, sourceHeight) {
   // A second, zoomed inference is most useful when the person is relatively
   // small in a large scene. It restores facial, ear and hair detail that a
   // single whole-photo pass cannot resolve.
-  if (boxAreaRatio >= 0.36) return null;
+  if (boxAreaRatio >= DETAIL_PASS_MAX_BOX_RATIO) return null;
 
   const scaleX = sourceWidth / globalMatte.width;
   const scaleY = sourceHeight / globalMatte.height;
@@ -740,6 +755,16 @@ export async function preloadModNet(onProgress) {
   return "modnet";
 }
 
+/** Clear a failed session so the caller can retry the exact same quality model. */
+export function resetModNetEngine({ freshAssets = false } = {}) {
+  sessionPromise = null;
+  if (freshAssets) {
+    runtimePromise = null;
+    assetRevision += 1;
+    forceFreshModelFetch = true;
+  }
+}
+
 export async function removeBackgroundWithModNet(file, onProgress, signal) {
   throwIfAborted(signal);
   onProgress?.("Professional portrait model तैयार हो रहा है…", 6);
@@ -832,16 +857,36 @@ export async function removeBackgroundWithModNet(file, onProgress, signal) {
 
   let visiblePixels = 0;
   let transparentPixels = 0;
+  let transparentBorderPixels = 0;
+  let borderPixels = 0;
   for (let pixelIndex = 0; pixelIndex < alphaMap.length; pixelIndex += 1) {
     const alpha = alphaMap[pixelIndex];
     if (alpha >= 128) visiblePixels += 1;
-    if (alpha <= 5) transparentPixels += 1;
+    if (alpha <= 8) transparentPixels += 1;
+    const x = pixelIndex % sourceCanvas.width;
+    const y = Math.floor(pixelIndex / sourceCanvas.width);
+    if (
+      x === 0 ||
+      y === 0 ||
+      x === sourceCanvas.width - 1 ||
+      y === sourceCanvas.height - 1
+    ) {
+      borderPixels += 1;
+      if (alpha <= 8) transparentBorderPixels += 1;
+    }
   }
   if (visiblePixels < alphaMap.length * 0.001) {
     throw new Error("No clear person was found in this photo.");
   }
-  if (transparentPixels < alphaMap.length * 0.0005) {
+  const transparentRatio = transparentPixels / alphaMap.length;
+  const transparentBorderRatio = borderPixels
+    ? transparentBorderPixels / borderPixels
+    : 0;
+  if (transparentRatio < MIN_TRANSPARENT_RATIO) {
     throw new Error("The portrait could not be separated from its background.");
+  }
+  if (transparentRatio < 0.015 && transparentBorderRatio < 0.02) {
+    throw new Error("The background is still attached to the portrait mask.");
   }
 
   const outputPixels = decontaminateEdgeColours(
@@ -877,10 +922,27 @@ export async function removeBackgroundWithModNet(file, onProgress, signal) {
   onProgress?.("Lossless Transparent PNG तैयार हो रही है…", 97);
   return new Promise((resolve, reject) => {
     outputCanvas.toBlob(
-      (blob) =>
-        blob
-          ? resolve(blob)
-          : reject(new Error("Transparent PNG creation failed.")),
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+
+        // Some Android WebViews occasionally return null from canvas.toBlob.
+        // A data-URL fallback prevents a clean matte from being lost at the
+        // final encoding step.
+        try {
+          const [, encoded] = outputCanvas.toDataURL("image/png").split(",");
+          const binary = atob(encoded);
+          const bytes = new Uint8Array(binary.length);
+          for (let index = 0; index < binary.length; index += 1) {
+            bytes[index] = binary.charCodeAt(index);
+          }
+          resolve(new Blob([bytes], { type: "image/png" }));
+        } catch (error) {
+          reject(new Error("Transparent PNG creation failed.", { cause: error }));
+        }
+      },
       "image/png",
     );
   });
