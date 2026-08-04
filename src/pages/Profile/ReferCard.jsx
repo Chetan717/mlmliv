@@ -156,21 +156,18 @@ export default function ReferCard() {
   }, [user?.referCode]);
 
   const handleShare = useCallback(() => {
-    if (!user?.referCode) return;
+   
 
     const appLink = createPlayStoreReferralLink(referCode);
     const msg =
       `🌟 *Join MLM LIVE & Grow Your Network!*\n\n` +
-      `Hey! I'm using *MLM LIVE* — the best app to create stunning marketing images for your MLM business instantly.\n\n` +
+      `Hey! I'm using *MLM LIVE* — the best app to create stunning marketing images for your business instantly.\n\n` +
       `🎁 *Use my referral code:* \`${referCode}\`\n\n` +
-      `✅ *You get:* 10 Free Credits on joining\n` +
-      `🎉 *I get:* 10 Credits for referring you\n\n` +
+      `✅ *You get:* Free Credits on joining\n` +
+
       `📲 Download now from Play Store:\n` +
       `👉 ${appLink}`;
 
-    // If running inside the MLM LIVE Android/iOS app (React Native WebView),
-    // delegate to the native share sheet so the user can share to any app
-    // (WhatsApp, SMS, Email, etc.) with the referral/coupon code attached.
     if (typeof window !== "undefined" && window.ReactNativeWebView?.postMessage) {
       window.ReactNativeWebView.postMessage(
         JSON.stringify({
@@ -211,7 +208,7 @@ export default function ReferCard() {
 
       <div className="w-full px-1">
         <div
-          className="relative overflow-hidden rounded-2xl p-5 w-full"
+          className="relative overflow-hidden rounded-2xl p-4 w-full"
           style={{
             background:
               "linear-gradient(135deg, #0088DA 0%, #0088DA 60%, #0088DA 100%)",
@@ -224,43 +221,22 @@ export default function ReferCard() {
           {/* Content: left side */}
           <div className="relative z-10 max-w-[58%]">
             <p className="text-white/80 text-[11px] font-medium mb-0.5">
-              Invite friends & earn
             </p>
             <p className="text-white text-[13px] font-bold mb-3">
-              10 Free Credits per referral!
+              Free Credits per Referral!
             </p>
 
-            {/* Code box */}
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center gap-2 bg-white/18 border border-white/30 rounded-xl px-3 py-2 flex-row min-w-0">
-                <span className="text-white text-[12px] font-mono font-bold tracking-widest truncate">
-                  {referCode}{" "}
-                </span>
-                <button
-                  onClick={handleCopy}
-                  className="text-white/80 hover:text-white transition-colors flex-shrink-0"
-                >
-                  {copied ? (
-                    <Check width={15} height={15} className="text-green-300" />
-                  ) : (
-                    <Copy width={15} height={15} />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap ">
               <button
                 onClick={handleShare}
                 className="bg-white/15 flex flex-row gap-2  border border-white/35 text-white font-semibold text-[11px] px-4 py-1.5 rounded-full hover:bg-white/25 active:scale-95 transition-all"
               >
                 <span className="text-white text-[11px] font-mono font-bold tracking-widest truncate">
-                  Share MLMLIVE
+                  SHARE MLM LIVE APP
                 </span>
                 <NodesRight width={15} height={15} />
               </button>
-              <button
+              {/* <button
                 onClick={() => setShowModal(true)}
                 className="bg-white/15 flex flex-row gap-2  border border-white/35 text-white font-semibold text-[11px] px-4 py-1.5 rounded-full hover:bg-white/25 active:scale-95 transition-all"
               >
@@ -268,7 +244,7 @@ export default function ReferCard() {
                   View Referrals
                 </span>
                 <CreditCard width={15} height={15} />
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -276,7 +252,7 @@ export default function ReferCard() {
           <img
             src={referGraphic}
             alt="refer graphic"
-            className="absolute w-[120px] -bottom-0 right-0 object-contain pointer-events-none"
+            className="absolute w-[95px] -bottom-0 right-0 object-contain pointer-events-none"
           />
         </div>
       </div>
