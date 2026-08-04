@@ -1031,7 +1031,6 @@ export default function SalesExecutiveForm() {
                     type="form"
                     editingType={editingType}
                     setEditingType={setEditingType}
-                    skipBackgroundRemoval={isIncome}
                   />
                   <InlineError message={errors.achieverImage} />
                 </div>

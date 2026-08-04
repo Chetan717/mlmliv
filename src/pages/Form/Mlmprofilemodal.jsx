@@ -30,10 +30,14 @@ import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 import { PAGE_REFRESH_EVENT } from "../../utils/pageRefresh";
 import RemoveBgLoadingOverlay from "../mainform/components/RemoveBgLoadingOverlay";
 import { getBannerSettingsReturn } from "../../utils/bannerSettingsNavigation";
+import { syncRemovedProfileTopuplinesToLocalForm } from "../../utils/topuplineStorageSync";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
-import { removeBg as removeBackground } from "../mainform/utils/removeBg";
+import {
+  preloadBgModel,
+  removeBg as removeBackground,
+} from "../mainform/utils/removeBg";
 
 // ════════════════════════════════════════════════════════════
 // SOCIAL ICONS
@@ -490,6 +494,7 @@ export default function MLMProfilePage() {
   const topupInputRef = useRef(null);
   const originalProfileImageURLsRef = useRef([]);
   const originalTopupURLsRef = useRef([]);
+  const originalAllTopupURLsRef = useRef([]);
   const savedFormSignatureRef = useRef(null);
   const restoringMobileBackRef = useRef(false);
   const allowMobileBackRef = useRef(false);
@@ -562,6 +567,7 @@ export default function MLMProfilePage() {
         originalProfileImageURLsRef.current = profileImageURLs;
 
         const rawTopupURLs = data.topuplineURLs || [];
+        originalAllTopupURLsRef.current = rawTopupURLs;
         originalTopupURLsRef.current = rawTopupURLs.filter(
           isManuallyUploadedUrl,
         );
@@ -715,6 +721,9 @@ export default function MLMProfilePage() {
 
   const handleTopupAddCustomFiles = (files) => {
     if (!files.length) return;
+    void preloadBgModel().catch(() => {
+      // The processing step will retry or use the bundled fallback.
+    });
     setEditorSrc(URL.createObjectURL(files[0]));
     setEditorContext("topup");
     setEditorStage("initial");
@@ -825,6 +834,10 @@ export default function MLMProfilePage() {
       toast.danger("Image must be smaller than 8 MB.");
       return;
     }
+
+    void preloadBgModel().catch(() => {
+      // The processing step will retry or use the bundled fallback.
+    });
 
     setEditorSrc(URL.createObjectURL(file));
     setEditingProfileIndex("new");
@@ -1194,6 +1207,16 @@ export default function MLMProfilePage() {
           JSON.stringify({ id: newDoc.id, ...profileData }),
         );
       }
+
+      // Banner Settings updates the profile, while Editor also keeps the
+      // current form selection in localStorage. Remove deleted profile URLs
+      // from that form copy so the canvas cannot render a stale photo after
+      // returning to Editor. Additions and form-only custom images stay as-is.
+      syncRemovedProfileTopuplinesToLocalForm(
+        originalAllTopupURLsRef.current,
+        allTopupURLs,
+      );
+      originalAllTopupURLsRef.current = allTopupURLs;
 
       toast.success(
         isEditMode

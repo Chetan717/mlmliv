@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Modal, toast } from "@heroui/react";
 import { validateUploadFile } from "../../../lib/fileValidation";
-import { removeBg } from "../utils/removeBg";
+import { preloadBgModel, removeBg } from "../utils/removeBg";
 import ImageEditorCanvas from "./ImageEditorCanvas";
 import photoupload from "./photoupload.png";
 import RemoveBgLoadingOverlay from "./RemoveBgLoadingOverlay";
@@ -88,6 +88,11 @@ export default function MultiImagePicker({
   // Adds newly selected files to the queue, starting processing immediately
   // if nothing is currently in flight.
   const enqueueFiles = (files) => {
+    // Model loading starts only after a user selects a photo and overlaps the
+    // first crop; this keeps startup/CDN optimisation intact.
+    void preloadBgModel().catch(() => {
+      // removeBg() owns the normal retry/fallback and user-facing error.
+    });
     if (!processingRef.current) {
       processingRef.current = true;
       const [first, ...rest] = files;

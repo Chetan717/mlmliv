@@ -225,6 +225,20 @@
          "size": "rectangle"
        }
      ]
+   },
+   {
+     "ID": "w0Nb93gSFyVcQDFRr3YV",
+     "name": "SAFE GOD",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785827298616_fwexbj.webp?alt=media&token=7f516a0c-8fae-42ee-8790-62c177cfeebd",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785827277608_8qqeea.webp?alt=media&token=4899f5bb-bf05-4df0-9908-70c0dc83ecae",
+         "size": "rectangle"
+       }
+     ]
    }
 
 ]

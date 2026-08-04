@@ -3138,8 +3138,8 @@ function GeneralEditPage({
                               ? 97
                               : isRank_B
                                 ? isRight
-                                  ? 104
-                                  : 104
+                                  ? 102.7
+                                  : 102.7
                                 : 96
                   }
                   width={isCapping ? 130 : isAnyversary ? 175 : 165}
@@ -3167,8 +3167,8 @@ function GeneralEditPage({
                         : 205
                       : isIncome
                         ? isRight
-                          ? 85
-                          : 185
+                          ? 65
+                          : 165
                         : isAnyversary
                           ? isRight
                             ? 75
@@ -3218,8 +3218,8 @@ function GeneralEditPage({
                                 : 112
                               : isRank_B
                                 ? isRight
-                                  ? 115
-                                  : 115
+                                  ? 113.7
+                                  : 113.7
                                 : 112
                   }
                   width={100}

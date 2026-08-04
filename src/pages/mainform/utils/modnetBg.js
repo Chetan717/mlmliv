@@ -10,6 +10,13 @@
 let runtimePromise = null;
 let sessionPromise = null;
 const MODEL_ASSET_VERSION = "modnet-2026-07";
+const INFERENCE_REFERENCE_SIZE = 640;
+const MAX_INFERENCE_SIDE = 1024;
+const MAX_OUTPUT_SIDE = 2048;
+const MAX_OUTPUT_PIXELS = 2048 * 1536;
+const STRONG_FOREGROUND_ALPHA = 0.32;
+const WEAK_EDGE_ALPHA = 0.006;
+const EDGE_RECOVERY_DISTANCE = 12;
 
 function abortError() {
   return new DOMException("Background removal cancelled", "AbortError");
@@ -154,116 +161,215 @@ async function decodeImage(file) {
   }
 }
 
-function getInferenceSize(width, height, referenceSize = 512) {
-  let inferenceWidth = width;
-  let inferenceHeight = height;
-  if (Math.max(width, height) < referenceSize || Math.min(width, height) > referenceSize) {
-    if (width >= height) {
-      inferenceHeight = referenceSize;
-      inferenceWidth = Math.round((width / height) * referenceSize);
-    } else {
-      inferenceWidth = referenceSize;
-      inferenceHeight = Math.round((height / width) * referenceSize);
-    }
+function alignToModelStride(value) {
+  return Math.max(32, Math.round(value / 32) * 32);
+}
+
+/**
+ * MODNet accepts dynamic shapes, but both dimensions must be divisible by 32.
+ * Always giving the short edge enough pixels fixes the old wide-photo case
+ * where a 200px-high portrait was sent to the model almost unchanged. The
+ * longest edge remains capped so unusual panoramas cannot exhaust a WebView.
+ */
+export function getInferenceSize(
+  width,
+  height,
+  referenceSize = INFERENCE_REFERENCE_SIZE,
+  maxSide = MAX_INFERENCE_SIDE,
+) {
+  if (!(width > 0) || !(height > 0)) return { width: 32, height: 32 };
+
+  const shortEdge = Math.min(width, height);
+  const longEdge = Math.max(width, height);
+  let scale = referenceSize / shortEdge;
+  if (longEdge * scale > maxSide) scale = maxSide / longEdge;
+
+  let inferenceWidth = alignToModelStride(width * scale);
+  let inferenceHeight = alignToModelStride(height * scale);
+  const alignedMaxSide = Math.max(32, Math.floor(maxSide / 32) * 32);
+
+  if (Math.max(inferenceWidth, inferenceHeight) > alignedMaxSide) {
+    const capScale = alignedMaxSide / Math.max(inferenceWidth, inferenceHeight);
+    inferenceWidth = alignToModelStride(inferenceWidth * capScale);
+    inferenceHeight = alignToModelStride(inferenceHeight * capScale);
   }
 
-  inferenceWidth = Math.max(32, inferenceWidth - (inferenceWidth % 32));
-  inferenceHeight = Math.max(32, inferenceHeight - (inferenceHeight % 32));
   return { width: inferenceWidth, height: inferenceHeight };
 }
 
-function smoothAlpha(value) {
-  const normalized = Math.max(0, Math.min(1, (value - 0.012) / 0.976));
-  return normalized * normalized * (3 - 2 * normalized);
+/** Keep large phone photos within a predictable memory budget without crop. */
+export function getSafeOutputSize(
+  width,
+  height,
+  maxSide = MAX_OUTPUT_SIDE,
+  maxPixels = MAX_OUTPUT_PIXELS,
+) {
+  if (!(width > 0) || !(height > 0)) return { width: 1, height: 1, scale: 1 };
+  const sideScale = Math.min(1, maxSide / Math.max(width, height));
+  const pixelScale = Math.min(1, Math.sqrt(maxPixels / (width * height)));
+  const scale = Math.min(sideScale, pixelScale);
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+    scale,
+  };
 }
 
-function removeDetachedMatteParticles(values, width, height) {
-  const pixelCount = width * height;
-  const visited = new Uint8Array(pixelCount);
-  const queue = new Int32Array(pixelCount);
-  const components = [];
-  let largestSize = 0;
+function smoothAlpha(value) {
+  const normalized = Math.max(0, Math.min(1, (value - 0.004) / 0.992));
+  const smoothStep = normalized * normalized * (3 - 2 * normalized);
+  // Do not crush genuine low-opacity hair into zero. Detached low confidence
+  // has already been rejected by cleanPortraitMatte's connectivity gate.
+  return Math.max(normalized * 0.78, smoothStep);
+}
 
-  // Find real foreground islands on the small inference matte. Very faint
-  // alpha is deliberately excluded here, otherwise a background line can
-  // connect dust/noise to the portrait. This does not erode the final edge;
-  // it only decides which islands are allowed to keep their soft alpha.
+/**
+ * Keep the main portrait and recover its weak connected edge. A low threshold
+ * alone used to keep sizeable background objects, while a hard threshold cut
+ * ears and fine hair. This is a two-threshold/hysteresis matte: the strongest
+ * portrait component is the anchor, then genuine low-alpha detail may grow a
+ * bounded distance from it. Detached background cannot re-enter the mask.
+ */
+export function cleanPortraitMatte(values, width, height) {
+  const pixelCount = width * height;
+  if (!values?.length || pixelCount <= 0) return new Float32Array(0);
+
+  const labels = new Uint32Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let nextLabel = 0;
+  let primaryLabel = 0;
+  let primaryArea = 0;
+  let primaryTop = height;
+  let primaryBottom = -1;
+
+  // Locate only confident components first. Eight-way connectivity prevents
+  // diagonal hair strands from being misclassified as separate particles.
   for (let start = 0; start < pixelCount; start += 1) {
-    if (visited[start] || values[start] < 0.055) continue;
+    if (labels[start] || values[start] < STRONG_FOREGROUND_ALPHA) continue;
+    nextLabel += 1;
     let head = 0;
     let tail = 1;
     queue[0] = start;
-    visited[start] = 1;
-    const members = [];
+    labels[start] = nextLabel;
+    let componentTop = Math.floor(start / width);
+    let componentBottom = componentTop;
 
     while (head < tail) {
-      const index = queue[head];
-      head += 1;
-      members.push(index);
+      const index = queue[head++];
       const x = index % width;
-      let neighbour;
-      if (x > 0) {
-        neighbour = index - 1;
-        if (!visited[neighbour] && values[neighbour] >= 0.055) {
-          visited[neighbour] = 1;
-          queue[tail++] = neighbour;
-        }
-      }
-      if (x + 1 < width) {
-        neighbour = index + 1;
-        if (!visited[neighbour] && values[neighbour] >= 0.055) {
-          visited[neighbour] = 1;
-          queue[tail++] = neighbour;
-        }
-      }
-      if (index >= width) {
-        neighbour = index - width;
-        if (!visited[neighbour] && values[neighbour] >= 0.055) {
-          visited[neighbour] = 1;
-          queue[tail++] = neighbour;
-        }
-      }
-      if (index + width < pixelCount) {
-        neighbour = index + width;
-        if (!visited[neighbour] && values[neighbour] >= 0.055) {
-          visited[neighbour] = 1;
-          queue[tail++] = neighbour;
+      const y = Math.floor(index / width);
+      componentTop = Math.min(componentTop, y);
+      componentBottom = Math.max(componentBottom, y);
+
+      for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+        const neighbourY = y + offsetY;
+        if (neighbourY < 0 || neighbourY >= height) continue;
+        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+          if (offsetX === 0 && offsetY === 0) continue;
+          const neighbourX = x + offsetX;
+          if (neighbourX < 0 || neighbourX >= width) continue;
+          const neighbour = neighbourY * width + neighbourX;
+          if (
+            !labels[neighbour] &&
+            values[neighbour] >= STRONG_FOREGROUND_ALPHA
+          ) {
+            labels[neighbour] = nextLabel;
+            queue[tail++] = neighbour;
+          }
         }
       }
     }
 
-    largestSize = Math.max(largestSize, members.length);
-    components.push(members);
+    if (tail > primaryArea) {
+      primaryArea = tail;
+      primaryLabel = nextLabel;
+      primaryTop = componentTop;
+      primaryBottom = componentBottom;
+    }
   }
 
-  if (largestSize === 0) return values;
-  const keep = new Uint8Array(pixelCount);
-  const minimumIslandSize = Math.max(48, Math.round(largestSize * 0.006));
-  for (const members of components) {
-    if (members.length < minimumIslandSize) continue;
-    for (const index of members) keep[index] = 1;
-  }
-
-  // Two inference pixels retain the continuous soft hair/ear boundary while
-  // detached background specks remain outside the permitted portrait area.
-  for (let pass = 0; pass < 2; pass += 1) {
-    const expanded = new Uint8Array(keep);
+  // Extremely low-contrast portraits can have no 0.32-confidence core. In
+  // that rare case return a gentle matte instead of an entirely blank image.
+  if (primaryLabel === 0) {
+    const fallback = new Float32Array(pixelCount);
     for (let index = 0; index < pixelCount; index += 1) {
-      if (!keep[index]) continue;
-      const x = index % width;
-      if (x > 0) expanded[index - 1] = 1;
-      if (x + 1 < width) expanded[index + 1] = 1;
-      if (index >= width) expanded[index - width] = 1;
-      if (index + width < pixelCount) expanded[index + width] = 1;
+      fallback[index] = smoothAlpha(values[index]);
     }
-    keep.set(expanded);
+    return fallback;
+  }
+
+  const distance = new Int16Array(pixelCount);
+  distance.fill(-1);
+  let head = 0;
+  let tail = 0;
+  for (let index = 0; index < pixelCount; index += 1) {
+    if (labels[index] !== primaryLabel) continue;
+    distance[index] = 0;
+    queue[tail++] = index;
+  }
+
+  while (head < tail) {
+    const index = queue[head++];
+    const nextDistance = distance[index] + 1;
+    if (nextDistance > EDGE_RECOVERY_DISTANCE) continue;
+    const x = index % width;
+    const y = Math.floor(index / width);
+
+    for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+      const neighbourY = y + offsetY;
+      if (neighbourY < 0 || neighbourY >= height) continue;
+      for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+        if (offsetX === 0 && offsetY === 0) continue;
+        const neighbourX = x + offsetX;
+        if (neighbourX < 0 || neighbourX >= width) continue;
+        const neighbour = neighbourY * width + neighbourX;
+        if (
+          distance[neighbour] === -1 &&
+          values[neighbour] >= WEAK_EDGE_ALPHA
+        ) {
+          distance[neighbour] = nextDistance;
+          queue[tail++] = neighbour;
+        }
+      }
+    }
   }
 
   const cleaned = new Float32Array(pixelCount);
   for (let index = 0; index < pixelCount; index += 1) {
-    cleaned[index] = keep[index] ? values[index] : 0;
+    if (distance[index] < 0) continue;
+    cleaned[index] = smoothAlpha(values[index]);
   }
-  return cleaned;
+
+  // Recover a very thin, soft rim only around the upper portrait where ears
+  // and loose hair live. The value is bounded by the model's original alpha,
+  // so this cannot grow an opaque halo into an unrelated background.
+  const protectedHeadEnd = Math.min(
+    height - 1,
+    primaryTop + Math.round((primaryBottom - primaryTop + 1) * 0.48),
+  );
+  const recovered = cleaned.slice();
+  for (let y = Math.max(1, primaryTop - 2); y <= protectedHeadEnd; y += 1) {
+    for (let x = 1; x < width - 1; x += 1) {
+      const index = y * width + x;
+      if (distance[index] < 0 || cleaned[index] >= 0.72) continue;
+      let strongestNeighbour = 0;
+      for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+        for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+          if (offsetX === 0 && offsetY === 0) continue;
+          strongestNeighbour = Math.max(
+            strongestNeighbour,
+            cleaned[index + offsetY * width + offsetX],
+          );
+        }
+      }
+      recovered[index] = Math.max(
+        recovered[index],
+        Math.min(strongestNeighbour * 0.34, values[index] * 3.2),
+      );
+    }
+  }
+
+  return recovered;
 }
 
 function decontaminateEdgeColours(pixels, alphaMap, width, height) {
@@ -336,6 +442,299 @@ function decontaminateEdgeColours(pixels, alphaMap, width, height) {
   return cleaned;
 }
 
+function getMatteBounds(values, width, height, threshold = 0.08) {
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  let count = 0;
+
+  for (let index = 0; index < values.length; index += 1) {
+    if (values[index] < threshold) continue;
+    const x = index % width;
+    const y = Math.floor(index / width);
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+    count += 1;
+  }
+
+  return maxX >= minX && maxY >= minY
+    ? { minX, minY, maxX, maxY, count }
+    : null;
+}
+
+function matteToCanvas(values, width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable on this device.");
+  const image = context.createImageData(width, height);
+
+  for (let index = 0; index < values.length; index += 1) {
+    const value = Math.round(Math.max(0, Math.min(1, values[index])) * 255);
+    const dataIndex = index * 4;
+    image.data[dataIndex] = value;
+    image.data[dataIndex + 1] = value;
+    image.data[dataIndex + 2] = value;
+    image.data[dataIndex + 3] = 255;
+  }
+  context.putImageData(image, 0, 0);
+  return canvas;
+}
+
+async function runModNetInference(
+  sourceCanvas,
+  ort,
+  session,
+  signal,
+  region = null,
+) {
+  throwIfAborted(signal);
+  const crop = region || {
+    x: 0,
+    y: 0,
+    width: sourceCanvas.width,
+    height: sourceCanvas.height,
+  };
+  const inferenceSize = getInferenceSize(crop.width, crop.height);
+  const inferenceCanvas = document.createElement("canvas");
+  inferenceCanvas.width = inferenceSize.width;
+  inferenceCanvas.height = inferenceSize.height;
+  const inferenceContext = inferenceCanvas.getContext("2d", {
+    alpha: false,
+    willReadFrequently: true,
+  });
+  if (!inferenceContext) throw new Error("Canvas is unavailable on this device.");
+  inferenceContext.imageSmoothingEnabled = true;
+  inferenceContext.imageSmoothingQuality = "high";
+  inferenceContext.drawImage(
+    sourceCanvas,
+    crop.x,
+    crop.y,
+    crop.width,
+    crop.height,
+    0,
+    0,
+    inferenceCanvas.width,
+    inferenceCanvas.height,
+  );
+
+  const inputPixels = inferenceContext.getImageData(
+    0,
+    0,
+    inferenceCanvas.width,
+    inferenceCanvas.height,
+  ).data;
+  const planeSize = inferenceCanvas.width * inferenceCanvas.height;
+  const tensorData = new Float32Array(planeSize * 3);
+  for (
+    let sourceIndex = 0, pixelIndex = 0;
+    sourceIndex < inputPixels.length;
+    sourceIndex += 4, pixelIndex += 1
+  ) {
+    tensorData[pixelIndex] = (inputPixels[sourceIndex] - 127.5) / 127.5;
+    tensorData[pixelIndex + planeSize] =
+      (inputPixels[sourceIndex + 1] - 127.5) / 127.5;
+    tensorData[pixelIndex + planeSize * 2] =
+      (inputPixels[sourceIndex + 2] - 127.5) / 127.5;
+  }
+
+  const inputName = session.inputNames[0];
+  const outputName = session.outputNames[0];
+  const inputTensor = new ort.Tensor("float32", tensorData, [
+    1,
+    3,
+    inferenceCanvas.height,
+    inferenceCanvas.width,
+  ]);
+  let matteTensor;
+  try {
+    const results = await session.run({ [inputName]: inputTensor });
+    throwIfAborted(signal);
+    matteTensor = results[outputName];
+    if (!matteTensor?.data?.length) {
+      throw new Error("Professional portrait model returned an empty matte.");
+    }
+    const matteHeight = matteTensor.dims[matteTensor.dims.length - 2];
+    const matteWidth = matteTensor.dims[matteTensor.dims.length - 1];
+    const rawValues = new Float32Array(matteTensor.data);
+    const values = cleanPortraitMatte(rawValues, matteWidth, matteHeight);
+    return {
+      values,
+      width: matteWidth,
+      height: matteHeight,
+      bounds: getMatteBounds(values, matteWidth, matteHeight),
+      region: crop,
+    };
+  } finally {
+    inputTensor.dispose?.();
+    matteTensor?.dispose?.();
+  }
+}
+
+function getDetailRegion(globalMatte, sourceWidth, sourceHeight) {
+  const bounds = globalMatte.bounds;
+  if (!bounds) return null;
+  const boxWidth = bounds.maxX - bounds.minX + 1;
+  const boxHeight = bounds.maxY - bounds.minY + 1;
+  const boxAreaRatio =
+    (boxWidth * boxHeight) / (globalMatte.width * globalMatte.height);
+
+  // A second, zoomed inference is most useful when the person is relatively
+  // small in a large scene. It restores facial, ear and hair detail that a
+  // single whole-photo pass cannot resolve.
+  if (boxAreaRatio >= 0.36) return null;
+
+  const scaleX = sourceWidth / globalMatte.width;
+  const scaleY = sourceHeight / globalMatte.height;
+  const subjectX = bounds.minX * scaleX;
+  const subjectY = bounds.minY * scaleY;
+  const subjectWidth = boxWidth * scaleX;
+  const subjectHeight = boxHeight * scaleY;
+  const horizontalPadding = Math.max(12, subjectWidth * 0.22);
+  const topPadding = Math.max(12, subjectHeight * 0.28);
+  const bottomPadding = Math.max(12, subjectHeight * 0.18);
+  const x = Math.max(0, subjectX - horizontalPadding);
+  const y = Math.max(0, subjectY - topPadding);
+  const right = Math.min(
+    sourceWidth,
+    subjectX + subjectWidth + horizontalPadding,
+  );
+  const bottom = Math.min(
+    sourceHeight,
+    subjectY + subjectHeight + bottomPadding,
+  );
+  const region = {
+    x,
+    y,
+    width: Math.max(1, right - x),
+    height: Math.max(1, bottom - y),
+  };
+
+  return region.width * region.height < sourceWidth * sourceHeight * 0.9
+    ? region
+    : null;
+}
+
+function buildAlphaMap(globalMatte, detailMatte, width, height) {
+  const globalCanvas = matteToCanvas(
+    globalMatte.values,
+    globalMatte.width,
+    globalMatte.height,
+  );
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = width;
+  outputCanvas.height = height;
+  const outputContext = outputCanvas.getContext("2d", {
+    willReadFrequently: true,
+  });
+  if (!outputContext) throw new Error("Canvas is unavailable on this device.");
+  outputContext.imageSmoothingEnabled = true;
+  outputContext.imageSmoothingQuality = "high";
+  outputContext.drawImage(globalCanvas, 0, 0, width, height);
+  const globalPixels = outputContext.getImageData(0, 0, width, height).data;
+  const alphaMap = new Uint8Array(width * height);
+  for (let index = 0; index < alphaMap.length; index += 1) {
+    alphaMap[index] = globalPixels[index * 4];
+  }
+
+  if (!detailMatte) return alphaMap;
+  const detailCanvas = matteToCanvas(
+    detailMatte.values,
+    detailMatte.width,
+    detailMatte.height,
+  );
+  outputContext.clearRect(0, 0, width, height);
+  outputContext.drawImage(
+    detailCanvas,
+    detailMatte.region.x,
+    detailMatte.region.y,
+    detailMatte.region.width,
+    detailMatte.region.height,
+  );
+  const detailPixels = outputContext.getImageData(0, 0, width, height).data;
+  const feather = Math.max(
+    4,
+    Math.min(detailMatte.region.width, detailMatte.region.height) * 0.06,
+  );
+  const startX = Math.max(0, Math.floor(detailMatte.region.x));
+  const startY = Math.max(0, Math.floor(detailMatte.region.y));
+  const endX = Math.min(width, Math.ceil(detailMatte.region.x + detailMatte.region.width));
+  const endY = Math.min(height, Math.ceil(detailMatte.region.y + detailMatte.region.height));
+
+  for (let y = startY; y < endY; y += 1) {
+    const distanceY = Math.min(
+      y - detailMatte.region.y,
+      detailMatte.region.y + detailMatte.region.height - y,
+    );
+    for (let x = startX; x < endX; x += 1) {
+      const distanceX = Math.min(
+        x - detailMatte.region.x,
+        detailMatte.region.x + detailMatte.region.width - x,
+      );
+      const edgeWeight = Math.max(
+        0,
+        Math.min(1, Math.min(distanceX, distanceY) / feather),
+      );
+      const index = y * width + x;
+      const detailAlpha = Math.round(detailPixels[index * 4] * edgeWeight);
+      alphaMap[index] = Math.max(alphaMap[index], detailAlpha);
+    }
+  }
+
+  return alphaMap;
+}
+
+function refineAlphaWithImage(alphaMap, sourcePixels, width, height) {
+  let current = alphaMap;
+
+  // A compact joint-bilateral pass follows the real colour edge at output
+  // resolution. This removes blocky upscaling without blurring an ear/hair
+  // boundary into a differently-coloured background.
+  for (let pass = 0; pass < 2; pass += 1) {
+    const refined = current.slice();
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const index = y * width + x;
+        const centerAlpha = current[index];
+        if (centerAlpha <= 4 || centerAlpha >= 251) continue;
+        const dataIndex = index * 4;
+        const red = sourcePixels[dataIndex];
+        const green = sourcePixels[dataIndex + 1];
+        const blue = sourcePixels[dataIndex + 2];
+        let alphaSum = centerAlpha * 5;
+        let weightSum = 5;
+
+        for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+          for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+            if (offsetX === 0 && offsetY === 0) continue;
+            const neighbour = index + offsetY * width + offsetX;
+            const neighbourDataIndex = neighbour * 4;
+            const colourDistance = colourDistanceSquared(
+              red,
+              green,
+              blue,
+              sourcePixels[neighbourDataIndex],
+              sourcePixels[neighbourDataIndex + 1],
+              sourcePixels[neighbourDataIndex + 2],
+            );
+            const weight = 1 / (1 + colourDistance / 900);
+            alphaSum += current[neighbour] * weight;
+            weightSum += weight;
+          }
+        }
+        refined[index] = Math.round(alphaSum / weightSum);
+      }
+    }
+    current = refined;
+  }
+
+  return current;
+}
+
 export async function preloadModNet(onProgress) {
   await getSession(onProgress);
   return "modnet";
@@ -351,114 +750,66 @@ export async function removeBackgroundWithModNet(file, onProgress, signal) {
   ]);
   throwIfAborted(signal);
 
+  const safeOutput = getSafeOutputSize(decoded.width, decoded.height);
   const sourceCanvas = document.createElement("canvas");
-  sourceCanvas.width = decoded.width;
-  sourceCanvas.height = decoded.height;
+  sourceCanvas.width = safeOutput.width;
+  sourceCanvas.height = safeOutput.height;
   const sourceContext = sourceCanvas.getContext("2d", {
+    alpha: false,
     willReadFrequently: true,
   });
   if (!sourceContext) {
     decoded.close();
     throw new Error("Canvas is unavailable on this device.");
   }
-  sourceContext.drawImage(decoded.source, 0, 0, decoded.width, decoded.height);
-  decoded.close();
-
-  const inferenceSize = getInferenceSize(sourceCanvas.width, sourceCanvas.height);
-  const inferenceCanvas = document.createElement("canvas");
-  inferenceCanvas.width = inferenceSize.width;
-  inferenceCanvas.height = inferenceSize.height;
-  const inferenceContext = inferenceCanvas.getContext("2d", {
-    alpha: false,
-    willReadFrequently: true,
-  });
-  if (!inferenceContext) throw new Error("Canvas is unavailable on this device.");
-  inferenceContext.imageSmoothingEnabled = true;
-  inferenceContext.imageSmoothingQuality = "high";
-  inferenceContext.drawImage(
-    sourceCanvas,
-    0,
-    0,
-    inferenceCanvas.width,
-    inferenceCanvas.height,
-  );
-
-  onProgress?.("AI बाल, कान और body की alpha edge बना रहा है…", 55);
-  const inputPixels = inferenceContext.getImageData(
-    0,
-    0,
-    inferenceCanvas.width,
-    inferenceCanvas.height,
-  ).data;
-  const planeSize = inferenceCanvas.width * inferenceCanvas.height;
-  const tensorData = new Float32Array(planeSize * 3);
-  for (let sourceIndex = 0, pixelIndex = 0; sourceIndex < inputPixels.length; sourceIndex += 4, pixelIndex += 1) {
-    tensorData[pixelIndex] = (inputPixels[sourceIndex] - 127.5) / 127.5;
-    tensorData[pixelIndex + planeSize] =
-      (inputPixels[sourceIndex + 1] - 127.5) / 127.5;
-    tensorData[pixelIndex + planeSize * 2] =
-      (inputPixels[sourceIndex + 2] - 127.5) / 127.5;
-  }
-
-  const inputName = session.inputNames[0];
-  const outputName = session.outputNames[0];
-  const feeds = {
-    [inputName]: new ort.Tensor("float32", tensorData, [
-      1,
-      3,
-      inferenceCanvas.height,
-      inferenceCanvas.width,
-    ]),
-  };
-  const results = await session.run(feeds);
-  throwIfAborted(signal);
-  const matteTensor = results[outputName];
-  if (!matteTensor?.data?.length) {
-    throw new Error("Professional portrait model returned an empty matte.");
-  }
-
-  const matteHeight = matteTensor.dims[matteTensor.dims.length - 2];
-  const matteWidth = matteTensor.dims[matteTensor.dims.length - 1];
-  const cleanMatte = removeDetachedMatteParticles(
-    matteTensor.data,
-    matteWidth,
-    matteHeight,
-  );
-  const matteCanvas = document.createElement("canvas");
-  matteCanvas.width = matteWidth;
-  matteCanvas.height = matteHeight;
-  const matteContext = matteCanvas.getContext("2d");
-  if (!matteContext) throw new Error("Canvas is unavailable on this device.");
-  const matteImage = matteContext.createImageData(matteWidth, matteHeight);
-  for (let index = 0; index < cleanMatte.length; index += 1) {
-    const value = Math.round(
-      Math.max(0, Math.min(1, cleanMatte[index])) * 255,
+  sourceContext.imageSmoothingEnabled = true;
+  sourceContext.imageSmoothingQuality = "high";
+  try {
+    sourceContext.drawImage(
+      decoded.source,
+      0,
+      0,
+      decoded.width,
+      decoded.height,
+      0,
+      0,
+      sourceCanvas.width,
+      sourceCanvas.height,
     );
-    const dataIndex = index * 4;
-    matteImage.data[dataIndex] = value;
-    matteImage.data[dataIndex + 1] = value;
-    matteImage.data[dataIndex + 2] = value;
-    matteImage.data[dataIndex + 3] = 255;
+  } finally {
+    decoded.close();
   }
-  matteContext.putImageData(matteImage, 0, 0);
 
-  onProgress?.("Background particles और edge colour साफ हो रहे हैं…", 86);
-  const resizedMatteCanvas = document.createElement("canvas");
-  resizedMatteCanvas.width = sourceCanvas.width;
-  resizedMatteCanvas.height = sourceCanvas.height;
-  const resizedMatteContext = resizedMatteCanvas.getContext("2d", {
-    willReadFrequently: true,
-  });
-  if (!resizedMatteContext) throw new Error("Canvas is unavailable on this device.");
-  resizedMatteContext.imageSmoothingEnabled = true;
-  resizedMatteContext.imageSmoothingQuality = "high";
-  resizedMatteContext.drawImage(
-    matteCanvas,
-    0,
-    0,
+  onProgress?.("AI बाल, कान और body की alpha edge बना रहा है…", 52);
+  const globalMatte = await runModNetInference(
+    sourceCanvas,
+    ort,
+    session,
+    signal,
+  );
+  if (!globalMatte.bounds) {
+    throw new Error("No clear person was found in this photo.");
+  }
+
+  const detailRegion = getDetailRegion(
+    globalMatte,
     sourceCanvas.width,
     sourceCanvas.height,
   );
+  let detailMatte = null;
+  if (detailRegion) {
+    onProgress?.("छोटे चेहरे, कान और बाल detail में साफ हो रहे हैं…", 72);
+    detailMatte = await runModNetInference(
+      sourceCanvas,
+      ort,
+      session,
+      signal,
+      detailRegion,
+    );
+  }
+
+  throwIfAborted(signal);
+  onProgress?.("Background particles और edge colour साफ हो रहे हैं…", 86);
 
   const sourceImage = sourceContext.getImageData(
     0,
@@ -466,21 +817,31 @@ export async function removeBackgroundWithModNet(file, onProgress, signal) {
     sourceCanvas.width,
     sourceCanvas.height,
   );
-  const resizedMatte = resizedMatteContext.getImageData(
-    0,
-    0,
+  let alphaMap = buildAlphaMap(
+    globalMatte,
+    detailMatte,
     sourceCanvas.width,
     sourceCanvas.height,
-  ).data;
-  const alphaMap = new Uint8Array(sourceCanvas.width * sourceCanvas.height);
+  );
+  alphaMap = refineAlphaWithImage(
+    alphaMap,
+    sourceImage.data,
+    sourceCanvas.width,
+    sourceCanvas.height,
+  );
+
   let visiblePixels = 0;
+  let transparentPixels = 0;
   for (let pixelIndex = 0; pixelIndex < alphaMap.length; pixelIndex += 1) {
-    const alpha = Math.round(smoothAlpha(resizedMatte[pixelIndex * 4] / 255) * 255);
-    alphaMap[pixelIndex] = alpha;
+    const alpha = alphaMap[pixelIndex];
     if (alpha >= 128) visiblePixels += 1;
+    if (alpha <= 5) transparentPixels += 1;
   }
   if (visiblePixels < alphaMap.length * 0.001) {
     throw new Error("No clear person was found in this photo.");
+  }
+  if (transparentPixels < alphaMap.length * 0.0005) {
+    throw new Error("The portrait could not be separated from its background.");
   }
 
   const outputPixels = decontaminateEdgeColours(

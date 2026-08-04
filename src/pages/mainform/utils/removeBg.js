@@ -147,9 +147,10 @@ function getPreferredDevice() {
 
 function createConfig(device) {
   return {
-    // "small" is the fast ~40 MB quantized model. It is the best balance for
-    // phones and is cached after the first download.
-    model: "small",
+    // The old ~40 MB quantized "small" model explicitly trades away edge
+    // quality and can leave artifacts. The medium model is downloaded only
+    // when Remove-BG is selected, then cached; normal app startup stays light.
+    model: "medium",
     device,
     proxyToWorker: false,
     rescale: true,
@@ -243,8 +244,39 @@ async function createSquareInputCanvas(file, maxSize) {
   return canvas;
 }
 
-async function prepareFastAiInput(file, maxSize = 1280) {
-  const canvas = await createSquareInputCanvas(file, maxSize);
+async function prepareFastAiInput(file, maxSize = 2048) {
+  const decoded = await decodeImage(file);
+  const maxPixels = maxSize * maxSize;
+  const sideScale = Math.min(1, maxSize / Math.max(decoded.width, decoded.height));
+  const pixelScale = Math.min(
+    1,
+    Math.sqrt(maxPixels / (decoded.width * decoded.height)),
+  );
+  const scale = Math.min(sideScale, pixelScale);
+
+  // Cropped app photos are normally already 800px. Preserve their original
+  // pixels and aspect ratio instead of placing them on a white square, which
+  // could confuse the subject boundary and recreate a pale background rim.
+  if (scale >= 0.999) {
+    decoded.close();
+    return file;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(decoded.width * scale));
+  canvas.height = Math.max(1, Math.round(decoded.height * scale));
+  const context = canvas.getContext("2d", { alpha: true });
+  if (!context) {
+    decoded.close();
+    throw new Error("Canvas is unavailable on this device.");
+  }
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  try {
+    context.drawImage(decoded.source, 0, 0, canvas.width, canvas.height);
+  } finally {
+    decoded.close();
+  }
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -253,7 +285,7 @@ async function prepareFastAiInput(file, maxSize = 1280) {
           ? resolve(blob)
           : reject(new Error("Fast AI image preparation failed.")),
       "image/webp",
-      0.92,
+      0.96,
     );
   });
 }
@@ -900,6 +932,27 @@ async function rawRgbaToPng(rawBlob) {
     throw new Error("The AI engine returned incomplete image pixels.");
   }
 
+  let transparentPixels = 0;
+  let visiblePixels = 0;
+  for (let index = 0; index < pixels.length; index += 4) {
+    const alpha = pixels[index + 3];
+    if (alpha <= 3) {
+      pixels[index] = 0;
+      pixels[index + 1] = 0;
+      pixels[index + 2] = 0;
+      pixels[index + 3] = 0;
+      transparentPixels += 1;
+    }
+    if (alpha >= 128) visiblePixels += 1;
+  }
+  const pixelCount = width * height;
+  if (visiblePixels < pixelCount * 0.001) {
+    throw new Error("No clear foreground was found in this photo.");
+  }
+  if (transparentPixels < pixelCount * 0.0005) {
+    throw new Error("The background-removal model did not create transparency.");
+  }
+
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -993,6 +1046,60 @@ function queueProcessing(task, signal) {
   return raceWithAbort(scheduled, signal);
 }
 
+async function removeWithModNet(file, signal) {
+  const { removeBackgroundWithModNet } = await loadModNetEngine();
+  const result = await removeBackgroundWithModNet(
+    file,
+    (stage, percentage) => emitProgress(stage, percentage),
+    signal,
+  );
+  throwIfAborted(signal);
+  return result;
+}
+
+async function removeWithImgly(file, onProgress, signal) {
+  const engine = await loadEngine();
+  await preloadBgModel(onProgress);
+  throwIfAborted(signal);
+  emitProgress("फोटो को high-quality AI प्रोसेसिंग के लिए तैयार किया जा रहा है…", 80);
+  const aiInput = await prepareFastAiInput(file);
+  throwIfAborted(signal);
+
+  // v1.7 exposes removeBackground as a named export at runtime. Some bundlers
+  // also provide a default export, so support both shapes.
+  const removeBackground =
+    engine.removeBackground ||
+    engine.default?.removeBackground ||
+    engine.default;
+  if (typeof removeBackground !== "function") {
+    throw new Error("Background-removal function is unavailable.");
+  }
+
+  let device = getPreferredDevice();
+  let result;
+  try {
+    result = await removeBackground(aiInput, createConfig(device));
+  } catch (gpuError) {
+    if (device !== "gpu" || signal?.aborted) throw gpuError;
+
+    // WebGPU can initialise successfully and still fail on a particular
+    // phone/driver during inference. Retry that photo once on CPU.
+    preferredDevice = "cpu";
+    configRevision += 1;
+    preloadPromise = null;
+    emitProgress("Compatible AI mode शुरू किया जा रहा है…", 10);
+    await preloadDevice("cpu");
+    throwIfAborted(signal);
+    result = await removeBackground(aiInput, createConfig("cpu"));
+  }
+  throwIfAborted(signal);
+
+  if (!(result instanceof Blob) || result.size === 0) {
+    throw new Error("The background remover returned an empty image.");
+  }
+  return rawRgbaToPng(result);
+}
+
 /**
  * Remove a background entirely on the user's device.
  *
@@ -1014,59 +1121,42 @@ export async function removeBg(file, onProgress, signal) {
 
     try {
       if (isEmbeddedWebView()) {
-        const { removeBackgroundWithModNet } = await loadModNetEngine();
-        const result = await removeBackgroundWithModNet(
-          file,
-          (stage, percentage) => emitProgress(stage, percentage),
-          signal,
-        );
-        throwIfAborted(signal);
+        try {
+          const result = await removeWithModNet(file, signal);
+          emitProgress("फोटो तैयार है", 100);
+          return result;
+        } catch (modNetError) {
+          if (modNetError?.name === "AbortError" || signal?.aborted) {
+            throw abortError();
+          }
+          // MODNet is the quality path. MediaPipe remains a same-device safety
+          // net for an unusual WebView/WASM failure so the original opaque
+          // photo is never silently returned as a successful Remove-BG result.
+          console.warn("[removeBg] MODNet failed; using safe WebView fallback:", modNetError);
+          emitProgress("Backup AI mode से background हटाया जा रहा है…", 18);
+          const result = await removeBgWithMediaPipe(file, signal);
+          emitProgress("फोटो तैयार है", 100);
+          return result;
+        }
+      }
+
+      try {
+        const result = await removeWithImgly(file, onProgress, signal);
+        emitProgress("फोटो तैयार है", 100);
+        return result;
+      } catch (imglyError) {
+        if (imglyError?.name === "AbortError" || signal?.aborted) {
+          throw abortError();
+        }
+        // A blocked external model, unsupported GPU or an invalid opaque result
+        // falls back to the bundled portrait model instead of keeping the old
+        // background on the canvas.
+        console.warn("[removeBg] Quality engine failed; using local portrait fallback:", imglyError);
+        emitProgress("Local portrait AI से दोबारा background हटाया जा रहा है…", 12);
+        const result = await removeWithModNet(file, signal);
         emitProgress("फोटो तैयार है", 100);
         return result;
       }
-
-      const engine = await loadEngine();
-      await preloadBgModel(onProgress);
-      throwIfAborted(signal);
-      emitProgress("फोटो को तेज AI प्रोसेसिंग के लिए तैयार किया जा रहा है…", 80);
-      const aiInput = await prepareFastAiInput(file);
-      throwIfAborted(signal);
-
-      // v1.7 exposes removeBackground as a named export at runtime. Some
-      // bundlers also provide a default export, so support both shapes.
-      const removeBackground =
-        engine.removeBackground ||
-        engine.default?.removeBackground ||
-        engine.default;
-      if (typeof removeBackground !== "function") {
-        throw new Error("Background-removal function is unavailable.");
-      }
-
-      let device = getPreferredDevice();
-      let result;
-      try {
-        result = await removeBackground(aiInput, createConfig(device));
-      } catch (gpuError) {
-        if (device !== "gpu" || signal?.aborted) throw gpuError;
-
-        // WebGPU can initialise successfully and still fail on a particular
-        // phone/driver during inference. Retry that photo once on CPU.
-        preferredDevice = "cpu";
-        configRevision += 1;
-        preloadPromise = null;
-        emitProgress("Compatible AI mode शुरू किया जा रहा है…", 10);
-        await preloadDevice("cpu");
-        throwIfAborted(signal);
-        result = await removeBackground(aiInput, createConfig("cpu"));
-      }
-      throwIfAborted(signal);
-
-      if (!(result instanceof Blob) || result.size === 0) {
-        throw new Error("The background remover returned an empty image.");
-      }
-      result = await rawRgbaToPng(result);
-      emitProgress("फोटो तैयार है", 100);
-      return result;
     } catch (error) {
       if (error?.name === "AbortError" || signal?.aborted) throw abortError();
       console.error("[removeBg] On-device background removal failed:", error);
