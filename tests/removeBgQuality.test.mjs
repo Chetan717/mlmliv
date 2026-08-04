@@ -5,11 +5,14 @@ import { join, resolve } from "node:path";
 
 import {
   cleanPortraitMatte,
+  colourDistanceSquared,
   getInferenceSize,
   getSafeOutputSize,
   MODNET_QUALITY_SETTINGS,
+  refineAlphaWithImage,
 } from "../src/pages/mainform/utils/modnetBg.js";
 import {
+  isRetryableRemoveBgError,
   REMOVE_BG_QUALITY,
 } from "../src/pages/mainform/utils/removeBg.js";
 
@@ -81,6 +84,45 @@ test("portrait matte preserves weak ear detail but rejects detached background",
   assert.equal(cleaned[24 * width + 4], 0, "detached background must be removed");
 });
 
+test("edge refinement executes its RGB distance path without a runtime failure", () => {
+  assert.equal(colourDistanceSquared(10, 20, 30, 13, 24, 30), 25);
+
+  const width = 5;
+  const height = 5;
+  const alpha = new Uint8Array(width * height).fill(255);
+  alpha[2 * width + 2] = 128;
+  const pixels = new Uint8ClampedArray(width * height * 4);
+  for (let index = 0; index < width * height; index += 1) {
+    const dataIndex = index * 4;
+    pixels[dataIndex] = index * 3;
+    pixels[dataIndex + 1] = index * 2;
+    pixels[dataIndex + 2] = index;
+    pixels[dataIndex + 3] = 255;
+  }
+
+  const refined = refineAlphaWithImage(alpha, pixels, width, height);
+  assert.equal(refined.length, alpha.length);
+  assert.notEqual(refined, alpha, "refinement must return its own alpha buffer");
+  assert.ok(refined[2 * width + 2] > 0);
+});
+
+test("automatic retry is limited to engine startup failures", () => {
+  const initError = Object.assign(new Error("model fetch interrupted"), {
+    removeBgStage: "model-download",
+    removeBgRetryable: true,
+  });
+  const deterministicError = Object.assign(
+    new ReferenceError("post-processing helper is missing"),
+    { removeBgStage: "post-process", removeBgRetryable: false },
+  );
+  assert.equal(isRetryableRemoveBgError(initError), true);
+  assert.equal(isRetryableRemoveBgError(deterministicError), false);
+  assert.equal(
+    isRetryableRemoveBgError(new Error("No clear person was found")),
+    false,
+  );
+});
+
 test("all runtimes require the same continuous-alpha portrait model", () => {
   const removeBg = read("src/pages/mainform/utils/removeBg.js");
   assert.deepEqual(REMOVE_BG_QUALITY, {
@@ -96,7 +138,7 @@ test("all runtimes require the same continuous-alpha portrait model", () => {
     removeBg,
     /removeBgWithMediaPipe|removeWithImgly|@imgly\/background-removal/,
   );
-  assert.match(removeBg, /resetModNetEngine\(\{ freshAssets: true \}\)/);
+  assert.match(removeBg, /resetModNetEngine\(\{ freshAssets: false \}\)/);
 
   for (const path of [
     "src/pages/mainform/components/ImageUploadWithBgRemove.jsx",

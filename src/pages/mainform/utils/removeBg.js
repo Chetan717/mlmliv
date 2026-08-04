@@ -125,10 +125,23 @@ async function removeWithProfessionalMatte(file, signal) {
   return result;
 }
 
+export function isRetryableRemoveBgError(error) {
+  let current = error;
+  const visited = new Set();
+  while (current && !visited.has(current)) {
+    visited.add(current);
+    if (current.removeBgRetryable === true) return true;
+    current = current.cause;
+  }
+  return false;
+}
+
 async function prepareSameQualityRetry() {
   preloadPromise = null;
   const { resetModNetEngine } = await loadModNetEngine();
-  resetModNetEngine({ freshAssets: true });
+  // Reuse browser-cached model/WASM bytes. Cache-busting roughly 38 MB here
+  // made one transient start-up failure feel like two complete runs on phones.
+  resetModNetEngine({ freshAssets: false });
 }
 
 /**
@@ -159,8 +172,15 @@ export async function removeBg(file, onProgress, signal) {
           throw abortError();
         }
 
+        // Only model download / engine initialisation errors deserve one
+        // automatic retry. Photo, quality and post-processing errors are
+        // deterministic; repeating the full inference only wastes time.
+        if (!isRetryableRemoveBgError(firstError)) {
+          throw firstError;
+        }
+
         // Retry only the same continuous-alpha quality model after clearing a
-        // partial/corrupt model session. Never downgrade to MediaPipe/original.
+        // partial session. Never downgrade to MediaPipe/original.
         console.warn("[removeBg] Professional portrait retry:", firstError);
         emitProgress("Professional AI clean retry कर रहा है…", 7);
         await prepareSameQualityRetry();

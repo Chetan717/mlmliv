@@ -38,6 +38,16 @@ function throwIfAborted(signal) {
   if (signal?.aborted) throw abortError();
 }
 
+function tagEngineError(error, stage, retryable = false) {
+  if (error?.name === "AbortError") return error;
+  const tagged = error instanceof Error ? error : new Error(String(error));
+  tagged.removeBgStage ||= stage;
+  if (typeof tagged.removeBgRetryable !== "boolean") {
+    tagged.removeBgRetryable = retryable;
+  }
+  return tagged;
+}
+
 function assetUrl(fileName) {
   const url = new URL(
     `${import.meta.env.BASE_URL}modnet/${fileName}`,
@@ -77,11 +87,20 @@ async function loadRuntime() {
 async function fetchModel(onProgress) {
   const cacheMode = forceFreshModelFetch ? "reload" : "force-cache";
   forceFreshModelFetch = false;
-  const response = await fetch(assetUrl("modnet.onnx"), {
-    cache: cacheMode,
-  });
+  let response;
+  try {
+    response = await fetch(assetUrl("modnet.onnx"), {
+      cache: cacheMode,
+    });
+  } catch (error) {
+    throw tagEngineError(error, "model-download", true);
+  }
   if (!response.ok) {
-    throw new Error(`Portrait model download failed (${response.status}).`);
+    throw tagEngineError(
+      new Error(`Portrait model download failed (${response.status}).`),
+      "model-download",
+      response.status === 408 || response.status === 429 || response.status >= 500,
+    );
   }
 
   const expectedSize = Number(response.headers.get("content-length")) || 0;
@@ -131,7 +150,7 @@ async function getSession(onProgress) {
       });
     })().catch((error) => {
       sessionPromise = null;
-      throw error;
+      throw tagEngineError(error, "engine-init", true);
     });
   }
   return sessionPromise;
@@ -567,7 +586,12 @@ async function runModNetInference(
   ]);
   let matteTensor;
   try {
-    const results = await session.run({ [inputName]: inputTensor });
+    let results;
+    try {
+      results = await session.run({ [inputName]: inputTensor });
+    } catch (error) {
+      throw tagEngineError(error, "inference", false);
+    }
     throwIfAborted(signal);
     matteTensor = results[outputName];
     if (!matteTensor?.data?.length) {
@@ -703,7 +727,26 @@ function buildAlphaMap(globalMatte, detailMatte, width, height) {
   return alphaMap;
 }
 
-function refineAlphaWithImage(alphaMap, sourcePixels, width, height) {
+/** Squared RGB distance, kept allocation-free for the per-pixel edge pass. */
+export function colourDistanceSquared(
+  red,
+  green,
+  blue,
+  otherRed,
+  otherGreen,
+  otherBlue,
+) {
+  const redDelta = red - otherRed;
+  const greenDelta = green - otherGreen;
+  const blueDelta = blue - otherBlue;
+  return (
+    redDelta * redDelta +
+    greenDelta * greenDelta +
+    blueDelta * blueDelta
+  );
+}
+
+export function refineAlphaWithImage(alphaMap, sourcePixels, width, height) {
   let current = alphaMap;
 
   // A compact joint-bilateral pass follows the real colour edge at output
