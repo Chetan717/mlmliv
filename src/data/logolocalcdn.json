@@ -38,8 +38,8 @@
         "size": "rectangle"
       },
       {
-        "link": "./companylogo/Anvik/anvik_square.webp",
-        "size": "square"
+        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786018791989_k37s2d.webp?alt=media&token=9ecec3bc-9dd6-44a1-a440-558d427e30f7",
+        "size": "rectangle"
       }
     ]
   },
@@ -235,6 +235,20 @@
       },
       {
         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785827277608_8qqeea.webp?alt=media&token=4899f5bb-bf05-4df0-9908-70c0dc83ecae",
+        "size": "rectangle"
+      }
+    ]
+  },
+  {
+    "ID": "4U1RAuPw2g1GLXp2Dupd",
+    "name": "DHANWANTARI",
+    "logos": [
+      {
+        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785584507681_vzem7x.webp?alt=media&token=cf26ad7f-c223-4884-977c-a404a3512a01",
+        "size": "rectangle"
+      },
+      {
+        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785584443256_b00hge.webp?alt=media&token=3aff11ab-2c92-4f46-918e-7928b8a016f4",
         "size": "rectangle"
       }
     ]
