@@ -63,7 +63,7 @@ async function fetchCompanyDirectory({ force = false } = {}) {
       const companies = snapshot.docs
         .map(normalizeCompany)
         .filter((company) => company.active && company.launched)
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, {
+        .sort((a, b) => b.name.localeCompare(a.name, undefined, {
           sensitivity: "base",
           numeric: true,
         }));
