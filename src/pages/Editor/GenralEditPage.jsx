@@ -1054,7 +1054,7 @@ function GeneralEditPage({
                       : 10;
 
     const y = isMeeting
-      ? 66
+      ? 64.5
       : isCapping
         ? 65
         : isIncome
