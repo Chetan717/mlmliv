@@ -214,6 +214,7 @@ export default function SelectComp() {
 
         <div className="w-full max-w-xl mx-auto mb-10">
           <div className="flex items-stretch gap-2">
+
             <div className="relative group min-w-0 flex-1">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
@@ -228,6 +229,7 @@ export default function SelectComp() {
                 inputMode="search"
                 aria-label="Search companies by name"
               />
+              
               {search && (
                 <button
                   type="button"
@@ -239,6 +241,7 @@ export default function SelectComp() {
                 </button>
               )}
             </div>
+
             <button
               type="button"
               onClick={handleRefresh}
@@ -289,7 +292,7 @@ export default function SelectComp() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-              {visibleCompanies.map((item, index) => {
+              {visibleCompanies?.map((item, index) => {
                 const isSelected = selectedCompany?.id === item.id;
                 return (
                   <button
@@ -324,7 +327,7 @@ export default function SelectComp() {
                     <p className={`font-display font-bold text-center text-sm line-clamp-2 leading-tight transition-colors ${
                       isSelected ? "text-accent" : "text-foreground"
                     }`}>
-                      {item.name || "Unnamed Company"}
+                      {item?.name || "Unnamed Company"}
                     </p>
 
                     {isSelected && (
