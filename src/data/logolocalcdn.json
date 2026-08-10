@@ -235,7 +235,7 @@
       },
       {
         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785995545822_546e9w.webp?alt=media&token=36b117e6-c9d3-433b-9f66-b003d88b3f24",
-        "size": "rectangle"
+        "size": "square"
       }
     ]
   },
@@ -266,5 +266,61 @@
         "size": "rectangle"
       }
     ]
-  }
+  },
+   {
+     "ID": "TwYZJJs7koHhUg2nDSj0",
+     "name": "DHAN LAKSHMI",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786354357895_kzx7h0.webp?alt=media&token=5819e78c-200d-404c-81ac-fc4741bcbfb3",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786354357895_kzx7h0.webp?alt=media&token=5819e78c-200d-404c-81ac-fc4741bcbfb3",
+         "size": "square"
+       }
+     ]
+   },
+   {
+     "ID": "oYs6fxTIo1DWCewC9qe4",
+     "name": "SWARNAYUR WELLNESS",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786352404788_8bytre.webp?alt=media&token=61913e06-db8c-4433-9a5a-9087ef9bf086",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786352395028_2dtnt8.webp?alt=media&token=ac30c385-5f4d-4c22-9036-2466031a842d",
+         "size": "square"
+       }
+     ]
+   },
+   {
+     "ID": "FQldfpogM23oJNwVkFnb",
+     "name": "GALWAY",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786093950846_7cqmqi.webp?alt=media&token=5c503bcc-bba3-490f-a4cf-45004bcea0cf",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786093950846_7cqmqi.webp?alt=media&token=5c503bcc-bba3-490f-a4cf-45004bcea0cf",
+         "size": "square"
+       }
+     ]
+   },
+    {
+      "ID": "X3GdvE2ctg8HYjSc9PZq",
+      "name": "WESTAAR WELLNESS",
+      "logos": [
+        {
+          "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786010392396_c7hgfs.webp?alt=media&token=0f26c01e-808f-4a6b-9b96-ef4c404c55fd",
+          "size": "square"
+        },
+        {
+          "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786018987782_ynybp7.webp?alt=media&token=63ea90b8-e665-4fd1-ba23-d134e10374dd",
+          "size": "square"
+        }
+      ]
+    }
 ]
