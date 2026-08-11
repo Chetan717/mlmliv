@@ -283,7 +283,7 @@
    },
    {
      "ID": "oYs6fxTIo1DWCewC9qe4",
-     "name": "SWARNAYUR WELLNESS",
+     "name": "SWARNAYUR CARE",
      "logos": [
        {
          "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786352404788_8bytre.webp?alt=media&token=61913e06-db8c-4433-9a5a-9087ef9bf086",
@@ -320,6 +320,20 @@
         {
           "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786018987782_ynybp7.webp?alt=media&token=63ea90b8-e665-4fd1-ba23-d134e10374dd",
           "size": "square"
+        }
+      ]
+    },
+    {
+      "ID": "3u4U8rly6W5Muuc7PEut",
+      "name": "NEED FEED",
+      "logos": [
+        {
+          "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786425288054_vxbs3j.webp?alt=media&token=f2892ec2-db0e-4476-96c6-d7bb3afee2db",
+          "size": "rectangle"
+        },
+        {
+          "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786425288054_vxbs3j.webp?alt=media&token=f2892ec2-db0e-4476-96c6-d7bb3afee2db",
+          "size": "rectangle"
         }
       ]
     }
