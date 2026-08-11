@@ -9,7 +9,6 @@ import {
   TextField,
 } from "@heroui/react";
 import logo from "/mlmboo2.ico";
-import { InputOTP } from "@heroui/react";
 import { useNavigate } from "react-router";
 import { toast } from "@heroui/react";
 import { login, getAuthErrorMessage } from "../services/authService";
@@ -208,8 +207,8 @@ export function Login() {
 
             <div className="flex flex-col gap-1 w-full">
               <div className="flex justify-between items-center mb-2">
-                <Label className="font-semibold text-[13px] text-foreground/70">
-                  4-Digit PIN / 4 अंकों का PIN
+                <Label htmlFor="login-password" className="font-semibold text-[13px] text-foreground/70">
+                  Enter Your Password / पासवर्ड दर्ज करें
                 </Label>
                 <span
                   onClick={() => navigate("/forgetpin")}
@@ -219,27 +218,19 @@ export function Login() {
                   Forgot PIN?
                 </span>
               </div>
-              <InputOTP
+              <input
+                id="login-password"
                 name="pin"
-                maxLength={4}
                 value={pin}
-                onChange={(val) => setPin(val)}
+                onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
                 type="password"
+                placeholder="Enter 4-digit password / 4 अंकों का पासवर्ड"
                 autoComplete="current-password"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                pushPasswordManagerStrategy="increase-width"
-              >
-                <InputOTP.Group className="gap-3 w-full justify-between">
-                  {[0, 1, 2, 3].map((i) => (
-                    <InputOTP.Slot
-                      key={i}
-                      index={i}
-                      className="flex-1 h-[56px] text-2xl font-bold bg-[var(--field-background)] border border-[var(--border)] data-[focus=true]:border-accent data-[focus=true]:ring-2 data-[focus=true]:ring-accent/20 shadow-sm rounded-2xl"
-                    />
-                  ))}
-                </InputOTP.Group>
-              </InputOTP>
+                maxLength={4}
+                className="w-full h-[56px] rounded-2xl border border-[var(--border)] bg-[var(--field-background)] px-4 text-[15px] font-medium outline-none shadow-sm focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
             </div>
 
             {formError && (

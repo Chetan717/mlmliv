@@ -169,7 +169,19 @@ const filtered = useMemo(() => {
 
   // ── trigger ───────────────────────────────────────────────────────────────
   const trigger = inlineStrip ? (
-    <div className="w-full flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-2">
+    <div
+      role="button"
+      tabIndex={isLimitReached || processingBg ? -1 : 0}
+      aria-label="Add top upline or senior image"
+      onClick={() => !isLimitReached && !processingBg && handleOpen()}
+      onKeyDown={(event) => {
+        if ((event.key === "Enter" || event.key === " ") && !isLimitReached && !processingBg) {
+          event.preventDefault();
+          handleOpen();
+        }
+      }}
+      className="w-full flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/30"
+    >
       <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {totalSelected === 0 && (
           <span className="text-[11px] text-gray-400 px-2 py-3 whitespace-nowrap">No images selected yet</span>
@@ -180,7 +192,7 @@ const filtered = useMemo(() => {
     <div key={link || `sel-${i}`} className="relative w-15 h-15 flex-shrink-0">
       <img src={link} alt="" className="w-14 h-14 p-1 rounded-full object-cover border border-2 border-yellow-400" />
       <button type="button"
-        onClick={() => setConfirmRemove({ action: () => onToggleLink(link) })}
+        onClick={(event) => { event.stopPropagation(); setConfirmRemove({ action: () => onToggleLink(link) }); }}
         className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] flex items-center justify-center shadow ring-2 ring-white dark:ring-gray-900" title="Remove">
         ✕
       </button>
@@ -191,14 +203,14 @@ const filtered = useMemo(() => {
           <div key={item.previewURL || `cus-${i}`} className="relative flex-shrink-0">
             <img src={item.previewURL} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-violet-300 dark:border-violet-500/50 bg-gray-100 dark:bg-gray-800" />
             <button type="button"
-              onClick={() => setConfirmRemove({ action: () => onRemoveCustomFile(i) })}
+              onClick={(event) => { event.stopPropagation(); setConfirmRemove({ action: () => onRemoveCustomFile(i) }); }}
               className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] flex items-center justify-center shadow ring-2 ring-white dark:ring-gray-900" title="Remove">
               ✕
             </button>
           </div>
         ))}
       </div>
-      <button type="button" onClick={handleOpen} disabled={isLimitReached || processingBg}
+      <button type="button" onClick={(event) => { event.stopPropagation(); handleOpen(); }} disabled={isLimitReached || processingBg}
         className="flex-shrink-0 w-14 h-14 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 flex items-center justify-center transition text-gray-400 hover:text-violet-500 disabled:opacity-40 disabled:cursor-not-allowed"
         title={isLimitReached ? "Limit reached" : processingBg ? "Processing…" : "Add image"}>
         {processingBg

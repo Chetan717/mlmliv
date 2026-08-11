@@ -378,13 +378,13 @@ function DisplaySettings({ accent = false }) {
           accent ? "text-accent" : "text-foreground/80"
         }`}
       >
-        Display Settings
+        Display Settings / डिस्प्ले सेटिंग्स
       </label>
 
       {/* Show Topupline Images */}
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-foreground/70">
-          Show Topupline Images
+          Show Top Upline Images / टॉप अपलाइन फोटो दिखाएँ
         </p>
         <button
           type="button"
@@ -1059,7 +1059,7 @@ export default function MLMProfilePage() {
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
-    if (!form.designation) e.designation = "Select a designation";
+    if (!form.designation) e.designation = "Select a rank / रैंक चुनें";
     const profilePhotoCount =
       form.existingProfileImageURLs.length + form.profileImageBlobs.length;
     if (profilePhotoCount < 1) {
@@ -1442,7 +1442,7 @@ export default function MLMProfilePage() {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-muted-foreground">
-                Your selected company
+                Your Selected Company / आपकी चुनी हुई कंपनी
               </p>
               <p className="truncate text-[15px] font-bold text-foreground">
                 {selectedCompanyName}
@@ -1482,7 +1482,7 @@ export default function MLMProfilePage() {
             <div className="bg-background rounded-2xl border border-border p-4" data-guide="profile-basic">
               {/* Full Name */}
               <label className="block text-[11px] font-bold text-foreground/60 mb-2">
-                Full Name <span className="text-red-500">*</span>
+                Full Name / पूरा नाम <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-2 mb-3">
                 <select
@@ -1515,7 +1515,7 @@ export default function MLMProfilePage() {
 
               {/* Mobile */}
               <label className="block text-[11px] font-bold text-foreground/60 mb-2">
-                Mobile Number
+                Mobile Number / मोबाइल नंबर
                 {/* <span className="ml-2 text-xs font-normal text-muted-foreground/70 bg-muted/40 px-2 py-0.5 rounded-full">
                 🔒 Locked
               </span> */}
@@ -1525,57 +1525,22 @@ export default function MLMProfilePage() {
                   type="tel"
                   value={`+91 ${userMobile}`}
                   readOnly
-                  className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-muted/20 text-muted-foreground cursor-not-allowed"
+                  className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-background text-foreground cursor-not-allowed"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/70">
-                  from account
+                  From Account / अकाउंट से
                 </span>
               </div>
 
-              {/* Designation */}
+              {/* Rank: one manual-capable control with company ranks as suggestions. */}
               <label className="block text-[11px] font-bold text-foreground/60 mb-2">
-                Designation <span className="text-red-500">*</span>
+                Select Rank / रैंक चुनें <span className="text-red-500">*</span>
               </label>
-              <select
-                value={
-                  designations.some((d) => d.profilename === form.designation)
-                    ? form.designation
-                    : ""
-                }
-                onChange={(e) => {
-                  setField("designation", e.target.value);
-                  clearError("designation");
-                }}
-                className={`w-full border rounded-lg px-3 py-2 text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 dark:bg-red-500/10" : "border-border"}`}
-              >
-                <option value="">Select designation…</option>
-                {designations.length > 0 ? (
-                  designations.map((d) => (
-                    <option key={d.id} value={d.profilename}>
-                      {d.profilename}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No designations in company data</option>
-                )}
-              </select>
-
-              <div className="flex items-center gap-2 my-2">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
-                  or
-                </span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
               <input
                 type="text"
-                placeholder="Enter designation manually"
-                value={
-                  designations.some((d) => d.profilename === form.designation)
-                    ? ""
-                    : form.designation
-                }
+                list="company-rank-options"
+                placeholder="Type or select rank / रैंक लिखें या चुनें"
+                value={form.designation}
                 onChange={(e) => {
                   setField("designation", e.target.value);
                   clearError("designation");
@@ -1583,6 +1548,11 @@ export default function MLMProfilePage() {
                 maxLength={40}
                 className={`w-full border rounded-lg px-3 py-2 text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 dark:bg-red-500/10" : "border-border"}`}
               />
+              <datalist id="company-rank-options">
+                {designations.map((rank) => (
+                  <option key={rank.id || rank.profilename} value={rank.profilename} />
+                ))}
+              </datalist>
 
               {errors.designation && (
                 <p className="text-xs text-red-500 mt-1">
@@ -1594,7 +1564,7 @@ export default function MLMProfilePage() {
           {/* ── TOPUP LINE ────────────────────────────────────── */}
           <div className="bg-background rounded-2xl border border-border p-4" data-guide="profile-topupline">
             <label className="block text-sm font-semibold text-foreground/80 mb-6">
-              Topup Line Images
+              Add Top Upline/Seniors Image / टॉप अपलाइन/सीनियर्स की फोटो जोड़ें
             </label>
             <div className="flex flex-col gap-2">
               <MultiImagePicker
@@ -1617,7 +1587,7 @@ export default function MLMProfilePage() {
           <div className="bg-background rounded-2xl p-4" data-guide="profile-photo">
             <div className="flex items-center justify-between mb-5">
               <label className="block text-sm font-semibold text-foreground/80">
-                Profile Photo <span className="text-red-500">*</span>
+                Add Profile Photo / प्रोफाइल फोटो जोड़ें <span className="text-red-500">*</span>
               </label>
               <span
                 className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${allProfileImages.length >= MAX_PROFILE_PHOTOS ? "bg-red-100 text-red-600" : "bg-muted/50 text-muted-foreground"}`}
@@ -1627,7 +1597,19 @@ export default function MLMProfilePage() {
             </div>
             <div className="flex flex-col gap-2">
               {/* Scrollable thumbnails + pinned upload, one combined border */}
-              <div className="w-full flex items-center gap-2 rounded-2xl border border-border p-2">
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label="Add profile photo"
+                onClick={() => !removingBg && allProfileImages.length < MAX_PROFILE_PHOTOS && profileInputRef.current?.click()}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    !removingBg && allProfileImages.length < MAX_PROFILE_PHOTOS && profileInputRef.current?.click();
+                  }
+                }}
+                className="w-full flex items-center gap-2 rounded-2xl border border-border p-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/30"
+              >
                 {/* Horizontally scrollable thumbnails area */}
                 <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {allProfileImages.length === 0 && (
@@ -1667,11 +1649,12 @@ export default function MLMProfilePage() {
                 {/* Circular upload icon pinned at the end (does not scroll) */}
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={(event) => {
+                    event.stopPropagation();
                     !removingBg &&
-                    allProfileImages.length < MAX_PROFILE_PHOTOS &&
-                    profileInputRef.current?.click()
-                  }
+                      allProfileImages.length < MAX_PROFILE_PHOTOS &&
+                      profileInputRef.current?.click();
+                  }}
                   disabled={
                     removingBg || allProfileImages.length >= MAX_PROFILE_PHOTOS
                   }

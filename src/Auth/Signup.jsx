@@ -71,11 +71,12 @@ export function Signup() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
+  const [password, setPassword] = useState("");
   const [otpError, setOtpError] = useState("");
 
   const [referInput, setReferInput] = useState(() => {
     const queryCode = getReferralCodeFromSearch(window.location.search);
-    return queryCode || getPendingReferralCode();
+    return queryCode || getPendingReferralCode() || "MLM300";
   });
 
   const [isReferralLocked, setIsReferralLocked] = useState(() => {
@@ -158,6 +159,11 @@ export function Signup() {
       data[key] = value.toString().trim();
     });
 
+    if (!/^[0-9]{4}$/.test(password)) {
+      setFormError("Please add a valid 4-digit password / कृपया सही 4 अंकों का पासवर्ड जोड़ें");
+      return;
+    }
+
     try {
       setLoading(true);
       setFormError("");
@@ -165,7 +171,7 @@ export function Signup() {
       const result = await signupInit(
         data.name,
         data.mobile,
-        data.pin,
+        password,
         referInput,
       );
 
@@ -306,7 +312,7 @@ export function Signup() {
             >
               <TextField name="name" type="text" className="w-full">
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
-                  Full Name
+                  Full Name / पूरा नाम
                 </Label>
 
                 <Input
@@ -324,7 +330,7 @@ export function Signup() {
 
               <TextField name="mobile" type="tel" className="w-full">
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
-                  Mobile Number
+                  Mobile Number / मोबाइल नंबर
                 </Label>
 
                 <Input
@@ -345,36 +351,31 @@ export function Signup() {
               </TextField>
 
               <div className="flex flex-col gap-1 w-full">
-                <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
-                  Create 4-Digit PIN
+                <Label htmlFor="signup-password" className="font-semibold text-sm text-foreground/80 mb-1.5 block">
+                  Add Your Password / अपना पासवर्ड जोड़ें
                 </Label>
 
-                <InputOTP
+                <input
+                  id="signup-password"
                   name="pin"
-                  maxLength={4}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value.replace(/\D/g, "").slice(0, 4))}
                   type="password"
+                  placeholder="Add 4-digit password / 4 अंकों का पासवर्ड"
                   autoComplete="new-password"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  pushPasswordManagerStrategy="increase-width"
-                >
-                  <InputOTP.Group className="gap-3 w-full justify-between">
-                    {[0, 1, 2, 3].map((index) => (
-                      <InputOTP.Slot
-                        key={index}
-                        index={index}
-                        className="flex-1 h-14 text-2xl font-bold bg-white dark:bg-black/20 border border-border data-[focus=true]:border-accent data-[focus=true]:ring-accent shadow-sm rounded-xl"
-                      />
-                    ))}
-                  </InputOTP.Group>
-                </InputOTP>
+                  maxLength={4}
+                  required
+                  className="w-full h-13 rounded-xl border border-border bg-white px-4 text-base font-medium outline-none shadow-sm focus:border-accent focus:ring-2 focus:ring-accent/20 dark:bg-black/20"
+                />
               </div>
 
               {/* Referral code field */}
               <div className="flex flex-col gap-1 w-full">
                 <div className="flex items-center justify-between mb-1.5">
                   <Label className="font-semibold text-sm text-foreground/80">
-                    Refer Code
+                    Coupon Code / कूपन कोड
                   </Label>
 
                   <span
@@ -384,7 +385,7 @@ export function Signup() {
                         : "text-muted-foreground bg-muted"
                     }`}
                   >
-                    {isReferralLocked ? "Auto Applied" : "Optional"}
+                    {isReferralLocked ? "Detected · Editable" : "Editable"}
                   </span>
                 </div>
 
@@ -393,12 +394,7 @@ export function Signup() {
                   placeholder="User or Marketing refer code"
                   maxLength={8}
                   value={referInput}
-                  disabled={isReferralLocked}
-                  readOnly={isReferralLocked}
-                  aria-readonly={isReferralLocked}
                   onChange={(event) => {
-                    if (isReferralLocked) return;
-
                     const code = normalizeReferralCode(event.target.value);
 
                     setReferInput(code);
@@ -415,16 +411,12 @@ export function Signup() {
 
                     setFormError("");
                   }}
-                  className={`h-13 px-4 border rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none transition-all shadow-sm disabled:opacity-100 ${
-                    isReferralLocked
-                      ? "border-accent/30 bg-accent/10 text-accent cursor-not-allowed"
-                      : "border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20"
-                  }`}
+                  className="h-13 px-4 border rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none transition-all shadow-sm border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
 
                 {isReferralLocked && (
                   <p className="text-[11px] font-medium text-accent mt-1">
-                    Referral code applied automatically from your install link.
+                    Coupon code was detected automatically and can still be edited.
                   </p>
                 )}
               </div>
@@ -472,7 +464,7 @@ export function Signup() {
 
               <div className="flex flex-col gap-1 w-full">
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block text-center">
-                  Enter 4-Digit OTP
+                  Enter 4-Digit OTP / 4 अंकों का OTP दर्ज करें
                 </Label>
 
                 <InputOTP
