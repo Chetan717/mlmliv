@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import topbg from "../../../public/topupline_bg.webp"
+import {
+  IMAGE_MAX_SIZE_BYTES,
+  IMAGE_SIZE_LIMIT_MESSAGE,
+} from "../../lib/fileValidation";
 // ── inline SVG icons (no image asset needed) ──────────────────────────────────
 const IcoUpload = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -435,8 +439,8 @@ const filtered = useMemo(() => {
                     e.target.value = "";
                     return;
                   }
-                  if (file.size > 8 * 1024 * 1024) {
-                    alert("Image must be smaller than 8 MB.");
+                  if (file.size > IMAGE_MAX_SIZE_BYTES) {
+                    alert(IMAGE_SIZE_LIMIT_MESSAGE);
                     e.target.value = "";
                     return;
                   }

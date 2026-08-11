@@ -1,4 +1,6 @@
-const IMAGE_MAX_SIZE = 8 * 1024 * 1024; // 8 MB
+export const IMAGE_MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+export const IMAGE_SIZE_LIMIT_MESSAGE =
+  "Image का size 20 MB से ज्यादा है। कृपया 20 MB से कम की image select करें।";
 const AUDIO_MAX_SIZE = 15 * 1024 * 1024; // 15 MB
 
 const ALLOWED_IMAGE_MIMES = new Set([
@@ -113,11 +115,13 @@ export function validateUploadFile(file: File, type: "image" | "audio") {
   }
 
   if (type === "image") {
+    // Check size before any image decoding, cropper, Remove-BG model preload,
+    // FileReader work, or upload starts.
+    if (file.size > IMAGE_MAX_SIZE_BYTES) {
+      return { valid: false, error: IMAGE_SIZE_LIMIT_MESSAGE };
+    }
     if (!isAllowedImage(file)) {
       return { valid: false, error: "Only JPG, PNG, and WEBP images are allowed." };
-    }
-    if (file.size > IMAGE_MAX_SIZE) {
-      return { valid: false, error: "Image must be smaller than 8 MB." };
     }
     return { valid: true };
   }

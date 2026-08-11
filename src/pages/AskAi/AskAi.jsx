@@ -12,6 +12,7 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
+import { toast } from "@heroui/react";
 import { preparePrescriptionImage } from "../../lib/prescriptionImage";
 import { readPrescription } from "../../services/askAiService";
 import {
@@ -128,7 +129,12 @@ export default function AskAi() {
       if (prepared?.previewUrl) URL.revokeObjectURL(prepared.previewUrl);
       setPrepared(next);
     } catch (nextError) {
-      setError("Unable to prepare this image. Please try again.");
+      const message =
+        nextError instanceof Error
+          ? nextError.message
+          : "Unable to prepare this image. Please try again.";
+      setError(message);
+      toast.danger(message);
       event.target.value = "";
     } finally {
       setOptimizing(false);
@@ -224,7 +230,7 @@ export default function AskAi() {
                   Add prescription
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  One image · maximum 10 MB
+                  One image · maximum 20 MB
                 </p>
               </div>
               {prepared && (

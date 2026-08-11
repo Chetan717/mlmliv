@@ -69,7 +69,7 @@ test("Select Company uses refresh, deferred search and scroll batching", () => {
   assert.match(source, /useDeferredValue\(search\)/);
   assert.match(source, /new IntersectionObserver/);
   assert.match(source, /COMPANY_BATCH_SIZE/);
-  assert.match(source, /visibleCompanies\.map/);
+  assert.match(source, /visibleCompanies\??\.map/);
 });
 
 test("My Profile is accessible before MLM profile creation and unifies editing", () => {

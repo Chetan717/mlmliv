@@ -1,4 +1,8 @@
-const MAX_UPLOAD_BYTES = 10 * 512 * 512;
+import {
+  IMAGE_MAX_SIZE_BYTES,
+  IMAGE_SIZE_LIMIT_MESSAGE,
+} from "./fileValidation";
+
 const MAX_IMAGE_EDGE = 1280;
 const WEBP_QUALITY = 0.8;
 
@@ -47,7 +51,7 @@ function canvasToWebP(canvas: HTMLCanvasElement): Promise<Blob> {
 
 export async function preparePrescriptionImage(file: File): Promise<PreparedPrescriptionImage> {
   if (!file || file.size === 0) throw new Error("Please choose a valid image.");
-  if (file.size > MAX_UPLOAD_BYTES) throw new Error("Image must be 10 MB or smaller.");
+  if (file.size > IMAGE_MAX_SIZE_BYTES) throw new Error(IMAGE_SIZE_LIMIT_MESSAGE);
   if (!SAFE_IMAGE_TYPES.has(file.type)) {
     throw new Error("Only JPG, PNG, WEBP, HEIC, and HEIF images are supported.");
   }

@@ -58,8 +58,8 @@ const GUIDES = {
       copy(
         "Upload a clear image",
         "साफ फोटो अपलोड करें",
-        "Choose one JPG, PNG, WEBP or HEIC image up to 10 MB. Keep the full prescription straight, bright and free from glare.",
-        "10 MB तक की एक JPG, PNG, WEBP या HEIC फोटो चुनें। पूरा prescription सीधा, रोशनी में और बिना glare के रखें।",
+        "Choose one JPG, PNG, WEBP or HEIC image up to 20 MB. Keep the full prescription straight, bright and free from glare.",
+        "20 MB तक की एक JPG, PNG, WEBP या HEIC फोटो चुनें। पूरा prescription सीधा, रोशनी में और बिना glare के रखें।",
         '[data-guide="ask-ai-upload"]',
       ),
       copy(

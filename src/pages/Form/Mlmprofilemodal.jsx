@@ -19,6 +19,10 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { convertToWebP } from "../../lib/convertToWebP";
+import {
+  IMAGE_MAX_SIZE_BYTES,
+  IMAGE_SIZE_LIMIT_MESSAGE,
+} from "../../lib/fileValidation";
 import MultiImagePicker from "./MultiImagePicker";
 import { ImageEditorCanvas } from "./ImageEditorCanvas";
 import { toast, Button } from "@heroui/react";
@@ -829,8 +833,8 @@ export default function MLMProfilePage() {
       toast.danger("Only JPG and PNG images are allowed.");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      toast.danger("Image must be smaller than 8 MB.");
+    if (file.size > IMAGE_MAX_SIZE_BYTES) {
+      toast.danger(IMAGE_SIZE_LIMIT_MESSAGE);
       return;
     }
 
