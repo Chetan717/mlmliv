@@ -13,6 +13,11 @@ import {
   clearCompanyScopedStorage,
   COMPANY_SCOPED_STORAGE_KEYS,
 } from "../src/utils/companyStorage.js";
+import {
+  clearPendingCompanySelection,
+  readPendingCompanySelection,
+  savePendingCompanySelection,
+} from "../src/utils/companySelectionStorage.js";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const read = (relativePath) =>
@@ -22,6 +27,7 @@ function createStorage(entries) {
   const values = new Map(Object.entries(entries));
   return {
     getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
     removeItem: (key) => values.delete(key),
     values,
   };
@@ -61,6 +67,31 @@ test("company-profile deletion clears company data but preserves login preferenc
   assert.equal(local.getItem("theme"), "dark");
   assert.equal(local.getItem("onboardingDone"), "1");
   assert.equal(session.getItem("authSession"), "verified");
+});
+
+test("pending company selection is UID-scoped and survives a blocked local store", () => {
+  const session = createStorage({});
+  const blockedLocal = {
+    getItem: () => { throw new Error("blocked"); },
+    setItem: () => { throw new Error("blocked"); },
+    removeItem: () => { throw new Error("blocked"); },
+  };
+  const stores = [blockedLocal, session];
+
+  assert.equal(savePendingCompanySelection("uid-1", "company-9", { stores }), true);
+  assert.equal(readPendingCompanySelection("uid-1", { stores }), "company-9");
+  assert.equal(readPendingCompanySelection("uid-2", { stores }), null);
+
+  clearPendingCompanySelection("uid-1", { stores });
+  assert.equal(readPendingCompanySelection("uid-1", { stores }), null);
+});
+
+test("company selection does not depend on the unsupported Firestore collection", () => {
+  const context = read("src/Context/SelectedCompanyContext.jsx");
+  assert.doesNotMatch(context, /userCompanySelections/);
+  assert.match(context, /savePendingCompanySelection\(user\.uid, company\.id\)/);
+  assert.match(context, /verifiedProfile\?\.companyId/);
+  assert.doesNotMatch(context, /setDoc\(selectionRef/);
 });
 
 test("Select Company uses refresh, deferred search and scroll batching", () => {

@@ -31,6 +31,8 @@ import {
 
 import {
   clearPendingReferralCode,
+  getInitialSignupCouponCode,
+  getSignupCouponCode,
   getPendingReferralCode,
   getReferralCodeFromBridgeMessage,
   getReferralCodeFromSearch,
@@ -71,27 +73,15 @@ export function Signup() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
-  const [password, setPassword] = useState("");
   const [otpError, setOtpError] = useState("");
 
   const [referInput, setReferInput] = useState(() => {
     const queryCode = getReferralCodeFromSearch(window.location.search);
-    return queryCode || getPendingReferralCode() || "MLM300";
-  });
-
-  const [isReferralLocked, setIsReferralLocked] = useState(() => {
-    const queryCode = getReferralCodeFromSearch(window.location.search);
-    const pendingCode = queryCode || getPendingReferralCode();
-    const storedSource = getStoredReferralSource();
-
-    /*
-     * If the pending code has no source, it probably came from the native
-     * WebView before the signup screen opened. Therefore, it will be treated
-     * as an automatically applied referral code.
-     *
-     * Codes entered manually are marked as "manual" and remain editable.
-     */
-    return Boolean(pendingCode && (queryCode || storedSource !== "manual"));
+    return getInitialSignupCouponCode({
+      queryCode,
+      pendingCode: getPendingReferralCode(),
+      pendingSource: getStoredReferralSource(),
+    });
   });
 
   const [sessionId, setSessionId] = useState(verifyState?.sessionId || "");
@@ -109,7 +99,6 @@ export function Signup() {
 
     if (queryCode) {
       setReferInput(savePendingReferralCode(queryCode));
-      setIsReferralLocked(true);
       storeReferralSource("automatic");
     }
 
@@ -119,7 +108,6 @@ export function Signup() {
       if (!code) return;
 
       setReferInput(savePendingReferralCode(code));
-      setIsReferralLocked(true);
       storeReferralSource("automatic");
       setFormError("");
     };
@@ -159,10 +147,15 @@ export function Signup() {
       data[key] = value.toString().trim();
     });
 
-    if (!/^[0-9]{4}$/.test(password)) {
-      setFormError("Please add a valid 4-digit password / कृपया सही 4 अंकों का पासवर्ड जोड़ें");
+    if (!/^[0-9]{4}$/.test(data.pin || "")) {
+      setFormError(
+        "Password must be 4 digits / पासवर्ड 4 अंकों का होना चाहिए।",
+      );
       return;
     }
+
+    const couponCode = getSignupCouponCode(referInput);
+    setReferInput(couponCode);
 
     try {
       setLoading(true);
@@ -171,8 +164,8 @@ export function Signup() {
       const result = await signupInit(
         data.name,
         data.mobile,
-        password,
-        referInput,
+        data.pin,
+        couponCode,
       );
 
       setSessionId(result.sessionId);
@@ -253,9 +246,17 @@ export function Signup() {
     }
   };
 
-  const stepTitles = ["", "Create Account", "Verify OTP"];
+  const stepTitles = [
+    "",
+    "Create Account / अकाउंट बनाएं",
+    "Verify OTP / OTP सत्यापित करें",
+  ];
 
-  const stepSubs = ["", "Join MLM LIVE today", `OTP sent to +91 ${userMobile}`];
+  const stepSubs = [
+    "",
+    "Join MLM LIVE today / आज ही MLM LIVE से जुड़ें",
+    `OTP sent to +91 ${userMobile} / OTP भेज दिया गया है`,
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background overflow-hidden">
@@ -322,7 +323,7 @@ export function Signup() {
                       "h-13 bg-white dark:bg-black/20 border border-border hover:border-accent focus-within:!border-accent focus-within:!ring-accent shadow-sm rounded-xl",
                     input: "text-base font-medium",
                   }}
-                  placeholder="Enter your full name"
+                  placeholder="Enter your full name / अपना पूरा नाम दर्ज करें"
                 />
 
                 <FieldError className="text-danger mt-1 text-xs" />
@@ -340,7 +341,7 @@ export function Signup() {
                       "h-13 bg-white dark:bg-black/20 border border-border hover:border-accent focus-within:!border-accent focus-within:!ring-accent shadow-sm rounded-xl",
                     input: "text-base font-medium tracking-wide",
                   }}
-                  placeholder="10-digit number"
+                  placeholder="10-digit mobile number / 10 अंकों का मोबाइल नंबर"
                   maxLength={10}
                   autoComplete="username"
                   inputMode="numeric"
@@ -351,23 +352,26 @@ export function Signup() {
               </TextField>
 
               <div className="flex flex-col gap-1 w-full">
-                <Label htmlFor="signup-password" className="font-semibold text-sm text-foreground/80 mb-1.5 block">
+                <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
                   Add Your Password / अपना पासवर्ड जोड़ें
                 </Label>
 
                 <input
-                  id="signup-password"
                   name="pin"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                  aria-label="Add Your Password / अपना पासवर्ड जोड़ें"
+                  className="h-13 w-full rounded-xl border border-border bg-white px-4 text-base font-semibold tracking-[0.22em] text-foreground shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:bg-black/20"
+                  maxLength={4}
                   type="password"
-                  placeholder="Add 4-digit password / 4 अंकों का पासवर्ड"
                   autoComplete="new-password"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  maxLength={4}
+                  onInput={(event) => {
+                    event.currentTarget.value = event.currentTarget.value
+                      .replace(/\D/g, "")
+                      .slice(0, 4);
+                  }}
+                  placeholder="••••"
                   required
-                  className="w-full h-13 rounded-xl border border-border bg-white px-4 text-base font-medium outline-none shadow-sm focus:border-accent focus:ring-2 focus:ring-accent/20 dark:bg-black/20"
                 />
               </div>
 
@@ -379,19 +383,16 @@ export function Signup() {
                   </Label>
 
                   <span
-                    className={`font-semibold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                      isReferralLocked
-                        ? "text-accent bg-accent/10"
-                        : "text-muted-foreground bg-muted"
-                    }`}
+                    className="font-semibold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide text-accent bg-accent/10"
                   >
-                    {isReferralLocked ? "Detected · Editable" : "Editable"}
+                    Editable / बदल सकते हैं
                   </span>
                 </div>
 
                 <input
                   type="text"
-                  placeholder="User or Marketing refer code"
+                  aria-label="Coupon Code / कूपन कोड"
+                  placeholder="Enter coupon code / कूपन कोड दर्ज करें"
                   maxLength={8}
                   value={referInput}
                   onChange={(event) => {
@@ -411,14 +412,17 @@ export function Signup() {
 
                     setFormError("");
                   }}
+                  onBlur={() => {
+                    const couponCode = getSignupCouponCode(referInput);
+                    setReferInput(couponCode);
+                    savePendingReferralCode(couponCode);
+                  }}
                   className="h-13 px-4 border rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none transition-all shadow-sm border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
 
-                {isReferralLocked && (
-                  <p className="text-[11px] font-medium text-accent mt-1">
-                    Coupon code was detected automatically and can still be edited.
-                  </p>
-                )}
+                <p className="text-[11px] font-medium text-muted-foreground mt-1">
+                  Default MLM100. You can edit it. / डिफ़ॉल्ट MLM100 है, आप इसे बदल सकते हैं।
+                </p>
               </div>
 
               {formError && (
@@ -432,16 +436,16 @@ export function Signup() {
                 type="submit"
                 isLoading={loading}
               >
-                {loading ? "Sending OTP..." : "Continue"}
+                {loading ? "Sending OTP... / OTP भेज रहे हैं..." : "Continue / आगे बढ़ें"}
               </Button>
 
               <p className="text-center text-sm font-medium text-muted-foreground">
-                Already have an account?
+                Already have an account? / पहले से अकाउंट है?
                 <span
                   onClick={() => navigate("/login")}
                   className="ml-1.5 text-accent font-bold cursor-pointer hover:underline"
                 >
-                  Login
+                  Login / लॉग इन करें
                 </span>
               </p>
             </Form>
@@ -499,7 +503,9 @@ export function Signup() {
                 onClick={onVerifyOtp}
                 isLoading={loading}
               >
-                {loading ? "Verifying..." : "Verify & Create Account"}
+                {loading
+                  ? "Verifying... / सत्यापित हो रहा है..."
+                  : "Verify & Create Account / सत्यापित करके अकाउंट बनाएं"}
               </Button>
 
               <div className="flex justify-between items-center px-2">
@@ -513,14 +519,14 @@ export function Signup() {
                   }}
                   className="text-sm text-muted-foreground font-semibold cursor-pointer hover:text-foreground transition-colors"
                 >
-                  Back
+                  Back / वापस
                 </span>
 
                 <span
                   onClick={onResendOtp}
                   className="text-sm text-accent font-bold cursor-pointer hover:underline"
                 >
-                  Resend OTP
+                  Resend OTP / OTP दोबारा भेजें
                 </span>
               </div>
             </div>

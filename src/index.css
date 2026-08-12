@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @import "@heroui/styles";
 
@@ -52,8 +52,8 @@ html {
 
   --radius: 0.75rem;
   --field-radius: 0.75rem;
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Syne', sans-serif;
+  --font-sans: 'Roboto', sans-serif;
+  --font-display: 'Roboto', sans-serif;
 
   /* Card shadow */
   --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06), 0 2px 12px rgba(0, 0, 0, 0.04);
@@ -600,13 +600,13 @@ html {
 /* ── Font Lock — prevent HeroUI/Tailwind from overriding fonts ─────────── */
 /* Must be at the bottom of the file to win the cascade */
 :root {
-  --font-sans: 'Inter', sans-serif !important;
-  --font-display: 'Syne', sans-serif !important;
+  --font-sans: 'Roboto', sans-serif !important;
+  --font-display: 'Roboto', sans-serif !important;
 }
 
 body,
 body * {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
 }
 
 h1,
@@ -616,7 +616,7 @@ h4,
 h5,
 h6,
 .font-display {
-  font-family: 'Syne', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
 }
 
 /* ── Global toast appearance ─────────────────────────────── */

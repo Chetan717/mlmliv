@@ -127,9 +127,16 @@ export default function MultiImagePicker({
   const totalSelected  = selectedLinks.length + customFiles.length;
   const allowed        = type === "Logo" ? 3 : maxImages;
   const isLimitReached = totalSelected >= allowed;
+  const isTriggerDisabled = isLimitReached || processingBg;
 
   const handleOpen  = useCallback(() => { setTab("company"); setSearch(""); setPage(1); setOpen(true); }, []);
   const handleClose = useCallback(() => setOpen(false), []);
+
+  const handleTriggerKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    if (!isTriggerDisabled) handleOpen();
+  };
 
   useEffect(() => {
     if (isLimitReached && open) {
@@ -171,20 +178,24 @@ const filtered = useMemo(() => {
   const trigger = inlineStrip ? (
     <div
       role="button"
-      tabIndex={isLimitReached || processingBg ? -1 : 0}
-      aria-label="Add top upline or senior image"
-      onClick={() => !isLimitReached && !processingBg && handleOpen()}
-      onKeyDown={(event) => {
-        if ((event.key === "Enter" || event.key === " ") && !isLimitReached && !processingBg) {
-          event.preventDefault();
-          handleOpen();
-        }
+      tabIndex={isTriggerDisabled ? -1 : 0}
+      aria-disabled={isTriggerDisabled}
+      aria-label="Add Top Upline or Seniors Image / टॉप अपलाइन या सीनियर्स की इमेज जोड़ें"
+      onClick={() => {
+        if (!isTriggerDisabled) handleOpen();
       }}
-      className="w-full flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/30"
+      onKeyDown={handleTriggerKeyDown}
+      className={`w-full flex items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-2 transition focus:outline-none focus:ring-2 focus:ring-accent/30 ${
+        isTriggerDisabled
+          ? "cursor-not-allowed opacity-60"
+          : "cursor-pointer hover:border-accent/60 hover:bg-accent/5"
+      }`}
     >
       <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {totalSelected === 0 && (
-          <span className="text-[11px] text-gray-400 px-2 py-3 whitespace-nowrap">No images selected yet</span>
+          <span className="text-[11px] text-gray-400 px-2 py-3">
+            Tap anywhere to add an image / इमेज जोड़ने के लिए बॉक्स पर टैप करें
+          </span>
         )}
        {selectedLinks.map((item, i) => {
   const link = getSelectionLink(item);
@@ -192,7 +203,10 @@ const filtered = useMemo(() => {
     <div key={link || `sel-${i}`} className="relative w-15 h-15 flex-shrink-0">
       <img src={link} alt="" className="w-14 h-14 p-1 rounded-full object-cover border border-2 border-yellow-400" />
       <button type="button"
-        onClick={(event) => { event.stopPropagation(); setConfirmRemove({ action: () => onToggleLink(link) }); }}
+        onClick={(event) => {
+          event.stopPropagation();
+          setConfirmRemove({ action: () => onToggleLink(link) });
+        }}
         className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] flex items-center justify-center shadow ring-2 ring-white dark:ring-gray-900" title="Remove">
         ✕
       </button>
@@ -203,14 +217,17 @@ const filtered = useMemo(() => {
           <div key={item.previewURL || `cus-${i}`} className="relative flex-shrink-0">
             <img src={item.previewURL} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-violet-300 dark:border-violet-500/50 bg-gray-100 dark:bg-gray-800" />
             <button type="button"
-              onClick={(event) => { event.stopPropagation(); setConfirmRemove({ action: () => onRemoveCustomFile(i) }); }}
+              onClick={(event) => {
+                event.stopPropagation();
+                setConfirmRemove({ action: () => onRemoveCustomFile(i) });
+              }}
               className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] flex items-center justify-center shadow ring-2 ring-white dark:ring-gray-900" title="Remove">
               ✕
             </button>
           </div>
         ))}
       </div>
-      <button type="button" onClick={(event) => { event.stopPropagation(); handleOpen(); }} disabled={isLimitReached || processingBg}
+      <button type="button" onClick={(event) => { event.stopPropagation(); handleOpen(); }} disabled={isTriggerDisabled}
         className="flex-shrink-0 w-14 h-14 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 flex items-center justify-center transition text-gray-400 hover:text-violet-500 disabled:opacity-40 disabled:cursor-not-allowed"
         title={isLimitReached ? "Limit reached" : processingBg ? "Processing…" : "Add image"}>
         {processingBg
@@ -250,7 +267,7 @@ const filtered = useMemo(() => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
           <div>
-            <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">Select Images</h2>
+            <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">Select Images / इमेज चुनें</h2>
             <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{totalSelected} of {allowed} selected</p>
           </div>
           <button type="button" onClick={handleClose}
@@ -269,8 +286,8 @@ const filtered = useMemo(() => {
           {!hideUpload && (
             <div className="flex gap-1.5 p-1 bg-gray-100 dark:bg-gray-800/60 rounded-2xl flex-shrink-0">
               {[
-                { key: "company", label: "Company Photos" },
-                { key: "upload",  label: "Upload New"     },
+                { key: "company", label: "Company Photos / कंपनी फोटो" },
+                { key: "upload",  label: "Upload New / नई अपलोड करें"  },
               ].map(({ key, label }) => (
                 <button key={key} type="button" onClick={() => setTab(key)}
                   className={`flex-1 py-2 px-3 rounded-xl text-[12px] font-bold transition-all duration-200 ${
@@ -296,7 +313,7 @@ const filtered = useMemo(() => {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name…"
+                  placeholder="Search by name / नाम से खोजें…"
                   aria-label="Search top upline by name"
                   autoComplete="off"
                   enterKeyHint="search"
@@ -433,7 +450,7 @@ const filtered = useMemo(() => {
                 </div>
                 <div className="text-left">
                   <p className="text-[13px] font-semibold text-gray-800 dark:text-gray-200 group-hover:text-[#0088DA] dark:group-hover:text-violet-400 transition-colors">
-                    {isLimitReached ? "Image limit reached" : processingBg ? "Processing image…" : "Choose from gallery"}
+                    {isLimitReached ? "Image limit reached / सीमा पूरी हुई" : processingBg ? "Processing image… / इमेज प्रोसेस हो रही है…" : "Choose from gallery / गैलरी से चुनें"}
                   </p>
                   <p className="text-[10px] text-gray-400">JPG, PNG · max {allowed}</p>
                 </div>

@@ -5,10 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
-  serverTimestamp,
-  setDoc,
   where,
-  writeBatch,
 } from "firebase/firestore";
 import {
   createContext,
@@ -27,9 +24,12 @@ import {
   clearMlmProfileStorage,
   saveMlmProfileToStorage,
 } from "../utils/companyStorage";
+import {
+  clearPendingCompanySelection,
+  readPendingCompanySelection,
+  savePendingCompanySelection,
+} from "../utils/companySelectionStorage";
 import { invalidateVerifiedMlmProfileCache } from "../utils/mlmProfileVerification";
-
-export const COMPANY_SELECTION_COLLECTION = "userCompanySelections";
 
 const SelectedCompanyContext = createContext({
   selectedCompany: null,
@@ -53,8 +53,8 @@ export function SelectedCompanyProvider({ children }) {
   const selectionRequestVersionRef = useRef(0);
 
   useEffect(() => {
-    // One-way migration: remove the old browser copy regardless of login
-    // state. It is never consulted by this provider.
+    // Remove the old unscoped object. New pending selections contain only a
+    // company id and are namespaced by the Firebase-verified UID.
     try { localStorage.removeItem("selectedCompany"); } catch {}
     try { sessionStorage.removeItem("selectedCompany"); } catch {}
   }, []);
@@ -71,16 +71,6 @@ export function SelectedCompanyProvider({ children }) {
 
     setLoading(true);
     try {
-      const selectionRef = doc(
-        db,
-        COMPANY_SELECTION_COLLECTION,
-        user.uid,
-      );
-      const selectionSnapshot = await getDoc(selectionRef);
-      let companyId = selectionSnapshot.exists()
-        ? selectionSnapshot.data()?.companyId
-        : null;
-
       // Profile details intentionally live in sessionStorage only, so closing
       // the app clears the browser copy. Rehydrate it from Firestore before
       // Home/Templates become interactive; otherwise an existing account is
@@ -105,28 +95,19 @@ export function SelectedCompanyProvider({ children }) {
         }
       }
 
-      // Secure migration for existing accounts: derive the company from the
-      // server profile, never from browser storage.
-      if (!companyId && verifiedProfile) {
-        companyId = verifiedProfile.companyId || null;
-        if (companyId) {
-          try {
-            await setDoc(selectionRef, {
-              companyId,
-              selectedAt: serverTimestamp(),
-            });
-          } catch (writeError) {
-            // React StrictMode or a second tab may have created the immutable
-            // selection between our read and write. Re-read and accept only
-            // the server value; propagate every other failure.
-            const concurrentSelection = await getDoc(selectionRef);
-            if (!concurrentSelection.exists()) throw writeError;
-            companyId = concurrentSelection.data()?.companyId || null;
-          }
-        }
-      }
+      // A completed MLM profile is the server-backed source of truth. Before
+      // the profile exists, keep the chosen public company id locally under
+      // the verified UID. This avoids relying on an undeployed Firestore
+      // collection while still surviving refreshes and app restarts.
+      const profileCompanyId = verifiedProfile?.companyId || null;
+      const companyId =
+        profileCompanyId || readPendingCompanySelection(user.uid);
+      if (profileCompanyId) clearPendingCompanySelection(user.uid);
 
       const company = await readCompany(companyId);
+      if (!company && companyId && !profileCompanyId) {
+        clearPendingCompanySelection(user.uid);
+      }
       if (requestVersion === selectionRequestVersionRef.current) {
         setSelectedCompany(company);
       }
@@ -154,36 +135,19 @@ export function SelectedCompanyProvider({ children }) {
         throw new Error("Authenticated user and company are required.");
       }
 
-      const selectionRef = doc(
-        db,
-        COMPANY_SELECTION_COLLECTION,
-        user.uid,
-      );
-      const existing = await getDoc(selectionRef);
-      if (existing.exists()) {
-        const existingId = existing.data()?.companyId;
-        if (existingId !== company.id) {
-          throw new Error("Your company has already been selected.");
-        }
-      } else {
-        await setDoc(selectionRef, {
-          companyId: company.id,
-          selectedAt: serverTimestamp(),
-        });
-      }
-
-      const verifiedCompany = await readCompany(company.id);
-      if (!verifiedCompany) throw new Error("Selected company was not found.");
+      // The company object came from the freshly loaded Firestore directory.
+      // Save only its public id; the full document is re-read on app startup.
+      savePendingCompanySelection(user.uid, company.id);
       selectionRequestVersionRef.current += 1;
-      setSelectedCompany(verifiedCompany);
-      return verifiedCompany;
+      setSelectedCompany(company);
+      return company;
     },
     [user],
   );
 
   const clearCompanySelection = useCallback(async () => {
     if (!user?.uid) throw new Error("Authenticated user is required.");
-    await deleteDoc(doc(db, COMPANY_SELECTION_COLLECTION, user.uid));
+    clearPendingCompanySelection(user.uid);
     selectionRequestVersionRef.current += 1;
     setSelectedCompany(null);
   }, [user]);
@@ -193,15 +157,11 @@ export function SelectedCompanyProvider({ children }) {
       if (!user?.uid) throw new Error("Authenticated user is required.");
       if (!profileId) throw new Error("MLM profile is required.");
 
-      // Delete both documents in one atomic Firestore commit. This prevents a
-      // deleted profile from leaving an orphaned company selection behind.
-      const batch = writeBatch(db);
-      batch.delete(doc(db, COLLECTIONS.MLMPROFILES, profileId));
-      batch.delete(doc(db, COMPANY_SELECTION_COLLECTION, user.uid));
-      await batch.commit();
+      await deleteDoc(doc(db, COLLECTIONS.MLMPROFILES, profileId));
 
       // Keep the authenticated Firebase session, but remove every draft/cache
       // tied to the deleted company before Select Company can render.
+      clearPendingCompanySelection(user.uid);
       selectionRequestVersionRef.current += 1;
       invalidateVerifiedMlmProfileCache();
       clearCompanyScopedStorage();

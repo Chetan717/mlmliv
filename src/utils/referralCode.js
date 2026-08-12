@@ -1,6 +1,8 @@
 const PENDING_REFERRAL_STORAGE_KEY = "mlmlive.pendingReferralCode";
 const REFERRAL_QUERY_KEYS = ["ref", "referCode", "referralCode"];
 
+export const DEFAULT_COUPON_CODE = "MLM100";
+
 export function normalizeReferralCode(value) {
   if (typeof value !== "string") return "";
 
@@ -9,6 +11,25 @@ export function normalizeReferralCode(value) {
     .toUpperCase()
     .replace(/[^A-Z0-9_-]/g, "")
     .slice(0, 8);
+}
+
+export function getSignupCouponCode(value = "") {
+  return normalizeReferralCode(value) || DEFAULT_COUPON_CODE;
+}
+
+export function getInitialSignupCouponCode({
+  queryCode = "",
+  pendingCode = "",
+  pendingSource = "",
+} = {}) {
+  const normalizedQueryCode = normalizeReferralCode(queryCode);
+  if (normalizedQueryCode) return normalizedQueryCode;
+
+  const normalizedPendingCode = normalizeReferralCode(pendingCode);
+  const isLegacyDefault =
+    normalizedPendingCode === "MLM300" && !pendingSource;
+
+  return getSignupCouponCode(isLegacyDefault ? "" : normalizedPendingCode);
 }
 
 export function getReferralCodeFromSearch(search = "") {

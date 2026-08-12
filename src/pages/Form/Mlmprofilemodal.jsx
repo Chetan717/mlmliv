@@ -194,11 +194,11 @@ function DeleteConfirmModal({ userMobile, onConfirm, onCancel, deleting }) {
         {/* Mobile confirmation input */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wide">
-            Confirm by entering your mobile number
+            Confirm by entering your mobile number / पुष्टि के लिए मोबाइल नंबर दर्ज करें
           </label>
           <input
             type="tel"
-            placeholder={`Enter Mobile Number`}
+            placeholder="Enter Mobile Number / मोबाइल नंबर दर्ज करें"
             value={inputMobile}
             onChange={(e) => setInputMobile(e.target.value)}
             className={`w-full border rounded-xl px-4 py-2.5 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 transition dark:bg-zinc-800 dark:text-white
@@ -384,7 +384,7 @@ function DisplaySettings({ accent = false }) {
       {/* Show Topupline Images */}
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-foreground/70">
-          Show Top Upline Images / टॉप अपलाइन फोटो दिखाएँ
+          Show Top Upline Images / टॉप अपलाइन इमेज दिखाएं
         </p>
         <button
           type="button"
@@ -486,6 +486,8 @@ export default function MLMProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmRemovePhoto, setConfirmRemovePhoto] = useState(null);
+  const [rankPickerOpen, setRankPickerOpen] = useState(false);
+  const [manualRankInput, setManualRankInput] = useState("");
   const [bgProgressMsg, setBgProgressMsg] = useState("Please wait…");
   const [bgProgressPct, setBgProgressPct] = useState(0);
   const [bgDots, setBgDots] = useState("");
@@ -496,6 +498,7 @@ export default function MLMProfilePage() {
   const abortTopupRef = useRef(null);
   const profileInputRef = useRef(null);
   const topupInputRef = useRef(null);
+  const rankDialogRef = useRef(null);
   const originalProfileImageURLsRef = useRef([]);
   const originalTopupURLsRef = useRef([]);
   const originalAllTopupURLsRef = useRef([]);
@@ -504,6 +507,30 @@ export default function MLMProfilePage() {
   const allowMobileBackRef = useRef(false);
 
   const isBgRemoving = removingBg || removingTopupBg;
+
+  useEffect(() => {
+    if (!rankPickerOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const focusFrame = window.requestAnimationFrame(() => {
+      rankDialogRef.current?.focus();
+    });
+    const closeRankPickerOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setRankPickerOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", closeRankPickerOnEscape);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", closeRankPickerOnEscape);
+    };
+  }, [rankPickerOpen]);
+
   useEffect(() => {
     if (!isBgRemoving) {
       setBgDots("");
@@ -528,6 +555,9 @@ export default function MLMProfilePage() {
   const designations = Array.isArray(companyData?.profile)
     ? companyData.profile
     : [];
+  const isListedRank = designations.some(
+    (designation) => designation.profilename === form.designation,
+  );
   const selectedCompanyName =
     companyData?.name || companyData?.companyName || "Selected Company";
   const selectedCompanyLogo =
@@ -698,6 +728,26 @@ export default function MLMProfilePage() {
   const setField = (key, val) => setForm((f) => ({ ...f, [key]: val }));
   const clearError = (key) =>
     setErrors((prev) => ({ ...prev, [key]: undefined }));
+
+  const openRankPicker = () => {
+    setManualRankInput(isListedRank ? "" : form.designation);
+    setRankPickerOpen(true);
+  };
+
+  const selectManualRank = () => {
+    const rank = manualRankInput.trim();
+    if (!rank) return;
+
+    setField("designation", rank);
+    clearError("designation");
+    setRankPickerOpen(false);
+  };
+
+  const selectListedRank = (rank) => {
+    setField("designation", rank);
+    clearError("designation");
+    setRankPickerOpen(false);
+  };
 
   // ── Logo ───────────────────────────────────────────────────
   const handleLogoToggleLink = (link, size = "") =>
@@ -1034,6 +1084,8 @@ export default function MLMProfilePage() {
     ...form.existingProfileImageURLs.map((url) => ({ url, isExisting: true })),
     ...form.profileImageBlobPreviews.map((url) => ({ url, isExisting: false })),
   ];
+  const canAddProfilePhoto =
+    !removingBg && allProfileImages.length < MAX_PROFILE_PHOTOS;
 
   // ── Social ─────────────────────────────────────────────────
   const handleSocialSameToggle = (platform) => {
@@ -1059,7 +1111,9 @@ export default function MLMProfilePage() {
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
-    if (!form.designation) e.designation = "Select a rank / रैंक चुनें";
+    if (!form.designation) {
+      e.designation = "Select a rank / रैंक चुनें";
+    }
     const profilePhotoCount =
       form.existingProfileImageURLs.length + form.profileImageBlobs.length;
     if (profilePhotoCount < 1) {
@@ -1396,6 +1450,151 @@ export default function MLMProfilePage() {
         </div>
       )}
 
+      {rankPickerOpen && (
+        <div
+          className="fixed inset-0 z-[99990] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setRankPickerOpen(false);
+            }
+          }}
+        >
+          <div
+            id="mlm-rank-picker"
+            ref={rankDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mlm-rank-picker-title"
+            tabIndex={-1}
+            className="flex max-h-[85dvh] w-full max-w-md flex-col overflow-hidden rounded-t-3xl border border-border bg-background shadow-2xl outline-none sm:rounded-3xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3.5">
+              <div>
+                <h2
+                  id="mlm-rank-picker-title"
+                  className="text-base font-bold text-foreground"
+                >
+                  Select Rank / रैंक चुनें
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Enter manually or choose from the list / मैन्युअल लिखें या सूची से चुनें
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Close rank selection / रैंक चयन बंद करें"
+                onClick={() => setRankPickerOpen(false)}
+                className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:bg-muted/40 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+              >
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="m6 6 12 12M18 6 6 18" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
+              <div className="shrink-0">
+                <label
+                  htmlFor="manual-rank"
+                  className="mb-2 block text-[11px] font-bold text-foreground/60"
+                >
+                  Enter Rank Manually / रैंक मैन्युअल रूप से दर्ज करें
+                </label>
+                <input
+                  id="manual-rank"
+                  type="text"
+                  placeholder="Type your rank / अपनी रैंक लिखें"
+                  value={manualRankInput}
+                  onChange={(event) => setManualRankInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      selectManualRank();
+                    }
+                  }}
+                  maxLength={40}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+                />
+                <button
+                  type="button"
+                  disabled={!manualRankInput.trim()}
+                  onClick={selectManualRank}
+                  className="mt-2.5 w-full rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Use Manual Rank / मैन्युअल रैंक चुनें
+                </button>
+              </div>
+
+              <div className="my-3 flex shrink-0 items-center gap-3">
+                <span className="h-px flex-1 bg-border" />
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Select from rank list / रैंक सूची से चुनें
+                </p>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+
+              <div
+                role="listbox"
+                aria-label="Rank list / रैंक सूची"
+                className="max-h-[48dvh] min-h-0 overflow-y-auto overscroll-contain rounded-xl border border-border divide-y divide-border"
+              >
+                {designations.length > 0 ? (
+                  designations.map((designation) => {
+                    const selected =
+                      designation.profilename === form.designation;
+                    return (
+                      <button
+                        key={designation.id || designation.profilename}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        onClick={() =>
+                          selectListedRank(designation.profilename)
+                        }
+                        className={`flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left text-sm transition ${
+                          selected
+                            ? "bg-accent/10 text-accent font-bold"
+                            : "bg-background text-foreground hover:bg-muted/30"
+                        }`}
+                      >
+                        <span>{designation.profilename}</span>
+                        {selected && (
+                          <svg
+                            className="h-4 w-4 shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                          >
+                            <path
+                              d="m5 12 4 4L19 6"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+                    No ranks found / कोई रैंक नहीं मिली
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <DeleteConfirmModal
@@ -1421,7 +1620,7 @@ export default function MLMProfilePage() {
         {/* Page header */}
         <div className="mb-2">
           <h1 className="text-[15px] font-bold text-foreground">
-            {isEditMode ? "" : "Create Profile"}
+            {isEditMode ? "" : "Create Profile / प्रोफाइल बनाएं"}
           </h1>
         </div>
 
@@ -1442,7 +1641,7 @@ export default function MLMProfilePage() {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-muted-foreground">
-                Your Selected Company / आपकी चुनी हुई कंपनी
+                Your selected company / आपकी चुनी हुई कंपनी
               </p>
               <p className="truncate text-[15px] font-bold text-foreground">
                 {selectedCompanyName}
@@ -1498,7 +1697,7 @@ export default function MLMProfilePage() {
                 </select>
                 <input
                   type="text"
-                  placeholder="Enter name"
+                  placeholder="Enter name / नाम दर्ज करें"
                   value={form.name}
                   onChange={(e) => {
                     setField("name", e.target.value);
@@ -1525,34 +1724,40 @@ export default function MLMProfilePage() {
                   type="tel"
                   value={`+91 ${userMobile}`}
                   readOnly
-                  className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-background text-foreground cursor-not-allowed"
+                  className="w-full border border-border rounded-xl px-3 py-2.5 text-[13px] bg-background text-foreground cursor-default"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/70">
-                  From Account / अकाउंट से
+                  from account / अकाउंट से
                 </span>
               </div>
 
-              {/* Rank: one manual-capable control with company ranks as suggestions. */}
+              {/* Rank picker trigger: manual entry and company ranks open in a modal */}
               <label className="block text-[11px] font-bold text-foreground/60 mb-2">
                 Select Rank / रैंक चुनें <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                list="company-rank-options"
-                placeholder="Type or select rank / रैंक लिखें या चुनें"
-                value={form.designation}
-                onChange={(e) => {
-                  setField("designation", e.target.value);
-                  clearError("designation");
-                }}
-                maxLength={40}
-                className={`w-full border rounded-lg px-3 py-2 text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 ${errors.designation ? "border-red-400 dark:bg-red-500/10" : "border-border"}`}
-              />
-              <datalist id="company-rank-options">
-                {designations.map((rank) => (
-                  <option key={rank.id || rank.profilename} value={rank.profilename} />
-                ))}
-              </datalist>
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-expanded={rankPickerOpen}
+                  aria-controls="mlm-rank-picker"
+                  onClick={openRankPicker}
+                  className={`w-full min-h-11 border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 flex items-center justify-between gap-3 text-left ${errors.designation ? "border-red-400 dark:bg-red-500/10" : "border-border"}`}
+                >
+                  <span className={form.designation ? "text-foreground font-medium" : "text-muted-foreground"}>
+                    {form.designation || "Select Rank / रैंक चुनें"}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform ${rankPickerOpen ? "rotate-180" : ""}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
 
               {errors.designation && (
                 <p className="text-xs text-red-500 mt-1">
@@ -1564,7 +1769,7 @@ export default function MLMProfilePage() {
           {/* ── TOPUP LINE ────────────────────────────────────── */}
           <div className="bg-background rounded-2xl border border-border p-4" data-guide="profile-topupline">
             <label className="block text-sm font-semibold text-foreground/80 mb-6">
-              Add Top Upline/Seniors Image / टॉप अपलाइन/सीनियर्स की फोटो जोड़ें
+              Add Top Upline/Seniors Image / टॉप अपलाइन/सीनियर्स की इमेज जोड़ें
             </label>
             <div className="flex flex-col gap-2">
               <MultiImagePicker
@@ -1599,22 +1804,32 @@ export default function MLMProfilePage() {
               {/* Scrollable thumbnails + pinned upload, one combined border */}
               <div
                 role="button"
-                tabIndex={0}
-                aria-label="Add profile photo"
-                onClick={() => !removingBg && allProfileImages.length < MAX_PROFILE_PHOTOS && profileInputRef.current?.click()}
+                tabIndex={canAddProfilePhoto ? 0 : -1}
+                aria-disabled={!canAddProfilePhoto}
+                aria-label="Add Profile Photo / प्रोफाइल फोटो जोड़ें"
+                onClick={() => {
+                  if (canAddProfilePhoto) profileInputRef.current?.click();
+                }}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
+                  if (
+                    canAddProfilePhoto &&
+                    (event.key === "Enter" || event.key === " ")
+                  ) {
                     event.preventDefault();
-                    !removingBg && allProfileImages.length < MAX_PROFILE_PHOTOS && profileInputRef.current?.click();
+                    profileInputRef.current?.click();
                   }
                 }}
-                className="w-full flex items-center gap-2 rounded-2xl border border-border p-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className={`w-full flex items-center gap-2 rounded-2xl border border-border p-2 transition focus:outline-none focus:ring-2 focus:ring-accent/30 ${
+                  canAddProfilePhoto
+                    ? "cursor-pointer hover:border-accent/60 hover:bg-accent/5"
+                    : "cursor-not-allowed opacity-60"
+                }`}
               >
                 {/* Horizontally scrollable thumbnails area */}
                 <div className="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {allProfileImages.length === 0 && (
                     <span className="text-[11px] text-muted-foreground px-2 py-3">
-                      Upload up to {MAX_PROFILE_PHOTOS} profile photos / अधिकतम {MAX_PROFILE_PHOTOS} प्रोफाइल फोटो अपलोड करें
+                      Tap anywhere to add up to {MAX_PROFILE_PHOTOS} photos / अधिकतम {MAX_PROFILE_PHOTOS} फोटो जोड़ने के लिए बॉक्स पर टैप करें
                     </span>
                   )}
                   {allProfileImages.map(({ url, isExisting }, idx) => (
@@ -1651,9 +1866,7 @@ export default function MLMProfilePage() {
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    !removingBg &&
-                      allProfileImages.length < MAX_PROFILE_PHOTOS &&
-                      profileInputRef.current?.click();
+                    if (canAddProfilePhoto) profileInputRef.current?.click();
                   }}
                   disabled={
                     removingBg || allProfileImages.length >= MAX_PROFILE_PHOTOS

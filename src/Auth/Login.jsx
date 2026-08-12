@@ -65,7 +65,9 @@ export function Login() {
       return;
     }
     if (!/^[0-9]{4}$/.test(pin)) {
-      setFormError("Please enter a valid 4-digit PIN");
+      setFormError(
+        "Please enter a valid 4-digit password / कृपया सही 4 अंकों का पासवर्ड दर्ज करें।",
+      );
       return;
     }
 
@@ -195,7 +197,7 @@ export function Login() {
               <div className="h-[52px] flex items-center  shadow-sm rounded-2xl px-3">
                 <Input
                   className="w-full bg-transparent outline-none text-[15px] font-medium tracking-wide"
-                  placeholder="Enter your 10-digit number"
+                  placeholder="Enter 10-digit mobile number / 10 अंकों का मोबाइल नंबर"
                   maxLength={10}
                   autoComplete="username"
                   inputMode="numeric"
@@ -207,29 +209,32 @@ export function Login() {
 
             <div className="flex flex-col gap-1 w-full">
               <div className="flex justify-between items-center mb-2">
-                <Label htmlFor="login-password" className="font-semibold text-[13px] text-foreground/70">
-                  Enter Your Password / पासवर्ड दर्ज करें
+                <Label className="font-semibold text-[13px] text-foreground/70">
+                  Enter Your Password / अपना पासवर्ड दर्ज करें
                 </Label>
                 <span
                   onClick={() => navigate("/forgetpin")}
                   className="text-[12px] text-accent font-bold cursor-pointer"
                   style={{ touchAction: "manipulation" }}
                 >
-                  Forgot PIN?
+                  Forgot Password? / पासवर्ड भूल गए?
                 </span>
               </div>
               <input
-                id="login-password"
                 name="pin"
+                aria-label="Enter Your Password / अपना पासवर्ड दर्ज करें"
+                className="h-[56px] w-full rounded-2xl border border-[var(--border)] bg-[var(--field-background)] px-4 text-[16px] font-semibold tracking-[0.22em] text-[var(--field-foreground)] shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                maxLength={4}
                 value={pin}
-                onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                onChange={(event) =>
+                  setPin(event.target.value.replace(/\D/g, "").slice(0, 4))
+                }
                 type="password"
-                placeholder="Enter 4-digit password / 4 अंकों का पासवर्ड"
                 autoComplete="current-password"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={4}
-                className="w-full h-[56px] rounded-2xl border border-[var(--border)] bg-[var(--field-background)] px-4 text-[15px] font-medium outline-none shadow-sm focus:border-accent focus:ring-2 focus:ring-accent/20"
+                placeholder="••••"
+                required
               />
             </div>
 
@@ -254,13 +259,13 @@ export function Login() {
                   <span>Logging in...</span>
                 </span>
               ) : (
-                "Login करें — Sign In"
+                "Sign In / लॉग इन करें"
               )}
             </Button>
 
             <div className="flex items-center gap-3 my-1">
               <div className="flex-1 h-px bg-[var(--border)]" />
-              <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">or</span>
+              <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">or / या</span>
               <div className="flex-1 h-px bg-[var(--border)]" />
             </div>
 
@@ -273,7 +278,7 @@ export function Login() {
                 touchAction: "manipulation",
               }}
             >
-              नया अकाउंट बनाएं — Register
+              Register / नया अकाउंट बनाएं
             </button>
 
           </Form>

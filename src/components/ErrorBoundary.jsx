@@ -67,7 +67,7 @@ const screenStyle = {
   justifyContent: "center",
   background: "linear-gradient(135deg, #0f2b5b 0%, #1a3a8a 50%, #0e4fa8 100%)",
   color: "#fff",
-  fontFamily: "system-ui, -apple-system, sans-serif",
+  fontFamily: "'Roboto', sans-serif",
   padding: "24px",
   zIndex: 99999,
   textAlign: "center",
@@ -178,7 +178,7 @@ function CrashScreen({ error, onReset, compact }) {
         justifyContent: "center", height: "100%", minHeight: "300px",
         background: "linear-gradient(135deg,#0f2b5b,#0e4fa8)",
         borderRadius: "16px", padding: "32px", textAlign: "center", color: "#fff",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        fontFamily: "'Roboto', sans-serif",
       }}>
         <div style={{ ...iconWrapStyle, marginBottom: 16 }}>
           <IconAlertTriangle style={{ width: 36, height: 36, color: "#fca5a5" }} />
@@ -187,7 +187,7 @@ function CrashScreen({ error, onReset, compact }) {
         <p style={{ margin: "0 0 4px", fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: 1.5, maxWidth: 260 }}>
           The canvas hit an unexpected error. Your data is safe.
         </p>
-        <p style={{ margin: "0 0 24px", fontSize: "11px", fontFamily: "monospace",
+        <p style={{ margin: "0 0 24px", fontSize: "11px", fontFamily: "'Roboto', sans-serif",
           color: "rgba(255,255,255,0.35)", maxWidth: 280, wordBreak: "break-word" }}>
           {msg}
         </p>
@@ -214,7 +214,7 @@ function CrashScreen({ error, onReset, compact }) {
         <p style={{ margin: "0 0 6px", fontSize: "14px", color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
           An unexpected error occurred. Your data is safe.
         </p>
-        <p style={{ margin: "0 0 28px", fontSize: "11px", fontFamily: "monospace",
+        <p style={{ margin: "0 0 28px", fontSize: "11px", fontFamily: "'Roboto', sans-serif",
           color: "rgba(255,255,255,0.35)", wordBreak: "break-word" }}>
           {msg}
         </p>

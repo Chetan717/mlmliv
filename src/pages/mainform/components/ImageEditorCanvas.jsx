@@ -897,7 +897,7 @@ export default function ImageEditorCanvas({
         width: "100%",
         backgroundColor: "#181818",
         userSelect: "none",
-        fontFamily: "-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif",
+        fontFamily: "'Roboto', sans-serif",
       }}
     >
       {/* Top bar */}
