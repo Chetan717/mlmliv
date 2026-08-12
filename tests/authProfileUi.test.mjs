@@ -73,6 +73,23 @@ test("login and registration use one bilingual password field", () => {
   assert.match(signup, /Enter 4-Digit OTP \/ 4 अंकों का OTP दर्ज करें/);
 });
 
+test("login and registration password fields have accessible show-hide buttons", () => {
+  for (const file of ["src/Auth/Login.jsx", "src/Auth/Signup.jsx"]) {
+    const source = read(file);
+
+    assert.match(source, /import \{ Eye, EyeOff \} from "lucide-react"/);
+    assert.match(source, /const \[showPassword, setShowPassword\] = useState\(false\)/);
+    assert.match(source, /type=\{showPassword \? "text" : "password"\}/);
+    assert.match(source, /type="button"[\s\S]{0,180}aria-label=\{/);
+    assert.match(source, /Show password \/ पासवर्ड दिखाएं/);
+    assert.match(source, /Hide password \/ पासवर्ड छिपाएं/);
+    assert.match(source, /aria-pressed=\{showPassword\}/);
+    assert.match(source, /onClick=\{\(\) => setShowPassword\(\(visible\) => !visible\)\}/);
+    assert.match(source, /<EyeOff aria-hidden="true"/);
+    assert.match(source, /<Eye aria-hidden="true"/);
+  }
+});
+
 test("MLM Profile opens a rank modal with manual entry above a scrollable rank list", () => {
   const profile = read("src/pages/Form/Mlmprofilemodal.jsx");
 

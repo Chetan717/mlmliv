@@ -13,6 +13,7 @@ import {
 } from "@heroui/react";
 import { useNavigate, useLocation } from "react-router";
 import logo from "/mlmboo2.ico";
+import { Eye, EyeOff } from "lucide-react";
 
 import {
   signupInit,
@@ -74,6 +75,7 @@ export function Signup() {
   const [formError, setFormError] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [referInput, setReferInput] = useState(() => {
     const queryCode = getReferralCodeFromSearch(window.location.search);
@@ -353,26 +355,47 @@ export function Signup() {
 
               <div className="flex flex-col gap-1 w-full">
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
-                  Create Your Password / अपना पासवर्ड जोड़ें
+                  Add Your Password / अपना पासवर्ड जोड़ें
                 </Label>
 
-                <input
-                  name="pin"
-                  aria-label="Create Your Password / अपना पासवर्ड जोड़ें"
-                  className="h-13 w-full rounded-xl border border-border bg-white px-4 text-base font-semibold tracking-[0.22em] text-foreground shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:bg-black/20"
-                  maxLength={4}
-                  type="password"
-                  autoComplete="new-password"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  onInput={(event) => {
-                    event.currentTarget.value = event.currentTarget.value
-                      .replace(/\D/g, "")
-                      .slice(0, 4);
-                  }}
-                  placeholder="••••"
-                  required
-                />
+                <div className="relative w-full">
+                  <input
+                    name="pin"
+                    aria-label="Add Your Password / अपना पासवर्ड जोड़ें"
+                    className="h-13 w-full rounded-xl border border-border bg-white px-4 pr-14 text-base font-semibold tracking-[0.22em] text-foreground shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:bg-black/20"
+                    maxLength={4}
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    onInput={(event) => {
+                      event.currentTarget.value = event.currentTarget.value
+                        .replace(/\D/g, "")
+                        .slice(0, 4);
+                    }}
+                    placeholder="••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showPassword
+                        ? "Hide password / पासवर्ड छिपाएं"
+                        : "Show password / पासवर्ड दिखाएं"
+                    }
+                    aria-pressed={showPassword}
+                    title={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute inset-y-0 right-1 flex w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                    style={{ touchAction: "manipulation" }}
+                  >
+                    {showPassword ? (
+                      <EyeOff aria-hidden="true" className="size-5" />
+                    ) : (
+                      <Eye aria-hidden="true" className="size-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Referral code field */}

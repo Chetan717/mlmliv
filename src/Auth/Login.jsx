@@ -11,6 +11,7 @@ import {
 import logo from "/mlmboo2.ico";
 import { useNavigate } from "react-router";
 import { toast } from "@heroui/react";
+import { Eye, EyeOff } from "lucide-react";
 import { login, getAuthErrorMessage } from "../services/authService";
 import { setAuthFlowPending, setUser } from "../utils/authStorage";
 import { db } from "@firebase-config";
@@ -30,6 +31,7 @@ export function Login() {
   const [loading, setLoading]       = useState(false);
   const [formError, setFormError]   = useState("");
   const [pin, setPin]               = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [lockout, setLockout]       = useState(0);
   const failCountRef                = useRef(0);
 
@@ -220,22 +222,43 @@ export function Login() {
                   Forgot Password? / पासवर्ड भूल गए?
                 </span>
               </div>
-              <input
-                name="pin"
-                aria-label="Enter Your Password / अपना पासवर्ड दर्ज करें"
-                className="h-[56px] w-full rounded-2xl border border-[var(--border)] bg-[var(--field-background)] px-4 text-[16px] font-semibold tracking-[0.22em] text-[var(--field-foreground)] shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
-                maxLength={4}
-                value={pin}
-                onChange={(event) =>
-                  setPin(event.target.value.replace(/\D/g, "").slice(0, 4))
-                }
-                type="password"
-                autoComplete="current-password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="••••"
-                required
-              />
+              <div className="relative w-full">
+                <input
+                  name="pin"
+                  aria-label="Enter Your Password / अपना पासवर्ड दर्ज करें"
+                  className="h-[56px] w-full rounded-2xl border border-[var(--border)] bg-[var(--field-background)] px-4 pr-14 text-[16px] font-semibold tracking-[0.22em] text-[var(--field-foreground)] shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  maxLength={4}
+                  value={pin}
+                  onChange={(event) =>
+                    setPin(event.target.value.replace(/\D/g, "").slice(0, 4))
+                  }
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="••••"
+                  required
+                />
+                <button
+                  type="button"
+                  aria-label={
+                    showPassword
+                      ? "Hide password / पासवर्ड छिपाएं"
+                      : "Show password / पासवर्ड दिखाएं"
+                  }
+                  aria-pressed={showPassword}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-1 flex w-12 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+                  style={{ touchAction: "manipulation" }}
+                >
+                  {showPassword ? (
+                    <EyeOff aria-hidden="true" className="size-5" />
+                  ) : (
+                    <Eye aria-hidden="true" className="size-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {formError && (
