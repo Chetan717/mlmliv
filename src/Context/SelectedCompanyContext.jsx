@@ -24,12 +24,16 @@ import {
   clearMlmProfileStorage,
   saveMlmProfileToStorage,
 } from "../utils/companyStorage";
+import { COMPANY_SELECTION_LOCKED_CODE } from "../utils/companyChangePolicy";
 import {
   clearPendingCompanySelection,
   readPendingCompanySelection,
   savePendingCompanySelection,
 } from "../utils/companySelectionStorage";
-import { invalidateVerifiedMlmProfileCache } from "../utils/mlmProfileVerification";
+import {
+  getVerifiedMlmProfile,
+  invalidateVerifiedMlmProfileCache,
+} from "../utils/mlmProfileVerification";
 
 const SelectedCompanyContext = createContext({
   selectedCompany: null,
@@ -135,6 +139,31 @@ export function SelectedCompanyProvider({ children }) {
         throw new Error("Authenticated user and company are required.");
       }
 
+      if (!identity?.mobileNo) {
+        throw new Error("Verified mobile number is required.");
+      }
+
+      const verifiedProfile = await getVerifiedMlmProfile(
+        user.uid,
+        identity.mobileNo,
+      );
+      if (verifiedProfile) {
+        saveMlmProfileToStorage(verifiedProfile);
+        clearPendingCompanySelection(user.uid);
+
+        const error = new Error(
+          "Company cannot be changed after MLM Profile creation.",
+        );
+        error.code = COMPANY_SELECTION_LOCKED_CODE;
+        throw error;
+      }
+
+      if (selectedCompany?.id && selectedCompany.id !== company.id) {
+        // Discard company-specific drafts before switching an unfinished
+        // profile to another company.
+        clearCompanyScopedStorage();
+      }
+
       // The company object came from the freshly loaded Firestore directory.
       // Save only its public id; the full document is re-read on app startup.
       savePendingCompanySelection(user.uid, company.id);
@@ -142,7 +171,7 @@ export function SelectedCompanyProvider({ children }) {
       setSelectedCompany(company);
       return company;
     },
-    [user],
+    [identity?.mobileNo, selectedCompany?.id, user],
   );
 
   const clearCompanySelection = useCallback(async () => {

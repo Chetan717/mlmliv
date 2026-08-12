@@ -18,6 +18,11 @@ import {
   readPendingCompanySelection,
   savePendingCompanySelection,
 } from "../src/utils/companySelectionStorage.js";
+import {
+  canChangeCompanyBeforeProfile,
+  getCompanySelectionDestination,
+  isCompanyChangeRequest,
+} from "../src/utils/companyChangePolicy.js";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const read = (relativePath) =>
@@ -92,6 +97,61 @@ test("company selection does not depend on the unsupported Firestore collection"
   assert.match(context, /savePendingCompanySelection\(user\.uid, company\.id\)/);
   assert.match(context, /verifiedProfile\?\.companyId/);
   assert.doesNotMatch(context, /setDoc\(selectionRef/);
+});
+
+test("company can change only before the first MLM Profile is created", () => {
+  assert.equal(isCompanyChangeRequest("?mode=change"), true);
+  assert.equal(isCompanyChangeRequest(""), false);
+  assert.equal(getCompanySelectionDestination("?mode=change"), "/mlmprofile");
+  assert.equal(getCompanySelectionDestination(""), "/");
+  assert.equal(
+    canChangeCompanyBeforeProfile({
+      profileLookupState: "missing",
+      existingDocId: null,
+    }),
+    true,
+  );
+  assert.equal(
+    canChangeCompanyBeforeProfile({
+      profileLookupState: "existing",
+      existingDocId: "profile-1",
+    }),
+    false,
+  );
+  assert.equal(
+    canChangeCompanyBeforeProfile({
+      profileLookupState: "error",
+      existingDocId: null,
+    }),
+    false,
+    "a failed server lookup must keep company change locked",
+  );
+
+  const profileForm = read("src/pages/Form/Mlmprofilemodal.jsx");
+  assert.match(profileForm, /canChangeCompany && \(/);
+  assert.match(profileForm, /aria-label="Change Company \/ कंपनी बदलें"/);
+  assert.match(profileForm, /navigate\("\/selectcomp\?mode=change"\)/);
+  assert.match(profileForm, /setProfileLookupState\("existing"\)/);
+  assert.match(profileForm, /setProfileLookupState\("missing"\)/);
+  assert.match(profileForm, /setProfileLookupState\("error"\)/);
+
+  const routeGuard = read("src/pages/SelectCompany/ProtectSelectComp.jsx");
+  assert.match(routeGuard, /isCompanyChangeRequest\(location\.search\)/);
+  assert.match(routeGuard, /getVerifiedMlmProfile\(user\.uid, mobile\)/);
+  assert.match(routeGuard, /changeAccess === "locked"/);
+  assert.match(routeGuard, /<Navigate to="\/mlmprofile" replace \/>/);
+
+  const context = read("src/Context/SelectedCompanyContext.jsx");
+  const verifyIndex = context.indexOf("const verifiedProfile = await getVerifiedMlmProfile");
+  const pendingSaveIndex = context.indexOf(
+    "savePendingCompanySelection(user.uid, company.id)",
+  );
+  assert.ok(verifyIndex >= 0 && verifyIndex < pendingSaveIndex);
+  assert.match(context, /error\.code = COMPANY_SELECTION_LOCKED_CODE/);
+
+  const selectCompany = read("src/pages/SelectCompany/SelectComp.jsx");
+  assert.match(selectCompany, /getCompanySelectionDestination\(location\.search\)/);
+  assert.match(selectCompany, /replace: isChangeMode/);
 });
 
 test("Select Company uses refresh, deferred search and scroll batching", () => {

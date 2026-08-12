@@ -5,6 +5,10 @@ import test from "node:test";
 
 import {
   DEFAULT_COUPON_CODE,
+  createPlayStoreReferralLink,
+  getReferralCodeFromBridgeMessage,
+  getReferralCodeFromInstallReferrer,
+  getReferralCodeFromSearch,
   getInitialSignupCouponCode,
   getSignupCouponCode,
 } from "../src/utils/referralCode.js";
@@ -19,8 +23,8 @@ test("signup coupon defaults to editable MLM100 while preserving entered codes",
   assert.equal(getSignupCouponCode("  team-42  "), "TEAM-42");
   assert.equal(
     getInitialSignupCouponCode({ pendingCode: "MLM300" }),
-    "MLM100",
-    "the previous default must migrate on existing installs",
+    "MLM300",
+    "a non-empty Play referral must never be mistaken for the default",
   );
   assert.equal(
     getInitialSignupCouponCode({
@@ -52,6 +56,53 @@ test("signup coupon defaults to editable MLM100 while preserving entered codes",
     )?.[0] || "";
   assert.ok(couponInput, "coupon input was not found");
   assert.doesNotMatch(couponInput, /\bdisabled\b|\breadOnly\b/);
+});
+
+test("Play Store install-referrer MLM300 reaches the signup coupon field", () => {
+  const playLink =
+    "https://play.google.com/store/apps/details?id=com.mlmbooster.mlmbooster&referrer=ref%3DMLM300";
+
+  assert.equal(
+    getReferralCodeFromSearch(new URL(playLink).search),
+    "MLM300",
+  );
+  assert.equal(getReferralCodeFromInstallReferrer("ref=MLM300"), "MLM300");
+  assert.equal(
+    getReferralCodeFromInstallReferrer("ref%3Dteam-42"),
+    "TEAM-42",
+  );
+  assert.equal(
+    getReferralCodeFromBridgeMessage({
+      type: "INSTALL_REFERRER",
+      referrer: "ref=MLM300",
+    }),
+    "MLM300",
+  );
+  assert.equal(
+    getReferralCodeFromBridgeMessage(
+      JSON.stringify({
+        type: "PLAY_INSTALL_REFERRER",
+        data: { installReferrer: "ref%3DMLM300" },
+      }),
+    ),
+    "MLM300",
+  );
+  assert.equal(
+    getReferralCodeFromBridgeMessage({
+      type: "INSTALL_REFERRER_RESPONSE",
+      code: "ref=MLM300",
+    }),
+    "MLM300",
+  );
+  assert.equal(getReferralCodeFromBridgeMessage("ref=MLM300"), "MLM300");
+
+  const generatedLink = new URL(createPlayStoreReferralLink("MLM300"));
+  assert.equal(generatedLink.searchParams.get("referrer"), "ref=MLM300");
+
+  const main = read("src/main.tsx");
+  const index = read("index.html");
+  assert.match(main, /installGlobalReferralCapture\(\)/);
+  assert.match(index, /__MLMLIVE_EARLY_BRIDGE_MESSAGES__/);
 });
 
 test("login and registration use one bilingual password field", () => {

@@ -35,6 +35,7 @@ import { PAGE_REFRESH_EVENT } from "../../utils/pageRefresh";
 import RemoveBgLoadingOverlay from "../mainform/components/RemoveBgLoadingOverlay";
 import { getBannerSettingsReturn } from "../../utils/bannerSettingsNavigation";
 import { syncRemovedProfileTopuplinesToLocalForm } from "../../utils/topuplineStorageSync";
+import { canChangeCompanyBeforeProfile } from "../../utils/companyChangePolicy";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
@@ -341,6 +342,69 @@ function UnsavedProfileModal({ saving, onSave, onLeave, onStay }) {
   );
 }
 
+function ChangeCompanyConfirmModal({ onConfirm, onCancel }) {
+  return (
+    <div
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="change-company-title"
+    >
+      <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-background shadow-2xl">
+        <div className="h-1.5 bg-accent" />
+        <div className="p-6">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+            <svg
+              className="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M7 7h11l-3-3" />
+              <path d="m18 7-3 3" />
+              <path d="M17 17H6l3 3" />
+              <path d="m6 17 3-3" />
+            </svg>
+          </div>
+
+          <h2
+            id="change-company-title"
+            className="text-[18px] font-extrabold text-foreground"
+          >
+            Change Company? / कंपनी बदलें?
+          </h2>
+          <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
+            Your unsaved profile details will be cleared when you choose another
+            company.
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
+            दूसरी कंपनी चुनने पर इस form की बिना save की गई जानकारी हट जाएगी।
+          </p>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="mt-5 w-full rounded-xl bg-accent py-3 text-[13px] font-bold text-white shadow-md shadow-accent/20"
+          >
+            Continue to Companies / कंपनियां देखें
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="mt-2 w-full rounded-xl border border-border py-3 text-[13px] font-bold text-foreground"
+          >
+            Keep Editing / फॉर्म भरना जारी रखें
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ════════════════════════════════════════════════════════════
 // PAGE COMPONENT
 // ════════════════════════════════════════════════════════════
@@ -475,6 +539,7 @@ export default function MLMProfilePage() {
   const [saveError, setSaveError] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [existingDocId, setExistingDocId] = useState(null);
+  const [profileLookupState, setProfileLookupState] = useState("checking");
   const [showSocial, setShowSocial] = useState(() => {
     return localStorage.getItem("socialradio") ?? "yes";
   });
@@ -493,6 +558,7 @@ export default function MLMProfilePage() {
   const [bgDots, setBgDots] = useState("");
   const [bgPreviewUrl, setBgPreviewUrl] = useState(null);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [showCompanyChangeConfirm, setShowCompanyChangeConfirm] = useState(false);
 
   const abortProfileRef = useRef(null);
   const abortTopupRef = useRef(null);
@@ -571,14 +637,37 @@ export default function MLMProfilePage() {
   const hasUnsavedProfileChanges =
     savedFormSignatureRef.current !== null &&
     currentFormSignature !== savedFormSignatureRef.current;
+  const canChangeCompany =
+    !saving &&
+    canChangeCompanyBeforeProfile({
+      profileLookupState,
+      existingDocId,
+    });
+
+  const goToCompanySelection = () => {
+    savedFormSignatureRef.current = currentFormSignature;
+    setShowCompanyChangeConfirm(false);
+    navigate("/selectcomp?mode=change");
+  };
+
+  const handleChangeCompany = () => {
+    if (!canChangeCompany) return;
+    if (hasUnsavedProfileChanges) {
+      setShowCompanyChangeConfirm(true);
+      return;
+    }
+    goToCompanySelection();
+  };
 
   // ── fetchProfile (extracted so it can be called after save too) ──
   const fetchProfile = useCallback(async () => {
     if (!userMobile) {
+      setProfileLookupState("error");
       setLoadingProfile(false);
       return;
     }
     setLoadingProfile(true);
+    setProfileLookupState("checking");
     try {
       const q = query(
         collection(db, COLLECTIONS.MLMPROFILES),
@@ -590,6 +679,7 @@ export default function MLMProfilePage() {
         const docSnap = snap.docs[0];
         const data = docSnap.data();
         setExistingDocId(docSnap.id);
+        setProfileLookupState("existing");
         saveMlmProfileToStorage({ id: docSnap.id, ...data });
 
         const fullName = data.fullName || "";
@@ -629,10 +719,11 @@ export default function MLMProfilePage() {
         });
       } else {
         setExistingDocId(null);
+        setProfileLookupState("missing");
         setForm(initialForm(userMobile));
       }
     } catch (err) {
-      
+      setProfileLookupState("error");
       setForm(initialForm(userMobile));
     } finally {
       setLoadingProfile(false);
@@ -1400,6 +1491,13 @@ export default function MLMProfilePage() {
         />
       )}
 
+      {showCompanyChangeConfirm && canChangeCompany && (
+        <ChangeCompanyConfirmModal
+          onConfirm={goToCompanySelection}
+          onCancel={() => setShowCompanyChangeConfirm(false)}
+        />
+      )}
+
       {/* ── Confirm Remove Photo ── */}
       {confirmRemovePhoto !== null && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -1639,14 +1737,25 @@ export default function MLMProfilePage() {
                 </span>
               )}
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-muted-foreground">
-                Your selected company / आपकी चुनी हुई कंपनी
-              </p>
+            <div className="min-w-0 flex-1">
+              {/* <p className="text-[11px] font-semibold text-muted-foreground">
+              आपकी चुनी हुई कंपनी
+              </p> */}
               <p className="truncate text-[15px] font-bold text-foreground">
                 {selectedCompanyName}
               </p>
             </div>
+            {canChangeCompany && (
+              <button
+                type="button"
+                onClick={handleChangeCompany}
+                aria-label="Change Company / कंपनी बदलें"
+                className="ml-auto inline-flex shrink-0 flex-col items-center justify-center rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[10px] font-bold leading-tight text-accent transition hover:bg-accent/15 focus:outline-none focus:ring-2 focus:ring-accent/40"
+              >
+                <span>Change Company</span>
+                <span className="mt-0.5 text-[10px]">कंपनी बदलें</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -1769,7 +1878,7 @@ export default function MLMProfilePage() {
           {/* ── TOPUP LINE ────────────────────────────────────── */}
           <div className="bg-background rounded-2xl border border-border p-4" data-guide="profile-topupline">
             <label className="block text-sm font-semibold text-foreground/80 mb-6">
-              Add Top Upline/Seniors Image / टॉप अपलाइन/सीनियर्स की इमेज जोड़ें
+              Add Top Upline/Seniors Image (टॉप अपलाइन/सीनियर्स की इमेज जोड़ें)
             </label>
             <div className="flex flex-col gap-2">
               <MultiImagePicker

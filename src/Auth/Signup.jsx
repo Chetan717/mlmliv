@@ -31,38 +31,20 @@ import {
 } from "../utils/companyStorage";
 
 import {
+  DEFAULT_COUPON_CODE,
+  REFERRAL_CODE_UPDATED_EVENT,
   clearPendingReferralCode,
   getInitialSignupCouponCode,
   getSignupCouponCode,
   getPendingReferralCode,
-  getReferralCodeFromBridgeMessage,
   getReferralCodeFromSearch,
+  getStoredReferralSource,
   normalizeReferralCode,
   notifyNativeReferralCleared,
+  requestNativeReferralCode,
   savePendingReferralCode,
+  storeReferralSource,
 } from "../utils/referralCode";
-
-const REFERRAL_SOURCE_STORAGE_KEY = "mlmlive.referralCodeSource";
-
-const getStoredReferralSource = () => {
-  try {
-    return window.localStorage.getItem(REFERRAL_SOURCE_STORAGE_KEY) || "";
-  } catch {
-    return "";
-  }
-};
-
-const storeReferralSource = (source) => {
-  try {
-    if (source) {
-      window.localStorage.setItem(REFERRAL_SOURCE_STORAGE_KEY, source);
-    } else {
-      window.localStorage.removeItem(REFERRAL_SOURCE_STORAGE_KEY);
-    }
-  } catch {
-    // Local storage may be unavailable in private mode.
-  }
-};
 
 export function Signup() {
   const navigate = useNavigate();
@@ -100,41 +82,31 @@ export function Signup() {
     const queryCode = getReferralCodeFromSearch(location.search);
 
     if (queryCode) {
-      setReferInput(savePendingReferralCode(queryCode));
-      storeReferralSource("automatic");
+      setReferInput(savePendingReferralCode(queryCode, "automatic"));
     }
 
-    const acceptReferralCode = (rawMessage) => {
-      const code = getReferralCodeFromBridgeMessage(rawMessage);
-
+    const handleReferralUpdate = (event) => {
+      const code = normalizeReferralCode(event.detail?.code);
       if (!code) return;
 
-      setReferInput(savePendingReferralCode(code));
-      storeReferralSource("automatic");
+      setReferInput(code);
       setFormError("");
     };
 
-    const handleWindowMessage = (event) => {
-      acceptReferralCode(event.data);
-    };
+    window.addEventListener(
+      REFERRAL_CODE_UPDATED_EVENT,
+      handleReferralUpdate,
+    );
 
-    const handleReferralEvent = (event) => {
-      acceptReferralCode(event.detail);
-    };
-
-    window.addEventListener("message", handleWindowMessage);
-
-    // Some Android WebView versions dispatch messages on document.
-    document.addEventListener("message", handleWindowMessage);
-
-    window.addEventListener("mlmlive:referral-code", handleReferralEvent);
+    // Ask again after Signup mounts so an install-referrer message cannot be
+    // lost behind Splash/Onboarding or lazy route loading.
+    requestNativeReferralCode();
 
     return () => {
-      window.removeEventListener("message", handleWindowMessage);
-
-      document.removeEventListener("message", handleWindowMessage);
-
-      window.removeEventListener("mlmlive:referral-code", handleReferralEvent);
+      window.removeEventListener(
+        REFERRAL_CODE_UPDATED_EVENT,
+        handleReferralUpdate,
+      );
     };
   }, [location.search]);
 
@@ -424,11 +396,9 @@ export function Signup() {
                     setReferInput(code);
 
                     if (code) {
-                      savePendingReferralCode(code);
-                      storeReferralSource("manual");
+                      savePendingReferralCode(code, "manual");
                     } else {
                       clearPendingReferralCode();
-                      storeReferralSource("");
 
                       notifyNativeReferralCleared();
                     }
@@ -438,7 +408,18 @@ export function Signup() {
                   onBlur={() => {
                     const couponCode = getSignupCouponCode(referInput);
                     setReferInput(couponCode);
-                    savePendingReferralCode(couponCode);
+
+                    if (
+                      couponCode === DEFAULT_COUPON_CODE &&
+                      !getStoredReferralSource()
+                    ) {
+                      clearPendingReferralCode();
+                    } else {
+                      savePendingReferralCode(
+                        couponCode,
+                        getStoredReferralSource(),
+                      );
+                    }
                   }}
                   className="h-13 px-4 border rounded-xl w-full text-base tracking-widest font-mono uppercase outline-none transition-all shadow-sm border-border bg-white dark:bg-black/20 focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />

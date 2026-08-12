@@ -10,7 +10,10 @@ import { AuthProvider } from "./Auth/AuthContext.jsx";
 import { SelectedCompanyProvider } from "./Context/SelectedCompanyContext.jsx";
 import DownloadConfetti from "./components/DownloadConfetti.jsx";
 import { installModalKeyboardGuard } from "./utils/modalKeyboard.js";
+import { installGlobalReferralCapture } from "./utils/referralCode.js";
 // import ScrollToTop from "./Pages/ScrollToTop.js";
+
+installGlobalReferralCapture();
 
 function GlobalToastController() {
   useEffect(() => {

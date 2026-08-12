@@ -30,7 +30,22 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
     <script>
-</script>
+      // Queue Android WebView messages immediately. The app bundle and Signup
+      // route load later, after Splash/Onboarding, but Play install-referrer is
+      // commonly delivered only once on the first launch.
+      (() => {
+        const queue = [];
+        const capture = (event) => {
+          queue.push(event.data);
+          if (queue.length > 20) queue.shift();
+        };
+
+        window.__MLMLIVE_EARLY_BRIDGE_MESSAGES__ = queue;
+        window.__MLMLIVE_EARLY_BRIDGE_HANDLER__ = capture;
+        window.addEventListener("message", capture);
+        document.addEventListener("message", capture);
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>

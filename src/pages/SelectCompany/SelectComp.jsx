@@ -9,11 +9,16 @@ import {
 } from "react";
 import { db } from "@firebase-config";
 import { collection, getDocs } from "firebase/firestore";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { RefreshCw, Search, X } from "lucide-react";
 import { COLLECTIONS } from "../../collections";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
 import { getCompanyLogoUrl } from "../../utils/getCompanyLogo";
+import {
+  COMPANY_SELECTION_LOCKED_CODE,
+  getCompanySelectionDestination,
+  isCompanyChangeRequest,
+} from "../../utils/companyChangePolicy";
 import {
   COMPANY_BATCH_SIZE,
   filterCompaniesByName,
@@ -80,7 +85,12 @@ async function fetchCompanyDirectory({ force = false } = {}) {
 
 export default function SelectComp() {
   const navigate = useNavigate();
-  const { selectCompany } = useSelectedCompany();
+  const location = useLocation();
+  const {
+    selectedCompany: currentCompany,
+    selectCompany,
+  } = useSelectedCompany();
+  const isChangeMode = isCompanyChangeRequest(location.search);
 
   const [companies, setCompanies] = useState([]);
   const [search, setSearch] = useState("");
@@ -128,6 +138,17 @@ export default function SelectComp() {
       requestVersionRef.current += 1;
     };
   }, [loadCompanies]);
+
+  useEffect(() => {
+    if (!isChangeMode || !currentCompany?.id || companies.length === 0) return;
+
+    setSelectedCompany((current) => {
+      if (current) return current;
+      return (
+        companies.find((company) => company.id === currentCompany.id) || null
+      );
+    });
+  }, [companies, currentCompany?.id, isChangeMode]);
 
   const filteredCompanies = useMemo(() => {
     return filterCompaniesByName(companies, deferredSearch);
@@ -185,13 +206,22 @@ export default function SelectComp() {
     try {
       setSavingSelection(true);
       await selectCompany(selectedCompany);
-      navigate("/");
+      navigate(getCompanySelectionDestination(location.search), {
+        replace: isChangeMode,
+      });
     } catch (error) {
+      if (error?.code === COMPANY_SELECTION_LOCKED_CODE) {
+        alert(
+          "MLM Profile बनने के बाद Company बदली नहीं जा सकती। / Company cannot be changed after MLM Profile creation.",
+        );
+        navigate("/mlmprofile", { replace: true });
+        return;
+      }
       alert("Unable to save your company. Please try again.");
     } finally {
       setSavingSelection(false);
     }
-  }, [navigate, selectCompany, selectedCompany]);
+  }, [isChangeMode, location.search, navigate, selectCompany, selectedCompany]);
 
   const getLogo = (company) => {
     return (
@@ -208,8 +238,16 @@ export default function SelectComp() {
       <div className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 md:py-12 flex flex-col relative z-10">
 
         <div className="mb-8 text-center">
-          <h1 className="mb-2 text-3xl font-bold text-foreground font-display">Select Your Company</h1>
-          <p className="font-medium text-muted-foreground">Choose your MLM organization to get started</p>
+          <h1 className="mb-2 text-3xl font-bold text-foreground font-display">
+            {isChangeMode
+              ? "Change Your Company / कंपनी बदलें"
+              : "Select Your Company / कंपनी चुनें"}
+          </h1>
+          <p className="font-medium text-muted-foreground">
+            {isChangeMode
+              ? "Choose the correct company before creating your MLM Profile / प्रोफाइल बनाने से पहले सही कंपनी चुनें"
+              : "Choose your MLM organization to get started / शुरू करने के लिए अपनी MLM कंपनी चुनें"}
+          </p>
         </div>
 
         <div className="w-full max-w-xl mx-auto mb-10">
@@ -401,7 +439,9 @@ export default function SelectComp() {
               {savingSelection
                 ? "Saving securely..."
                 : selectedCompany
-                  ? "Continue"
+                  ? isChangeMode
+                    ? "Use This Company / यह कंपनी चुनें"
+                    : "Continue"
                   : "Select a Company"}
             </Button>
           </div>
