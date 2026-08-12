@@ -253,20 +253,6 @@
       }
     ]
   },
-  {
-    "ID": "4U1RAuPw2g1GLXp2Dupd",
-    "name": "DHANWANTARI",
-    "logos": [
-      {
-        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785584507681_vzem7x.webp?alt=media&token=cf26ad7f-c223-4884-977c-a404a3512a01",
-        "size": "rectangle"
-      },
-      {
-        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1785584443256_b00hge.webp?alt=media&token=3aff11ab-2c92-4f46-918e-7928b8a016f4",
-        "size": "rectangle"
-      }
-    ]
-  },
    {
      "ID": "TwYZJJs7koHhUg2nDSj0",
      "name": "DHAN LAKSHMI",
@@ -286,11 +272,11 @@
      "name": "SWARNAYUR CARE",
      "logos": [
        {
-         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786352404788_8bytre.webp?alt=media&token=61913e06-db8c-4433-9a5a-9087ef9bf086",
-         "size": "rectangle"
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786528741132_bdm3f1.webp?alt=media&token=9385a685-ef51-4216-ba6b-0c488736be6e",
+         "size": "square"
        },
        {
-         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786352395028_2dtnt8.webp?alt=media&token=ac30c385-5f4d-4c22-9036-2466031a842d",
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786528802009_8rdlj0.webp?alt=media&token=0ae373f4-38d2-4e5b-848c-5c34775a6ea6",
          "size": "square"
        }
      ]
