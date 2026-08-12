@@ -210,7 +210,7 @@ export function Login() {
             <div className="flex flex-col gap-1 w-full">
               <div className="flex justify-between items-center mb-2">
                 <Label className="font-semibold text-[13px] text-foreground/70">
-                  Enter Your Password / अपना पासवर्ड दर्ज करें
+                  Enter Your Password / पासवर्ड दर्ज करें
                 </Label>
                 <span
                   onClick={() => navigate("/forgetpin")}

@@ -353,12 +353,12 @@ export function Signup() {
 
               <div className="flex flex-col gap-1 w-full">
                 <Label className="font-semibold text-sm text-foreground/80 mb-1.5 block">
-                  Add Your Password / अपना पासवर्ड जोड़ें
+                  Create Your Password / अपना पासवर्ड जोड़ें
                 </Label>
 
                 <input
                   name="pin"
-                  aria-label="Add Your Password / अपना पासवर्ड जोड़ें"
+                  aria-label="Create Your Password / अपना पासवर्ड जोड़ें"
                   className="h-13 w-full rounded-xl border border-border bg-white px-4 text-base font-semibold tracking-[0.22em] text-foreground shadow-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:bg-black/20"
                   maxLength={4}
                   type="password"
