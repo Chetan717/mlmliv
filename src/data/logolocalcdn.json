@@ -322,5 +322,33 @@
           "size": "rectangle"
         }
       ]
-    }
+    },
+     {
+       "ID": "qyXdNwAf5N1m66uYjhqD",
+       "name": "ADMS E-BIKE INDIA",
+       "logos": [
+         {
+           "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786705976222_d8ot6p.webp?alt=media&token=494a9e5f-0c98-41a6-9569-d726f306b0c3",
+           "size": "square"
+         },
+         {
+           "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786705976222_d8ot6p.webp?alt=media&token=494a9e5f-0c98-41a6-9569-d726f306b0c3",
+           "size": "square"
+         }
+       ]
+     },
+      {
+        "ID": "obnUIsZ2hx1zY0FZPjvo",
+        "name": "AUSHADHI VIRRAT",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786703462975_qtoerc.webp?alt=media&token=05f23b67-c57e-4eb9-810c-4f0968ea91d3",
+            "size": "square"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786703556233_gkguk6.webp?alt=media&token=607b183b-45f1-42fb-a0f8-0deff4035bc6",
+            "size": "square"
+          }
+        ]
+      }
 ]
