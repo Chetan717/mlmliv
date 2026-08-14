@@ -3498,7 +3498,7 @@ function GeneralEditPage({
                       : isClosing
                         ? 132
                         : charslen?.length === 10
-                          ? 238
+                          ? 250
                           : isRank_B
                             ? 236.5
                             : 250
@@ -3509,7 +3509,7 @@ function GeneralEditPage({
                       : isClosing
                         ? 28
                         : charslen?.length === 10
-                          ? 26
+                          ? 32
                           : isRank_B
                             ? 29
                             : 32
