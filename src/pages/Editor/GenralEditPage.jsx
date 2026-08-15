@@ -356,6 +356,7 @@ export const GENERAL_SELECT_TYPES2 = [
   { name: "Leader_Quotes", value: "Leader_Quotes" },
   { name: "Festival", value: "Festival" },
   { name: "Trending", value: "Trending" },
+  { name: "Today_Trending", value: "Today_Trending" },
 ];
 
 const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
@@ -4104,7 +4105,7 @@ function GeneralEditPage({
                     <>
                       <Text
                         fontFamily="Montserrat"
-                        x={isRank_B ? 38 : 31}
+                        x={isRank_B ? 38 : 30}
                         y={isRank_B ? 295 : 298}
                         width={150}
                         height={5}
