@@ -11,6 +11,7 @@ import {
   isDirectEditorTemplate,
   rememberEditorBackTarget,
 } from "../../../utils/editorNavigation";
+import { subscribeToCompanyTemplateInvalidation } from "../../../utils/companyTemplateState";
 
 const SkeletonCard = () => (
   <div className="rounded-[24px] overflow-hidden bg-muted aspect-square w-full relative border border-border">
@@ -85,6 +86,33 @@ export default function AllTemplates() {
   const sentinelRef = useRef(null);
   const lastKeyRef = useRef(null);
   const fetchingMoreRef = useRef(false);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      lastKeyRef.current = null;
+      fetchingMoreRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const invalidateCurrentCompany = () => {
+      // Invalidate the request key synchronously. An older Firestore response
+      // must not restore the previous company's cards after the shared cache
+      // has already been cleared.
+      lastKeyRef.current = null;
+      fetchingMoreRef.current = false;
+      setTempData([]);
+      setLastDoc(null);
+      setHasMore(true);
+      setInitialLoad(true);
+      setFetchingMore(false);
+    };
+
+    return subscribeToCompanyTemplateInvalidation(invalidateCurrentCompany);
+  }, []);
 
   useEffect(() => {
     if (!contextSelType?.type) return;
@@ -101,6 +129,7 @@ export default function AllTemplates() {
           lastDoc: ld,
           hasMore: more,
         } = await Alltemplateservice(type, null, 12, companyName);
+        if (!mountedRef.current || lastKeyRef.current !== cacheKey) return;
         setTempData(templates);
         setLastDoc(ld);
         setHasMore(more);
@@ -111,7 +140,9 @@ export default function AllTemplates() {
       } catch (err) {
         
       } finally {
-        setInitialLoad(false);
+        if (mountedRef.current && lastKeyRef.current === cacheKey) {
+          setInitialLoad(false);
+        }
       }
     },
     [companyName, setAllTemplatesCache],
@@ -152,13 +183,15 @@ export default function AllTemplates() {
     fetchingMoreRef.current = true;
     setFetchingMore(true);
     try {
+      const requestKey = `${companyName}::${activeType.type}`;
       const {
         templates,
         lastDoc: ld,
         hasMore: more,
       } = await Alltemplateservice(activeType.type, lastDoc, 6, companyName);
+      if (!mountedRef.current || lastKeyRef.current !== requestKey) return;
       const next = [...tempdata, ...templates];
-      const cacheKey = `${companyName}::${activeType.type}`;
+      const cacheKey = requestKey;
       setTempData(next);
       setAllTemplatesCache((cached) => ({
         ...cached,
@@ -169,8 +202,14 @@ export default function AllTemplates() {
     } catch (err) {
       
     } finally {
-      fetchingMoreRef.current = false;
-      setFetchingMore(false);
+      const activeType = getSelType(contextSelType);
+      const requestKey = activeType?.type
+        ? `${companyName}::${activeType.type}`
+        : "";
+      if (mountedRef.current && lastKeyRef.current === requestKey) {
+        fetchingMoreRef.current = false;
+        setFetchingMore(false);
+      }
     }
   }, [
     companyName,

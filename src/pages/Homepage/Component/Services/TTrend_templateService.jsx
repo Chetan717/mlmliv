@@ -19,15 +19,18 @@ let _cache = null;
 let _cacheCompany = null;
 let _cacheTs = 0;
 let _cacheDate = "";
+let _cacheGeneration = 0;
 const CACHE_TTL = 10 * 60 * 1000;
 
 export const TTrend_templateService = async (companyName) => {
+  const requestedCompany = companyName || "";
+  const requestGeneration = _cacheGeneration;
   const today = new Date().toISOString().split("T")[0];
   const now = Date.now();
 
   if (
     _cache !== null &&
-    _cacheCompany === (companyName || "") &&
+    _cacheCompany === requestedCompany &&
     _cacheDate === today &&
     now - _cacheTs < CACHE_TTL
   ) {
@@ -47,14 +50,14 @@ export const TTrend_templateService = async (companyName) => {
 
     const fetchList = [getDocs(q1)];
 
-    if (companyName) {
+    if (requestedCompany) {
       const q2 = query(
         collection(db, COLLECTIONS.MLMTEMPLATE),
         where("MainType", "==", "MLM"),
         where("SelectType", "==", "Today_Trending"),
         where("Active", "==", true),
         where("Launched", "==", true),
-        where("Company", "==", companyName),
+        where("Company", "==", requestedCompany),
         limit(10),
       );
       fetchList.push(getDocs(q2));
@@ -71,19 +74,24 @@ export const TTrend_templateService = async (companyName) => {
         return true;
       });
 
-    _cache = templates;
-    _cacheCompany = companyName || "";
-    _cacheDate = today;
-    _cacheTs = now;
+    if (requestGeneration === _cacheGeneration) {
+      _cache = templates;
+      _cacheCompany = requestedCompany;
+      _cacheDate = today;
+      _cacheTs = now;
+    }
 
     return templates;
   } catch (error) {
-    
-    return _cache || [];
+    // A failed request for company B must never fall back to company A.
+    return _cacheCompany === requestedCompany ? _cache || [] : [];
   }
 };
 
 export function clearTrendingCache() {
+  _cacheGeneration += 1;
   _cache = null;
+  _cacheCompany = null;
   _cacheTs = 0;
+  _cacheDate = "";
 }

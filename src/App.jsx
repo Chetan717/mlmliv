@@ -108,7 +108,7 @@ function PageSpinner() {
   );
 }
 
-function PersistentPages({ pathname, authenticated, ready }) {
+function PersistentPages({ pathname, authenticated, ready, companyId }) {
   const isHome    = pathname === "/";
   const isAllTemp = pathname === "/alltemp";
 
@@ -153,14 +153,14 @@ function PersistentPages({ pathname, authenticated, ready }) {
               <div
                 style={{ height: "100%", display: isHome ? "block" : "none" }}
               >
-                <Home />
+                <Home key={`home-${companyId || "none"}`} />
               </div>
             )}
             {allTempReady && (
               <div
                 style={{ height: "100%", display: isAllTemp ? "block" : "none" }}
               >
-                <AllTemplates />
+                <AllTemplates key={`all-templates-${companyId || "none"}`} />
               </div>
             )}
           </Suspense>
@@ -380,6 +380,7 @@ function App() {
         pathname={pathname}
         authenticated={!!firebaseUser}
         ready={!!firebaseUser && !companyLoading && !!selectedCompany}
+        companyId={selectedCompany?.id || ""}
       />
     </>
   );

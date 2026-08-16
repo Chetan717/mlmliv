@@ -20,6 +20,10 @@ function writeCache(date, data) {
   _mem.set(date, { ts: Date.now(), data });
 }
 
+export function clearFestivalTemplateCache() {
+  _mem.clear();
+}
+
 export const Festival_template = async (Selected_date) => {
   const hit = readCache(Selected_date);
   if (hit) return hit;

@@ -13,9 +13,12 @@ import {
   clearTemplateCache,
   TEMPLATE_GROUP_COUNT,
 } from "./Homepage/Component/Services/GeneralTemplateService";
+import { clearTrendingCache } from "./Homepage/Component/Services/TTrend_templateService";
+import { clearFestivalTemplateCache } from "./Homepage/Component/Services/Festival_template";
 import { useGeneralData } from "../Context/GeneralContext";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
 import { PAGE_REFRESH_EVENT } from "../utils/pageRefresh";
+import { subscribeToCompanyTemplateInvalidation } from "../utils/companyTemplateState";
 
 function WhatsAppBadge() {
   const [visible, setVisible] = useState(true);
@@ -150,7 +153,9 @@ function Home() {
     setCachedGroupIndex,
     setCachedFestivalData,
     setCachedTrending,
+    templateDataVersion,
   } = useGeneralData();
+  const companyId = selectedCompany?.id || "";
 
   const [loading, setLoading] = useState(false);
   const [homeDataVersion, setHomeDataVersion] = useState(0);
@@ -158,34 +163,47 @@ function Home() {
   const loadingRef = useRef(false);
   const groupIndexRef = useRef(cachedGroupIndex);
   const loadTemplatesRef = useRef(null);
+  const activeLoadTokenRef = useRef(null);
+  const activeCompanyIdRef = useRef(companyId);
+  activeCompanyIdRef.current = companyId;
 
- 
   const loadTemplates = useCallback(async () => {
     if (
+      !companyId ||
       loadingRef.current ||
       groupIndexRef.current >= TEMPLATE_GROUP_COUNT
     ) return;
 
+    const groupIndex = groupIndexRef.current;
+    const loadToken = Symbol("home-template-load");
+    activeLoadTokenRef.current = loadToken;
     loadingRef.current = true;
     setLoading(true);
 
-    const companyName = selectedCompany?.id || "";
-    const data = await fetchGeneralTemplates(
-      groupIndexRef.current,
-      companyName,
-    );
+    try {
+      const data = await fetchGeneralTemplates(groupIndex, companyId);
+      if (
+        activeLoadTokenRef.current !== loadToken ||
+        activeCompanyIdRef.current !== companyId
+      ) {
+        return;
+      }
 
-    setCachedTemplates((prev) => {
-      const existingTypes = new Set(prev.map((g) => g.type));
-      return [...prev, ...data.filter((g) => !existingTypes.has(g.type))];
-    });
+      setCachedTemplates((prev) => {
+        const existingTypes = new Set(prev.map((g) => g.type));
+        return [...prev, ...data.filter((g) => !existingTypes.has(g.type))];
+      });
 
-    groupIndexRef.current += 1;
-    setCachedGroupIndex(groupIndexRef.current);
-
-    loadingRef.current = false;
-    setLoading(false);
-  }, [selectedCompany?.id, setCachedTemplates, setCachedGroupIndex]);
+      groupIndexRef.current = groupIndex + 1;
+      setCachedGroupIndex(groupIndexRef.current);
+    } finally {
+      if (activeLoadTokenRef.current === loadToken) {
+        activeLoadTokenRef.current = null;
+        loadingRef.current = false;
+        setLoading(false);
+      }
+    }
+  }, [companyId, setCachedTemplates, setCachedGroupIndex]);
 
   useEffect(() => {
     loadTemplatesRef.current = loadTemplates;
@@ -194,15 +212,33 @@ function Home() {
   useEffect(() => {
     groupIndexRef.current = cachedGroupIndex;
 
-    if (cachedTemplates.length === 0) loadTemplates();
-  }, [cachedGroupIndex, cachedTemplates.length, loadTemplates]);
+    if (companyId && cachedTemplates.length === 0) loadTemplates();
+  }, [cachedGroupIndex, cachedTemplates.length, companyId, loadTemplates]);
+
+  useEffect(() => {
+    const cancelObsoleteCompanyLoad = () => {
+      // Ref updates are immediate, so a request for the previous company is
+      // rejected even before React finishes rendering the new selection.
+      activeLoadTokenRef.current = null;
+      loadingRef.current = false;
+      groupIndexRef.current = 0;
+      setLoading(false);
+      setSearchQuery("");
+    };
+
+    return subscribeToCompanyTemplateInvalidation(cancelObsoleteCompanyLoad);
+  }, []);
 
   const refreshHomeData = useCallback(async () => {
     if (loadingRef.current) return;
 
+    const loadToken = Symbol("home-template-refresh");
+    activeLoadTokenRef.current = loadToken;
     loadingRef.current = true;
     setLoading(true);
     clearTemplateCache();
+    clearTrendingCache();
+    clearFestivalTemplateCache();
     setCachedTemplates([]);
     setCachedGroupIndex(0);
     setCachedFestivalData({});
@@ -215,14 +251,31 @@ function Home() {
 
     try {
       const company = await refreshCompany();
-      const companyName = company?.id || selectedCompany?.id || "";
-      const data = await fetchGeneralTemplates(0, companyName);
+      const refreshedCompanyId = company?.id || "";
+      if (
+        !refreshedCompanyId ||
+        activeLoadTokenRef.current !== loadToken ||
+        activeCompanyIdRef.current !== refreshedCompanyId
+      ) {
+        return;
+      }
+
+      const data = await fetchGeneralTemplates(0, refreshedCompanyId);
+      if (
+        activeLoadTokenRef.current !== loadToken ||
+        activeCompanyIdRef.current !== refreshedCompanyId
+      ) {
+        return;
+      }
       setCachedTemplates(data);
       groupIndexRef.current = 1;
       setCachedGroupIndex(1);
     } finally {
-      loadingRef.current = false;
-      setLoading(false);
+      if (activeLoadTokenRef.current === loadToken) {
+        activeLoadTokenRef.current = null;
+        loadingRef.current = false;
+        setLoading(false);
+      }
     }
   }, [
     setCachedFestivalData,
@@ -230,7 +283,6 @@ function Home() {
     setCachedTemplates,
     setCachedTrending,
     refreshCompany,
-    selectedCompany?.id,
   ]);
 
   useEffect(() => {
@@ -294,11 +346,15 @@ function Home() {
         </section>
 
         <section className="w-full" data-guide="home-carousel">
-          <Carosel key={`carousel-${homeDataVersion}`} />
+          <Carosel
+            key={`carousel-${companyId}-${templateDataVersion}-${homeDataVersion}`}
+          />
         </section>
 
         <section className="w-full" data-guide="home-templates">
-          <Festival key={`festival-${homeDataVersion}`} />
+          <Festival
+            key={`festival-${companyId}-${templateDataVersion}-${homeDataVersion}`}
+          />
         </section>
 
         <section className="w-full">

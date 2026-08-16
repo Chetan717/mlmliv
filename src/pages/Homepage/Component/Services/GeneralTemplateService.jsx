@@ -41,6 +41,7 @@ export const TEMPLATE_GROUP_COUNT = TYPE_GROUPS.length;
 // In-memory only cache — cleared on every page reload so new data always shows
 // TTL: 5 minutes within a session to avoid redundant fetches during navigation
 const _cache = new Map();
+let _cacheGeneration = 0;
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function getTemplateCache() {
@@ -48,6 +49,7 @@ export function getTemplateCache() {
 }
 
 export function clearTemplateCache() {
+  _cacheGeneration += 1;
   _cache.clear();
 }
 
@@ -67,6 +69,7 @@ const HOME_LIMIT = 20;
 
 export const fetchGeneralTemplates = async (groupIndex, company) => {
   const cacheKey = `${groupIndex}__${company || ""}`;
+  const requestGeneration = _cacheGeneration;
 
   // In-memory cache hit (with TTL check)
   if (_cache.has(cacheKey)) {
@@ -109,7 +112,11 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
       }),
     );
 
-    _cache.set(cacheKey, { ts: Date.now(), data: results });
+    // A company switch may have cleared the cache while Firestore was still
+    // responding. Never let that obsolete request repopulate the cache.
+    if (requestGeneration === _cacheGeneration) {
+      _cache.set(cacheKey, { ts: Date.now(), data: results });
+    }
     return results;
   } catch (error) {
     

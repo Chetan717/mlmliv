@@ -46,8 +46,8 @@ export default function Carosel() {
     const loadTrending = async () => {
       try {
         setLoading(true);
-        const companyName = selectedCompany?.name || "";
-        const data = await TTrend_templateService(companyName);
+        const companyId = selectedCompany?.id || "";
+        const data = await TTrend_templateService(companyId);
         if (!isMounted) return;
         setSlides(data);
       } catch (error) {
@@ -61,7 +61,7 @@ export default function Carosel() {
     return () => {
       isMounted = false;
     };
-  }, [selectedCompany?.name]);
+  }, [selectedCompany?.id]);
 
   const handleImagePress = (item) => {
     const selttype = {

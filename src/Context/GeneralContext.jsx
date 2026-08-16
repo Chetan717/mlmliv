@@ -1,4 +1,15 @@
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
+import { clearTemplateCache } from "../pages/Homepage/Component/Services/GeneralTemplateService";
+import { clearTrendingCache } from "../pages/Homepage/Component/Services/TTrend_templateService";
+import { clearFestivalTemplateCache } from "../pages/Homepage/Component/Services/Festival_template";
+import { subscribeToCompanyTemplateInvalidation } from "../utils/companyTemplateState";
 const DataContextGen = createContext();
 
 function GeneralContext({ children }) {
@@ -28,6 +39,27 @@ function GeneralContext({ children }) {
   // New-templates notification badge
   // true when templates with a higher serial than last seen have been loaded
   const [hasNewTemplates, setHasNewTemplates] = useState(false);
+  const [templateDataVersion, setTemplateDataVersion] = useState(0);
+
+  const resetCompanyTemplateData = useCallback(() => {
+    // Clear both module-level request caches and all keep-alive React state.
+    // This runs before SelectedCompanyContext commits the next company.
+    clearTemplateCache();
+    clearTrendingCache();
+    clearFestivalTemplateCache();
+    setSelType({});
+    setCachedTemplates([]);
+    setCachedGroupIndex(0);
+    setCachedFestivalData({});
+    setCachedTrending(null);
+    setAllTemplatesCache({});
+    setHasNewTemplates(false);
+    setTemplateDataVersion((version) => version + 1);
+  }, []);
+
+  useEffect(() => {
+    return subscribeToCompanyTemplateInvalidation(resetCompanyTemplateData);
+  }, [resetCompanyTemplateData]);
 
   const contextValue = useMemo(
     () => ({
@@ -48,6 +80,8 @@ function GeneralContext({ children }) {
       setAllTemplatesCache,
       hasNewTemplates,
       setHasNewTemplates,
+      templateDataVersion,
+      resetCompanyTemplateData,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -59,6 +93,8 @@ function GeneralContext({ children }) {
       cachedTrending,
       allTemplatesCache,
       hasNewTemplates,
+      templateDataVersion,
+      resetCompanyTemplateData,
     ],
   );
 

@@ -34,6 +34,7 @@ import {
   getVerifiedMlmProfile,
   invalidateVerifiedMlmProfileCache,
 } from "../utils/mlmProfileVerification";
+import { invalidateCompanyTemplateState } from "../utils/companyTemplateState";
 
 const SelectedCompanyContext = createContext({
   selectedCompany: null,
@@ -55,6 +56,27 @@ export function SelectedCompanyProvider({ children }) {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const selectionRequestVersionRef = useRef(0);
+  const selectedCompanyIdRef = useRef("");
+
+  const commitSelectedCompany = useCallback((company, reason) => {
+    const previousCompanyId = selectedCompanyIdRef.current;
+    const nextCompanyId = company?.id || "";
+
+    if (previousCompanyId !== nextCompanyId) {
+      // Home and All Templates are keep-alive pages. Invalidate their React
+      // and service caches synchronously so the previous company's templates
+      // cannot flash or be restored by an older in-flight request.
+      invalidateCompanyTemplateState({
+        previousCompanyId,
+        nextCompanyId,
+        reason,
+      });
+      selectedCompanyIdRef.current = nextCompanyId;
+    }
+
+    setSelectedCompany(company);
+    return company;
+  }, []);
 
   useEffect(() => {
     // Remove the old unscoped object. New pending selections contain only a
@@ -67,7 +89,7 @@ export function SelectedCompanyProvider({ children }) {
     const requestVersion = ++selectionRequestVersionRef.current;
     if (!user) {
       if (requestVersion === selectionRequestVersionRef.current) {
-        setSelectedCompany(null);
+        commitSelectedCompany(null, "signed-out");
         setLoading(false);
       }
       return null;
@@ -113,12 +135,12 @@ export function SelectedCompanyProvider({ children }) {
         clearPendingCompanySelection(user.uid);
       }
       if (requestVersion === selectionRequestVersionRef.current) {
-        setSelectedCompany(company);
+        commitSelectedCompany(company, "company-loaded");
       }
       return company;
     } catch (error) {
       if (requestVersion === selectionRequestVersionRef.current) {
-        setSelectedCompany(null);
+        commitSelectedCompany(null, "company-load-failed");
       }
       throw error;
     } finally {
@@ -126,7 +148,7 @@ export function SelectedCompanyProvider({ children }) {
         setLoading(false);
       }
     }
-  }, [identity?.mobileNo, user]);
+  }, [commitSelectedCompany, identity?.mobileNo, user]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -158,7 +180,8 @@ export function SelectedCompanyProvider({ children }) {
         throw error;
       }
 
-      if (selectedCompany?.id && selectedCompany.id !== company.id) {
+      const previousCompanyId = selectedCompanyIdRef.current;
+      if (previousCompanyId && previousCompanyId !== company.id) {
         // Discard company-specific drafts before switching an unfinished
         // profile to another company.
         clearCompanyScopedStorage();
@@ -168,18 +191,17 @@ export function SelectedCompanyProvider({ children }) {
       // Save only its public id; the full document is re-read on app startup.
       savePendingCompanySelection(user.uid, company.id);
       selectionRequestVersionRef.current += 1;
-      setSelectedCompany(company);
-      return company;
+      return commitSelectedCompany(company, "company-selected");
     },
-    [identity?.mobileNo, selectedCompany?.id, user],
+    [commitSelectedCompany, identity?.mobileNo, user],
   );
 
   const clearCompanySelection = useCallback(async () => {
     if (!user?.uid) throw new Error("Authenticated user is required.");
     clearPendingCompanySelection(user.uid);
     selectionRequestVersionRef.current += 1;
-    setSelectedCompany(null);
-  }, [user]);
+    commitSelectedCompany(null, "company-selection-cleared");
+  }, [commitSelectedCompany, user]);
 
   const deleteProfileAndCompanySelection = useCallback(
     async (profileId) => {
@@ -194,9 +216,9 @@ export function SelectedCompanyProvider({ children }) {
       selectionRequestVersionRef.current += 1;
       invalidateVerifiedMlmProfileCache();
       clearCompanyScopedStorage();
-      setSelectedCompany(null);
+      commitSelectedCompany(null, "mlm-profile-deleted");
     },
-    [user],
+    [commitSelectedCompany, user],
   );
 
   const value = useMemo(

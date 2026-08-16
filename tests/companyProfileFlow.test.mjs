@@ -23,6 +23,11 @@ import {
   getCompanySelectionDestination,
   isCompanyChangeRequest,
 } from "../src/utils/companyChangePolicy.js";
+import {
+  COMPANY_TEMPLATE_STATE_INVALIDATED_EVENT,
+  invalidateCompanyTemplateState,
+  subscribeToCompanyTemplateInvalidation,
+} from "../src/utils/companyTemplateState.js";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const read = (relativePath) =>
@@ -196,4 +201,108 @@ test("selected-company logo edit and delete redirect are production-safe", () =>
   const context = read("src/Context/SelectedCompanyContext.jsx");
   assert.match(context, /clearCompanyScopedStorage\(\)/);
   assert.match(context, /invalidateVerifiedMlmProfileCache\(\)/);
+});
+
+test("company template invalidation reports the exact company transition", () => {
+  const previousWindow = globalThis.window;
+  const previousCustomEvent = globalThis.CustomEvent;
+  const events = [];
+  const subscriberDetails = [];
+  const unsubscribe = subscribeToCompanyTemplateInvalidation((detail) => {
+    subscriberDetails.push(detail);
+  });
+
+  globalThis.window = {
+    dispatchEvent(event) {
+      events.push(event);
+      return true;
+    },
+  };
+  globalThis.CustomEvent = class {
+    constructor(type, init = {}) {
+      this.type = type;
+      this.detail = init.detail;
+    }
+  };
+
+  try {
+    const detail = invalidateCompanyTemplateState({
+      previousCompanyId: "company-old",
+      nextCompanyId: "company-new",
+      reason: "company-selected",
+    });
+
+    assert.equal(events.length, 1);
+    assert.equal(subscriberDetails.length, 1);
+    assert.equal(events[0].type, COMPANY_TEMPLATE_STATE_INVALIDATED_EVENT);
+    assert.deepEqual(events[0].detail, detail);
+    assert.deepEqual(subscriberDetails[0], detail);
+    assert.equal(detail.previousCompanyId, "company-old");
+    assert.equal(detail.nextCompanyId, "company-new");
+  } finally {
+    unsubscribe();
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+    if (previousCustomEvent === undefined) delete globalThis.CustomEvent;
+    else globalThis.CustomEvent = previousCustomEvent;
+  }
+});
+
+test("company change and profile deletion atomically reset keep-alive templates", () => {
+  const selectedCompanyContext = read(
+    "src/Context/SelectedCompanyContext.jsx",
+  );
+  const generalContext = read("src/Context/GeneralContext.jsx");
+  const home = read("src/pages/Home.jsx");
+  const allTemplates = read(
+    "src/pages/Homepage/Component/AllTemplates.jsx",
+  );
+  const trendingService = read(
+    "src/pages/Homepage/Component/Services/TTrend_templateService.jsx",
+  );
+  const generalService = read(
+    "src/pages/Homepage/Component/Services/GeneralTemplateService.jsx",
+  );
+  const app = read("src/App.jsx");
+
+  const invalidateIndex = selectedCompanyContext.indexOf(
+    "invalidateCompanyTemplateState({",
+  );
+  const commitIndex = selectedCompanyContext.indexOf(
+    "setSelectedCompany(company)",
+    invalidateIndex,
+  );
+  assert.ok(invalidateIndex >= 0 && invalidateIndex < commitIndex);
+  assert.match(
+    selectedCompanyContext,
+    /commitSelectedCompany\(company, "company-selected"\)/,
+  );
+  assert.match(
+    selectedCompanyContext,
+    /commitSelectedCompany\(null, "mlm-profile-deleted"\)/,
+  );
+
+  for (const reset of [
+    "setCachedTemplates([])",
+    "setCachedGroupIndex(0)",
+    "setCachedFestivalData({})",
+    "setCachedTrending(null)",
+    "setAllTemplatesCache({})",
+  ]) {
+    assert.ok(generalContext.includes(reset), `${reset} is not reset`);
+  }
+  assert.match(generalContext, /subscribeToCompanyTemplateInvalidation/);
+  assert.match(home, /activeLoadTokenRef\.current !== loadToken/);
+  assert.match(home, /activeCompanyIdRef\.current !== companyId/);
+  assert.match(allTemplates, /lastKeyRef\.current !== cacheKey/);
+  assert.match(app, /key={`home-\$\{companyId \|\| "none"\}`}/);
+  assert.match(
+    app,
+    /key={`all-templates-\$\{companyId \|\| "none"\}`}/,
+  );
+  assert.match(generalService, /requestGeneration === _cacheGeneration/);
+  assert.match(
+    trendingService,
+    /_cacheCompany === requestedCompany \? _cache \|\| \[\] : \[\]/,
+  );
 });

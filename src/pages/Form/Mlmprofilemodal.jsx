@@ -1878,7 +1878,7 @@ export default function MLMProfilePage() {
           {/* ── TOPUP LINE ────────────────────────────────────── */}
           <div className="bg-background rounded-2xl border border-border p-4" data-guide="profile-topupline">
             <label className="block text-sm font-semibold text-foreground/80 mb-6">
-              Add Top Upline/Seniors Image (टॉप अपलाइन/सीनियर्स की इमेज जोड़ें)
+              Add Top Upline/Seniors Image / टॉप अपलाइन/सीनियर्स की इमेज जोड़ें
             </label>
             <div className="flex flex-col gap-2">
               <MultiImagePicker
