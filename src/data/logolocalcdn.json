@@ -350,5 +350,19 @@
             "size": "square"
           }
         ]
+      },
+      {
+        "ID": "6yDXMrxjH77P65X7niQe",
+        "name": "VEDVITA",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786773538920_w6mgfi.webp?alt=media&token=692f16eb-c2c4-4175-aeac-faf7731f0147",
+            "size": "square"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786773590327_3md162.webp?alt=media&token=e9e506bf-80c2-4072-878e-01bb0ab00e0b",
+            "size": "rectangle"
+          }
+        ]
       }
 ]
