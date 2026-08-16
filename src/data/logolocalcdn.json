@@ -364,5 +364,19 @@
             "size": "rectangle"
           }
         ]
+      },
+      {
+        "ID": "LYRPlE2IsKZJvghijMbn",
+        "name": "RCM BUSSINESS",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786778849241_ptnx8s.webp?alt=media&token=94b47abe-bd2c-4f27-b8ef-2f6934e06d2e",
+            "size": "rectangle"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1786778849241_ptnx8s.webp?alt=media&token=94b47abe-bd2c-4f27-b8ef-2f6934e06d2e",
+            "size": "rectangle"
+          }
+        ]
       }
 ]
