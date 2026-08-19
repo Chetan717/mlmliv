@@ -465,7 +465,7 @@ export default function Festival() {
                           onClick={() => handleImagePress(card)}
                           className="shrink-0 flex flex-col gap-1.5 cursor-pointer"
                         >
-                          <div className="w-[85px] md:w-[140px] aspect-square rounded-2xl overflow-hidden relative border border-border shadow-sm bg-white dark:bg-black/20 card-press">
+                          <div className="w-[100px] md:w-[140px] aspect-square rounded-2xl overflow-hidden relative border border-border shadow-sm bg-white dark:bg-black/20 card-press">
                             <img
                               src={card.image}
                               alt={card.Subtype || "festival template"}
