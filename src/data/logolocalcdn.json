@@ -392,5 +392,19 @@
             "size": "rectangle"
           }
         ]
+      },
+      {
+        "ID": "AB0CsjKCnyVlmI1l5rPV",
+        "name": "V-BOOST",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787123252035_bnxtn8.webp?alt=media&token=e7bbc431-d6d3-4b91-8fb0-ced40f72b6cd",
+            "size": "square"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787123252035_bnxtn8.webp?alt=media&token=e7bbc431-d6d3-4b91-8fb0-ced40f72b6cd",
+            "size": "square"
+          }
+        ]
       }
 ]
