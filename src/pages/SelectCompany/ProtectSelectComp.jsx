@@ -2,18 +2,27 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../../Auth/AuthContext";
 import {
+  getMlmProfileFromStorage,
   hasMlmProfileInStorage,
   saveMlmProfileToStorage,
 } from "../../utils/companyStorage";
 import { isCompanyChangeRequest } from "../../utils/companyChangePolicy";
 import { getVerifiedMlmProfile } from "../../utils/mlmProfileVerification";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
+import {
+  getProfileCompanyIdentity,
+  hasCompleteCompanyIdentity,
+} from "../../utils/mlmProfileCompanyIdentity";
 
 export default function ProtectSelectComp({ children }) {
   const location = useLocation();
   const { user, identity, loading } = useAuth();
   const { selectedCompany, loading: companyLoading } = useSelectedCompany();
+  const storedProfile = getMlmProfileFromStorage();
   const hasMlmProfile = hasMlmProfileInStorage();
+  const needsCompanyRepair =
+    hasMlmProfile &&
+    !hasCompleteCompanyIdentity(getProfileCompanyIdentity(storedProfile));
   const isChangeRequest = isCompanyChangeRequest(location.search);
   const [changeAccess, setChangeAccess] = useState("idle");
 
@@ -75,6 +84,11 @@ export default function ProtectSelectComp({ children }) {
     if (changeAccess !== "allowed") return null;
     return children;
   }
+
+  // A legacy/corrupt profile is allowed through only for a one-time company
+  // identity repair. This is separate from the normal company-change mode,
+  // which stays locked for every existing MLM Profile.
+  if (needsCompanyRepair) return children;
 
   if (hasMlmProfile || selectedCompany) {
     return <Navigate to="/" replace />;

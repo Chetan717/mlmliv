@@ -26,16 +26,22 @@ import {
   getNextCompanyCount,
   normalizeCompanySearch,
 } from "./companyListUtils";
+import { getSelectedCompanyIdentity } from "../../utils/mlmProfileCompanyIdentity";
 
 const COMPANY_CACHE_TTL_MS = 5 * 60 * 1000;
 let companyDirectoryCache = null;
 let companyDirectoryRequest = null;
 
 const normalizeCompany = (companyDoc) => {
-  const data = companyDoc.data();
-  const name = data?.name || "";
-  return {
+  const data = companyDoc.data() || {};
+  const identity = getSelectedCompanyIdentity({
+    ...data,
+    // Firestore document identity is authoritative.
     id: companyDoc.id,
+  });
+  const name = identity.companyName;
+  return {
+    id: identity.companyId,
     name,
     searchKey: normalizeCompanySearch(name),
     address: data?.address || "",

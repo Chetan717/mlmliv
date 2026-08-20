@@ -3,11 +3,16 @@ import { Navigate } from "react-router";
 import { useAuth } from "../../Auth/AuthContext";
 import { getUser } from "../../utils/authStorage";
 import {
+  getMlmProfileFromStorage,
   hasMlmProfileInStorage,
   saveMlmProfileToStorage,
 } from "../../utils/companyStorage";
 import { getVerifiedMlmProfile } from "../../utils/mlmProfileVerification";
 import { useSelectedCompany } from "../../Context/SelectedCompanyContext";
+import {
+  getProfileCompanyIdentity,
+  hasCompleteCompanyIdentity,
+} from "../../utils/mlmProfileCompanyIdentity";
 
 export default function ProtectMlmProfile({ children, requireProfile = false }) {
   const { user, loading } = useAuth();
@@ -15,7 +20,11 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
   const [serverProfileState, setServerProfileState] = useState(
     requireProfile ? "checking" : "not-required",
   );
+  const storedProfile = getMlmProfileFromStorage();
   const hasMlmProfile = hasMlmProfileInStorage();
+  const needsCompanyRepair =
+    hasMlmProfile &&
+    !hasCompleteCompanyIdentity(getProfileCompanyIdentity(storedProfile));
 
   useEffect(() => {
     if (!requireProfile || loading || !user) return;
@@ -36,7 +45,11 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
           return;
         }
         saveMlmProfileToStorage(profile);
-        setServerProfileState("verified");
+        setServerProfileState(
+          hasCompleteCompanyIdentity(getProfileCompanyIdentity(profile))
+            ? "verified"
+            : "company-repair-required",
+        );
       } catch (error) {
         
         if (!cancelled) setServerProfileState("error");
@@ -50,6 +63,12 @@ export default function ProtectMlmProfile({ children, requireProfile = false }) 
   if (loading || companyLoading) return null;
   if (!user) return <Navigate to="/login" replace />;
   if (requireProfile && serverProfileState === "checking") return null;
+  if (
+    (requireProfile && serverProfileState === "company-repair-required") ||
+    (!requireProfile && needsCompanyRepair)
+  ) {
+    return <Navigate to="/selectcomp" replace />;
+  }
   if (requireProfile && serverProfileState === "verified") return children;
   if (requireProfile && serverProfileState === "error") {
     return <Navigate to="/" replace />;

@@ -28,6 +28,12 @@ import {
   invalidateCompanyTemplateState,
   subscribeToCompanyTemplateInvalidation,
 } from "../src/utils/companyTemplateState.js";
+import {
+  getProfileCompanyIdentity,
+  getSelectedCompanyIdentity,
+  hasCompleteCompanyIdentity,
+  selectPreferredMlmProfile,
+} from "../src/utils/mlmProfileCompanyIdentity.js";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const read = (relativePath) =>
@@ -99,9 +105,97 @@ test("pending company selection is UID-scoped and survives a blocked local store
 test("company selection does not depend on the unsupported Firestore collection", () => {
   const context = read("src/Context/SelectedCompanyContext.jsx");
   assert.doesNotMatch(context, /userCompanySelections/);
-  assert.match(context, /savePendingCompanySelection\(user\.uid, company\.id\)/);
-  assert.match(context, /verifiedProfile\?\.companyId/);
+  assert.match(
+    context,
+    /savePendingCompanySelection\(user\.uid, normalizedCompany\.id\)/,
+  );
+  assert.match(context, /getProfileCompanyIdentity\(verifiedProfile\)/);
   assert.doesNotMatch(context, /setDoc\(selectionRef/);
+});
+
+test("company identity is normalized and valid duplicate profiles win", () => {
+  assert.deepEqual(
+    getSelectedCompanyIdentity({
+      id: "  company-7  ",
+      name: null,
+      companyName: "  Example Network  ",
+    }),
+    {
+      companyId: "company-7",
+      companyName: "Example Network",
+    },
+  );
+  assert.deepEqual(
+    getProfileCompanyIdentity({
+      company_id: "legacy-id",
+      company_name: "Legacy Network",
+    }),
+    {
+      companyId: "legacy-id",
+      companyName: "Legacy Network",
+    },
+  );
+  assert.equal(
+    hasCompleteCompanyIdentity({ companyId: "company-1", companyName: null }),
+    false,
+  );
+
+  const preferred = selectPreferredMlmProfile([
+    {
+      id: "newer-corrupt",
+      companyId: null,
+      companyName: null,
+      updatedAt: { seconds: 200 },
+    },
+    {
+      id: "older-complete",
+      companyId: "company-1",
+      companyName: "Complete Network",
+      updatedAt: { seconds: 100 },
+    },
+  ]);
+  assert.equal(preferred.id, "older-complete");
+});
+
+test("MLM Profile company identity cannot save null and corrupt users can repair once", () => {
+  const profileForm = read("src/pages/Form/Mlmprofilemodal.jsx");
+  const saveStart = profileForm.indexOf("const handleSave");
+  const identityGuard = profileForm.indexOf(
+    "if (!hasCompleteCompanyIdentity(companyIdentity))",
+    saveStart,
+  );
+  const firstUpload = profileForm.indexOf("uploadBlob(blob", saveStart);
+  assert.ok(saveStart >= 0 && identityGuard > saveStart);
+  assert.ok(identityGuard < firstUpload, "company validation must run before uploads");
+  assert.match(profileForm, /companyId: companyIdentity\.companyId/);
+  assert.match(profileForm, /companyName: companyIdentity\.companyName/);
+  assert.doesNotMatch(profileForm, /companyId:\s*companyData\?\.id\s*\|\|\s*null/);
+  assert.doesNotMatch(profileForm, /companyName:\s*companyData\?\.name\s*\|\|\s*null/);
+  assert.match(profileForm, /invalidateVerifiedMlmProfileCache\(\)/);
+
+  const context = read("src/Context/SelectedCompanyContext.jsx");
+  assert.match(context, /repairMlmProfileCompanyIdentity/);
+  assert.match(context, /updateDoc\(doc\(db, COLLECTIONS\.MLMPROFILES, profileId\), patch\)/);
+  assert.match(context, /"profile-company-repaired"/);
+  assert.match(context, /error\.code = COMPANY_SELECTION_LOCKED_CODE/);
+  assert.match(context, /\.\.\.data,[\s\S]*?id: snapshot\.id/);
+
+  const profileGuard = read("src/pages/SelectCompany/ProtectMlmProfile.jsx");
+  assert.match(profileGuard, /"company-repair-required"/);
+  assert.match(profileGuard, /<Navigate to="\/selectcomp" replace \/>/);
+
+  const companyGuard = read("src/pages/SelectCompany/ProtectSelectComp.jsx");
+  assert.match(companyGuard, /if \(needsCompanyRepair\) return children/);
+  assert.match(companyGuard, /if \(isChangeRequest\)/);
+  assert.match(companyGuard, /<Navigate to="\/mlmprofile" replace \/>/);
+
+  const login = read("src/Auth/Login.jsx");
+  assert.match(login, /selectPreferredMlmProfile/);
+  assert.match(login, /\? "\/"[\s\S]*?: "\/selectcomp"/);
+
+  const companyList = read("src/pages/SelectCompany/SelectComp.jsx");
+  assert.match(companyList, /getSelectedCompanyIdentity/);
+  assert.match(companyList, /id: companyDoc\.id/);
 });
 
 test("company can change only before the first MLM Profile is created", () => {
@@ -149,7 +243,7 @@ test("company can change only before the first MLM Profile is created", () => {
   const context = read("src/Context/SelectedCompanyContext.jsx");
   const verifyIndex = context.indexOf("const verifiedProfile = await getVerifiedMlmProfile");
   const pendingSaveIndex = context.indexOf(
-    "savePendingCompanySelection(user.uid, company.id)",
+    "savePendingCompanySelection(user.uid, normalizedCompany.id)",
   );
   assert.ok(verifyIndex >= 0 && verifyIndex < pendingSaveIndex);
   assert.match(context, /error\.code = COMPANY_SELECTION_LOCKED_CODE/);
@@ -275,7 +369,7 @@ test("company change and profile deletion atomically reset keep-alive templates"
   assert.ok(invalidateIndex >= 0 && invalidateIndex < commitIndex);
   assert.match(
     selectedCompanyContext,
-    /commitSelectedCompany\(company, "company-selected"\)/,
+    /commitSelectedCompany\(normalizedCompany, "company-selected"\)/,
   );
   assert.match(
     selectedCompanyContext,

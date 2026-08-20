@@ -36,6 +36,13 @@ import RemoveBgLoadingOverlay from "../mainform/components/RemoveBgLoadingOverla
 import { getBannerSettingsReturn } from "../../utils/bannerSettingsNavigation";
 import { syncRemovedProfileTopuplinesToLocalForm } from "../../utils/topuplineStorageSync";
 import { canChangeCompanyBeforeProfile } from "../../utils/companyChangePolicy";
+import {
+  getProfileCompanyIdentity,
+  getSelectedCompanyIdentity,
+  hasCompleteCompanyIdentity,
+  selectPreferredMlmProfile,
+} from "../../utils/mlmProfileCompanyIdentity";
+import { invalidateVerifiedMlmProfileCache } from "../../utils/mlmProfileVerification";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
@@ -568,6 +575,10 @@ export default function MLMProfilePage() {
   const originalProfileImageURLsRef = useRef([]);
   const originalTopupURLsRef = useRef([]);
   const originalAllTopupURLsRef = useRef([]);
+  const existingCompanyIdentityRef = useRef({
+    companyId: "",
+    companyName: "",
+  });
   const savedFormSignatureRef = useRef(null);
   const restoringMobileBackRef = useRef(false);
   const allowMobileBackRef = useRef(false);
@@ -675,12 +686,17 @@ export default function MLMProfilePage() {
       );
       const snap = await getDocs(q);
 
-      if (!snap.empty) {
-        const docSnap = snap.docs[0];
-        const data = docSnap.data();
-        setExistingDocId(docSnap.id);
+      const data = selectPreferredMlmProfile(
+        snap.docs.map((profileDoc) => ({
+          ...profileDoc.data(),
+          id: profileDoc.id,
+        })),
+      );
+      if (data) {
+        setExistingDocId(data.id);
         setProfileLookupState("existing");
-        saveMlmProfileToStorage({ id: docSnap.id, ...data });
+        existingCompanyIdentityRef.current = getProfileCompanyIdentity(data);
+        saveMlmProfileToStorage(data);
 
         const fullName = data.fullName || "";
         const dotIdx = fullName.indexOf(".");
@@ -720,10 +736,18 @@ export default function MLMProfilePage() {
       } else {
         setExistingDocId(null);
         setProfileLookupState("missing");
+        existingCompanyIdentityRef.current = {
+          companyId: "",
+          companyName: "",
+        };
         setForm(initialForm(userMobile));
       }
     } catch (err) {
       setProfileLookupState("error");
+      existingCompanyIdentityRef.current = {
+        companyId: "",
+        companyName: "",
+      };
       setForm(initialForm(userMobile));
     } finally {
       setLoadingProfile(false);
@@ -1279,6 +1303,31 @@ export default function MLMProfilePage() {
     setSaving(true);
     setSaveError(null);
     try {
+      let companyIdentity = getSelectedCompanyIdentity(companyData);
+      if (!hasCompleteCompanyIdentity(companyIdentity)) {
+        const existingIdentity = existingCompanyIdentityRef.current;
+        if (hasCompleteCompanyIdentity(existingIdentity)) {
+          companyIdentity = existingIdentity;
+        }
+      }
+      if (!hasCompleteCompanyIdentity(companyIdentity)) {
+        let refreshedCompany = null;
+        try {
+          refreshedCompany = await refreshCompany();
+        } catch {
+          // The same validation message below is clearer than a generic save
+          // failure and, importantly, no image upload/profile write has begun.
+        }
+        companyIdentity = getSelectedCompanyIdentity(refreshedCompany);
+      }
+      if (!hasCompleteCompanyIdentity(companyIdentity)) {
+        const message =
+          "Selected company could not be verified. Please select your company again.";
+        setSaveError(message);
+        toast.danger(message);
+        return;
+      }
+
       const uid = existingDocId || Date.now().toString(36);
 
       const allLogoURLs = form.logoSelectedLinks.map(({ link, size }) => ({
@@ -1333,13 +1382,16 @@ export default function MLMProfilePage() {
         profileImageURLs: allProfileImageURLs,
         topuplineURLs: allTopupURLs,
         socials: form.socials,
-        companyId: companyData?.id || null,
-        companyName: companyData?.name || null,
+        companyId: companyIdentity.companyId,
+        companyName: companyIdentity.companyName,
         updatedAt: serverTimestamp(),
       };
 
       if (isEditMode) {
-        await updateDoc(doc(db, "mlmprofiles", existingDocId), profileData);
+        await updateDoc(
+          doc(db, COLLECTIONS.MLMPROFILES, existingDocId),
+          profileData,
+        );
         sessionStorage.setItem(
           "mlmProfile",
           JSON.stringify({ id: existingDocId, ...profileData }),
@@ -1354,6 +1406,7 @@ export default function MLMProfilePage() {
           JSON.stringify({ id: newDoc.id, ...profileData }),
         );
       }
+      invalidateVerifiedMlmProfileCache();
 
       // Banner Settings updates the profile, while Editor also keeps the
       // current form selection in localStorage. Remove deleted profile URLs

@@ -1,6 +1,7 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@firebase-config";
 import { COLLECTIONS } from "../collections";
+import { selectPreferredMlmProfile } from "./mlmProfileCompanyIdentity";
 
 const PROFILE_VERIFY_TTL_MS = 2 * 60 * 1000;
 const verifiedProfileCache = new Map();
@@ -29,8 +30,14 @@ export async function getVerifiedMlmProfile(uid, mobile) {
         verifiedProfileCache.delete(key);
         return null;
       }
-      const profileDoc = snapshot.docs[0];
-      const profile = { id: profileDoc.id, ...profileDoc.data() };
+      const profile = selectPreferredMlmProfile(
+        snapshot.docs.map((profileDoc) => ({
+          ...profileDoc.data(),
+          // Firestore document identity is authoritative. A legacy `id` field
+          // inside document data must never replace it with null.
+          id: profileDoc.id,
+        })),
+      );
       verifiedProfileCache.set(key, {
         checkedAt: Date.now(),
         profile,

@@ -23,6 +23,11 @@ import {
   clearMlmProfileStorage,
   saveMlmProfileToStorage,
 } from "../utils/companyStorage";
+import {
+  getProfileCompanyIdentity,
+  hasCompleteCompanyIdentity,
+  selectPreferredMlmProfile,
+} from "../utils/mlmProfileCompanyIdentity";
 
 export function Login() {
   const navigate = useNavigate();
@@ -110,8 +115,13 @@ export function Login() {
         );
         const profileSnapshot = await getDocs(profileQuery);
         if (!profileSnapshot.empty) {
-          const profileDoc = profileSnapshot.docs[0];
-          mlmProfile = { id: profileDoc.id, ...profileDoc.data() };
+          mlmProfile = selectPreferredMlmProfile(
+            profileSnapshot.docs.map((profileDoc) => ({
+              ...profileDoc.data(),
+              // The Firestore document id must win over stale/null data.
+              id: profileDoc.id,
+            })),
+          );
         }
       } catch (profileLookupError) {
         
@@ -122,7 +132,11 @@ export function Login() {
         clearCompanyProfileStorage();
         saveMlmProfileToStorage(mlmProfile);
         toast.success("Login Successful!");
-        navigate("/");
+        navigate(
+          hasCompleteCompanyIdentity(getProfileCompanyIdentity(mlmProfile))
+            ? "/"
+            : "/selectcomp",
+        );
       } else {
         clearMlmProfileStorage();
         toast.success("Login Successful!");

@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -35,6 +36,12 @@ import {
   invalidateVerifiedMlmProfileCache,
 } from "../utils/mlmProfileVerification";
 import { invalidateCompanyTemplateState } from "../utils/companyTemplateState";
+import {
+  getProfileCompanyIdentity,
+  getSelectedCompanyIdentity,
+  hasCompleteCompanyIdentity,
+  selectPreferredMlmProfile,
+} from "../utils/mlmProfileCompanyIdentity";
 
 const SelectedCompanyContext = createContext({
   selectedCompany: null,
@@ -45,10 +52,42 @@ const SelectedCompanyContext = createContext({
   deleteProfileAndCompanySelection: async () => {},
 });
 
-async function readCompany(companyId) {
+async function readCompany(companyId, fallbackCompanyName = "") {
   if (!companyId) return null;
   const snapshot = await getDoc(doc(db, COLLECTIONS.MLMCOMP, companyId));
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  if (!snapshot.exists()) return null;
+
+  const data = snapshot.data() || {};
+  const identity = getSelectedCompanyIdentity({
+    ...data,
+    // The Firestore document id must win over any stale/null `id` data field.
+    id: snapshot.id,
+    companyName: data.companyName || fallbackCompanyName,
+  });
+  return {
+    ...data,
+    id: identity.companyId,
+    name: identity.companyName,
+  };
+}
+
+async function repairMlmProfileCompanyIdentity(profile, company) {
+  const profileId = String(profile?.id || "").trim();
+  const companyIdentity = getSelectedCompanyIdentity(company);
+  if (!profileId || !hasCompleteCompanyIdentity(companyIdentity)) {
+    throw new Error("A valid MLM Profile and selected company are required.");
+  }
+
+  const patch = {
+    companyId: companyIdentity.companyId,
+    companyName: companyIdentity.companyName,
+  };
+  await updateDoc(doc(db, COLLECTIONS.MLMPROFILES, profileId), patch);
+
+  const repairedProfile = { ...profile, ...patch, id: profileId };
+  invalidateVerifiedMlmProfileCache();
+  saveMlmProfileToStorage(repairedProfile);
+  return repairedProfile;
 }
 
 export function SelectedCompanyProvider({ children }) {
@@ -109,12 +148,13 @@ export function SelectedCompanyProvider({ children }) {
             where("mobile", "==", identity.mobileNo),
           ),
         );
-        const profileDoc = profileSnapshot.docs[0];
-        if (profileDoc) {
-          verifiedProfile = {
-            id: profileDoc.id,
+        verifiedProfile = selectPreferredMlmProfile(
+          profileSnapshot.docs.map((profileDoc) => ({
             ...profileDoc.data(),
-          };
+            id: profileDoc.id,
+          })),
+        );
+        if (verifiedProfile) {
           saveMlmProfileToStorage(verifiedProfile);
         } else {
           clearMlmProfileStorage();
@@ -125,12 +165,30 @@ export function SelectedCompanyProvider({ children }) {
       // the profile exists, keep the chosen public company id locally under
       // the verified UID. This avoids relying on an undeployed Firestore
       // collection while still surviving refreshes and app restarts.
-      const profileCompanyId = verifiedProfile?.companyId || null;
+      let profileCompanyIdentity = getProfileCompanyIdentity(verifiedProfile);
+      const profileCompanyId = profileCompanyIdentity.companyId || null;
+      const pendingCompanyId = readPendingCompanySelection(user.uid);
       const companyId =
-        profileCompanyId || readPendingCompanySelection(user.uid);
-      if (profileCompanyId) clearPendingCompanySelection(user.uid);
+        profileCompanyId || pendingCompanyId;
 
-      const company = await readCompany(companyId);
+      const company = await readCompany(
+        companyId,
+        profileCompanyIdentity.companyName,
+      );
+      if (
+        verifiedProfile &&
+        company &&
+        !hasCompleteCompanyIdentity(profileCompanyIdentity)
+      ) {
+        verifiedProfile = await repairMlmProfileCompanyIdentity(
+          verifiedProfile,
+          company,
+        );
+        profileCompanyIdentity = getProfileCompanyIdentity(verifiedProfile);
+      }
+      if (hasCompleteCompanyIdentity(profileCompanyIdentity)) {
+        clearPendingCompanySelection(user.uid);
+      }
       if (!company && companyId && !profileCompanyId) {
         clearPendingCompanySelection(user.uid);
       }
@@ -157,7 +215,8 @@ export function SelectedCompanyProvider({ children }) {
 
   const selectCompany = useCallback(
     async (company) => {
-      if (!user?.uid || !company?.id) {
+      const companyIdentity = getSelectedCompanyIdentity(company);
+      if (!user?.uid || !hasCompleteCompanyIdentity(companyIdentity)) {
         throw new Error("Authenticated user and company are required.");
       }
 
@@ -170,6 +229,25 @@ export function SelectedCompanyProvider({ children }) {
         identity.mobileNo,
       );
       if (verifiedProfile) {
+        const profileCompanyIdentity = getProfileCompanyIdentity(verifiedProfile);
+        if (!hasCompleteCompanyIdentity(profileCompanyIdentity)) {
+          const normalizedCompany = {
+            ...company,
+            id: companyIdentity.companyId,
+            name: companyIdentity.companyName,
+          };
+          await repairMlmProfileCompanyIdentity(
+            verifiedProfile,
+            normalizedCompany,
+          );
+          clearPendingCompanySelection(user.uid);
+          selectionRequestVersionRef.current += 1;
+          return commitSelectedCompany(
+            normalizedCompany,
+            "profile-company-repaired",
+          );
+        }
+
         saveMlmProfileToStorage(verifiedProfile);
         clearPendingCompanySelection(user.uid);
 
@@ -180,8 +258,13 @@ export function SelectedCompanyProvider({ children }) {
         throw error;
       }
 
+      const normalizedCompany = {
+        ...company,
+        id: companyIdentity.companyId,
+        name: companyIdentity.companyName,
+      };
       const previousCompanyId = selectedCompanyIdRef.current;
-      if (previousCompanyId && previousCompanyId !== company.id) {
+      if (previousCompanyId && previousCompanyId !== normalizedCompany.id) {
         // Discard company-specific drafts before switching an unfinished
         // profile to another company.
         clearCompanyScopedStorage();
@@ -189,9 +272,9 @@ export function SelectedCompanyProvider({ children }) {
 
       // The company object came from the freshly loaded Firestore directory.
       // Save only its public id; the full document is re-read on app startup.
-      savePendingCompanySelection(user.uid, company.id);
+      savePendingCompanySelection(user.uid, normalizedCompany.id);
       selectionRequestVersionRef.current += 1;
-      return commitSelectedCompany(company, "company-selected");
+      return commitSelectedCompany(normalizedCompany, "company-selected");
     },
     [commitSelectedCompany, identity?.mobileNo, user],
   );
