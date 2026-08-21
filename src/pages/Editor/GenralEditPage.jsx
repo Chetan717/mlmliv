@@ -2905,7 +2905,7 @@ function GeneralEditPage({
               />
               {/* )} */}
               {/* {isMlmToday ? null : ( */}
-              {isAwpl ? null : (
+              {isAwpl && isMlmToday ? null : (
                 <Image
                   image={Imagel3}
                   x={logo2size === "square" ? 292 : 268}
