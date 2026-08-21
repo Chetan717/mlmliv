@@ -11,6 +11,10 @@ import {
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
+import {
+  buildHomeTemplateSections,
+  getTemplateTypeDisplayName,
+} from "./homeTemplatePresentation";
 
 const profileCreate = "/prcrete.webp";
 
@@ -500,7 +504,151 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     );
   }
 
-  const noResults = searchQuery && templates?.length === 0;
+  const homeSections = buildHomeTemplateSections(templates);
+  const noResults = Boolean(searchQuery && homeSections.length === 0);
+
+  const renderViewAllButton = (group) => (
+    <button
+      onClick={() => handleViewAll(group)}
+      className="flex items-center gap-1 text-xs font-bold text-accent dark:text-white bg-accent/10 dark:bg-white/10 px-3 py-1.5 rounded-full"
+    >
+      View All
+      <ArrowUpRight className="w-3 h-3" />
+    </button>
+  );
+
+  const renderGroupTemplates = (group, displayName) => {
+    const isGrid = GRID_TYPES.has(group.type);
+    const isFull = FULL_TYPES.has(group.type);
+    const isCircle = CIRCLE_TYPES.has(group.type);
+
+    if (isFull) {
+      return (
+        <div className="grid grid-cols-1 gap-4">
+          {group.templates.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => handleImagePress(item)}
+              className={`relative rounded-2xl overflow-hidden cursor-pointer group border bg-white dark:bg-black/20 card-press ${
+                selectedTemp?.id === item?.id
+                  ? "dark:ring-offset-[#0b0f19] shadow-md"
+                  : "border-border shadow-sm"
+              }`}
+            >
+              <div className="w-full aspect-[2/1] overflow-hidden">
+                <ImageWithSkeleton
+                  src={item.image}
+                  className="w-full h-full object-cover"
+                  alt={item.Subtype || displayName}
+                />
+              </div>
+              {isNewTemplate(item.serial) && <NewBadge />}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (isGrid) {
+      return (
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
+          {group.templates.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => handleImagePress(item)}
+              className={`relative rounded-2xl overflow-hidden cursor-pointer group border bg-white dark:bg-black/20 card-press ${
+                selectedTemp?.id === item?.id
+                  ? "dark:ring-offset-[#0b0f19] shadow-md"
+                  : "border-border shadow-sm"
+              }`}
+            >
+              <div className="w-full aspect-[3/2] overflow-hidden">
+                <ImageWithSkeleton
+                  src={item.image}
+                  className="w-full h-full object-cover"
+                  alt={item.Subtype || displayName}
+                />
+              </div>
+              {isNewTemplate(item.serial) && <NewBadge />}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (isCircle) {
+      return (
+        <div className="flex gap-4 overflow-x-auto pb-2 pt-1 px-2 hide-scrollbar snap-x scroll-gpu">
+          {group.templates.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => handleImagePress(item)}
+              className="flex flex-col items-center gap-1.5 cursor-pointer shrink-0 snap-start card-press"
+              style={{ width: 72 }}
+            >
+              <div
+                className="rounded-full p-[2.5px]"
+                style={{
+                  background:
+                    selectedTemp?.id === item?.id
+                      ? "var(--color-accent)"
+                      : "linear-gradient(135deg, #0088DA 0%, #7C3AED 50%, #EC4899 100%)",
+                }}
+              >
+                <div className="rounded-full p-[2px] bg-background">
+                  <div className="w-[80px] h-[80px] rounded-full overflow-hidden relative">
+                    <ImageWithSkeleton
+                      src={item.image}
+                      className="w-full h-full object-cover"
+                      alt={item.Subtype || displayName}
+                    />
+                    {isNewTemplate(item.serial) && (
+                      <span className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background block" />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="text-[10px] font-medium text-foreground/80 text-center leading-tight w-full truncate px-0.5">
+                {item.Subtype || displayName}
+              </p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex gap-4 overflow-x-auto pb-1 pt-1 px-1 hide-scrollbar snap-x scroll-gpu">
+        {group.templates.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => handleImagePress(item)}
+            className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 snap-start w-[110px] card-press"
+          >
+            <div
+              className={`relative h-[120px] w-full rounded-md overflow-hidden border bg-white dark:bg-black/20 ${
+                selectedTemp?.id === item?.id
+                  ? "ring-offset-1 dark:ring-offset-[#0b0f19] shadow-md scale-95"
+                  : "border-border shadow-sm"
+              }`}
+            >
+              <ImageWithSkeleton
+                src={item.image}
+                className="w-full h-full object-cover"
+                alt={item.Subtype || displayName}
+              />
+              {isNewTemplate(item.serial) && <NewBadge />}
+            </div>
+            {item.Subtype && (
+              <p className="w-full truncate px-1 text-center text-xs font-medium text-foreground/80">
+                {item.Subtype}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col w-full pb-8">
@@ -529,185 +677,72 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
         </div>
       )}
 
-      {templates?.map((group) => {
-        const isGrid = GRID_TYPES.has(group.type);
-        const isFull = FULL_TYPES.has(group.type);
-        const isCircle = CIRCLE_TYPES.has(group.type);
-
-        if (!group?.templates || group.templates.length === 0) return null;
-
-        const displayName =
-          group.type === "ThankYou_Banner_B"
-            ? "Thank You Rank & Bonanza"
-            : group.type === "Training"
-              ? "Training Seat Booking"
-              : group.type.replaceAll("_", " ");
+      {homeSections.map((section) => {
+        const headerEntry = section.headerEntryType
+          ? section.entries.find(
+              (entry) => entry.type === section.headerEntryType,
+            )
+          : section.entries.length === 1
+            ? section.entries[0]
+            : null;
+        const headerGroup = headerEntry?.group;
+        const isCircleHeader =
+          section.entries.length === 1 && CIRCLE_TYPES.has(headerGroup?.type);
+        const canViewHeaderGroup =
+          headerGroup &&
+          !GRID_TYPES.has(headerGroup.type) &&
+          !CIRCLE_TYPES.has(headerGroup.type);
 
         return (
           <div
-            key={group.type}
+            key={section.id}
             className="w-full mb-5"
             style={{
               contentVisibility: "auto",
               containIntrinsicSize: "320px",
             }}
           >
-            {isCircle && (
-              <div className="flex items-center gap-3 mb-3 px-1">
+            <div
+              className={`flex items-center justify-between px-1 ${
+                isCircleHeader ? "mb-3" : "mb-4"
+              }`}
+            >
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="w-1.5 h-6 rounded-full bg-accent" />
-                <h2 className="text-lg font-display font-bold text-foreground">
-                  {`${companyName} ${displayName}`}
+                <h2 className="truncate text-lg font-display font-bold text-foreground">
+                  {isCircleHeader && companyName
+                    ? `${companyName} ${section.title}`
+                    : section.title}
                 </h2>
               </div>
-            )}
-            {!isGrid && !isCircle && (
-              <div className="flex items-center justify-between mb-4 px-1">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 rounded-full bg-accent" />
-                  <h2 className="text-lg font-display font-bold text-foreground">
-                    {`${displayName}`}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => handleViewAll(group)}
-                  className="flex items-center gap-1 text-xs font-bold text-accent dark:text-white bg-accent/10 dark:bg-white/10 px-3 py-1.5 rounded-full"
+              {canViewHeaderGroup && renderViewAllButton(headerGroup)}
+            </div>
+
+            {section.entries.map((entry, index) => {
+              const group = entry.group;
+              const displayName = getTemplateTypeDisplayName(group.type);
+              const canViewEntry =
+                entry.label &&
+                !GRID_TYPES.has(group.type) &&
+                !CIRCLE_TYPES.has(group.type);
+
+              return (
+                <div
+                  key={group.type}
+                  className={index > 0 ? "mt-6" : undefined}
                 >
-                  View All
-                  <ArrowUpRight className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-
-            {isFull ? (
-              <div className="grid grid-cols-1 gap-4">
-                {group?.templates?.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleImagePress(item)}
-                    className={`relative rounded-2xl overflow-hidden cursor-pointer group border bg-white dark:bg-black/20 card-press ${
-                      selectedTemp?.id === item?.id
-                        ? " dark:ring-offset-[#0b0f19] shadow-md"
-                        : "border-border shadow-sm"
-                    }`}
-                  >
-                    <div className="w-full aspect-[2/1] overflow-hidden">
-                      <ImageWithSkeleton
-                        src={item.image}
-                        className="w-full h-full object-cover"
-                        alt={item.Subtype || displayName}
-                      />
+                  {entry.label && (
+                    <div className="mb-3 flex items-center justify-between px-1">
+                      <h3 className="text-sm font-semibold text-foreground/80">
+                        {entry.label}
+                      </h3>
+                      {canViewEntry && renderViewAllButton(group)}
                     </div>
-                    {isNewTemplate(item.serial) && <NewBadge />}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {isFull ? null : isGrid ? (
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4 px-1">
-                  <div className="w-1.5 h-6 rounded-full bg-accent" />
-                  <h2 className="text-lg font-display font-bold text-foreground">
-                    {displayName}
-                  </h2>
+                  )}
+                  {renderGroupTemplates(group, displayName)}
                 </div>
-                <div className="grid grid-cols-2 gap-3 md:gap-4">
-                  {group?.templates?.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleImagePress(item)}
-                      className={`relative rounded-2xl overflow-hidden cursor-pointer group border bg-white dark:bg-black/20 card-press ${
-                        selectedTemp?.id === item?.id
-                          ? "dark:ring-offset-[#0b0f19] shadow-md"
-                          : "border-border shadow-sm"
-                      }`}
-                    >
-                      <div className="w-full aspect-[3/2] overflow-hidden">
-                        <ImageWithSkeleton
-                          src={item.image}
-                          className="w-full h-full object-cover"
-                          alt={item.Subtype || displayName}
-                        />
-                      </div>
-                      {isNewTemplate(item.serial) && <NewBadge />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : isCircle ? (
-              /* ── Instagram-story style circles ── */
-              <div className="flex gap-4 overflow-x-auto pb-2 pt-1 px-2 hide-scrollbar snap-x scroll-gpu">
-                {group?.templates?.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleImagePress(item)}
-                    className="flex flex-col items-center gap-1.5 cursor-pointer shrink-0 snap-start card-press"
-                    style={{ width: 72 }}
-                  >
-                    {/* Gradient story ring */}
-                    <div
-                      className="rounded-full p-[2.5px]"
-                      style={{
-                        background:
-                          selectedTemp?.id === item?.id
-                            ? "var(--color-accent)"
-                            : "linear-gradient(135deg, #0088DA 0%, #7C3AED 50%, #EC4899 100%)",
-                      }}
-                    >
-                      {/* White gap ring */}
-                      <div className="rounded-full p-[2px] bg-background">
-                        {/* Circle image */}
-                        <div className="w-[60px] h-[60px] rounded-full overflow-hidden relative">
-                          <ImageWithSkeleton
-                            src={item.image}
-                            className="w-full h-full object-cover"
-                            alt={item.Subtype || displayName}
-                          />
-                          {isNewTemplate(item.serial) && (
-                            <span className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background block" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Label */}
-                    <p className="text-[10px] font-medium text-foreground/80 text-center leading-tight w-full truncate px-0.5">
-                      {item.Subtype || displayName}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              /* ── Default horizontal scroll (non-circle, non-grid, non-full) ── */
-              <div className="flex gap-4 overflow-x-auto pb-1 pt-1 px-1 hide-scrollbar snap-x scroll-gpu">
-                {group?.templates?.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleImagePress(item)}
-                    className="flex-col items-center gap-2 cursor-pointer group shrink-0 snap-start w-[85px] md:w-[140px] card-press"
-                  >
-                    <div
-                      className={`relative rounded-2xl overflow-hidden aspect-square border bg-white dark:bg-black/20 ${
-                        selectedTemp?.id === item?.id
-                          ? "ring-offset-1 dark:ring-offset-[#0b0f19] shadow-md scale-95"
-                          : "border-border shadow-sm"
-                      }`}
-                    >
-                      <ImageWithSkeleton
-                        src={item.image}
-                        className="w-full h-full object-cover"
-                        alt={item.Subtype || displayName}
-                      />
-                      {isNewTemplate(item.serial) && <NewBadge />}
-                    </div>
-                    {item.Subtype && (
-                      <p className="text-xs font-medium text-foreground/80 text-center truncate px-1 mt-2">
-                        {item.Subtype}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+              );
+            })}
           </div>
         );
       })}

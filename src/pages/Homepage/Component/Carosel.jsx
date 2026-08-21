@@ -141,7 +141,7 @@ export default function Carosel() {
         effect="fade"
         autoplay={{ delay: 4000, disableOnInteraction: false }}
         modules={[Pagination, EffectFade, Autoplay]}
-        className="w-full aspect-[21/9] md:aspect-[3/1]"
+        className="w-full aspect-[17/9] md:aspect-[3/1]"
       >
         {slides.map((item) => (
           <SwiperSlide

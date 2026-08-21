@@ -13,6 +13,7 @@ import {
   getProfileCompanyIdentity,
   hasCompleteCompanyIdentity,
 } from "../../utils/mlmProfileCompanyIdentity";
+import { isProfileDeletedNavigation } from "../../utils/profileDeletionNavigation";
 
 export default function ProtectSelectComp({ children }) {
   const location = useLocation();
@@ -24,6 +25,7 @@ export default function ProtectSelectComp({ children }) {
     hasMlmProfile &&
     !hasCompleteCompanyIdentity(getProfileCompanyIdentity(storedProfile));
   const isChangeRequest = isCompanyChangeRequest(location.search);
+  const isPostDeleteSelection = isProfileDeletedNavigation(location.state);
   const [changeAccess, setChangeAccess] = useState("idle");
 
   useEffect(() => {
@@ -76,6 +78,11 @@ export default function ProtectSelectComp({ children }) {
 
   if (loading || companyLoading) return null;
   if (!user) return <Navigate to="/login" replace />;
+
+  // The context state update after deletion can land one React render after the
+  // route change. Let this explicit post-delete navigation render Select Company
+  // immediately instead of bouncing to Home and leaving its keep-alive page blank.
+  if (isPostDeleteSelection) return children;
 
   if (isChangeRequest) {
     if (hasMlmProfile || changeAccess === "locked") {

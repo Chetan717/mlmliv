@@ -154,7 +154,7 @@ export default function Sidebar({
                 ? "md:opacity-0 md:w-0 md:overflow-hidden"
                 : "opacity-100",
             ].join(" ")}
-            style={{ fontFamily: "'Roboto', sans-serif" }}
+            style={{ fontFamily: "'Figtree', sans-serif" }}
           >
             {/* ✅ Use company name from localStorage if available */}
             <span className={`text-white text-[14px]`}>{comapnyName}</span>

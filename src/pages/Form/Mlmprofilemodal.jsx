@@ -43,6 +43,7 @@ import {
   selectPreferredMlmProfile,
 } from "../../utils/mlmProfileCompanyIdentity";
 import { invalidateVerifiedMlmProfileCache } from "../../utils/mlmProfileVerification";
+import { createProfileDeletedNavigationState } from "../../utils/profileDeletionNavigation";
 const storage = getStorage(app);
 
 // Background removal — shared utility (GPU-accelerated, edge cleanup included).
@@ -1458,7 +1459,10 @@ export default function MLMProfilePage() {
 
       toast.success("Profile deleted successfully.");
       setShowDeleteModal(false);
-      navigate("/selectcomp", { replace: true });
+      navigate("/selectcomp", {
+        replace: true,
+        state: createProfileDeletedNavigationState(),
+      });
     } catch (err) {
       
       toast.danger("Failed to delete profile. Please try again.");

@@ -17,8 +17,19 @@ import { clearTrendingCache } from "./Homepage/Component/Services/TTrend_templat
 import { clearFestivalTemplateCache } from "./Homepage/Component/Services/Festival_template";
 import { useGeneralData } from "../Context/GeneralContext";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
-import { PAGE_REFRESH_EVENT } from "../utils/pageRefresh";
+import {
+  PAGE_REFRESH_EVENT,
+  consumeRefreshAttempt,
+  refreshLimitMessage,
+} from "../utils/pageRefresh";
 import { subscribeToCompanyTemplateInvalidation } from "../utils/companyTemplateState";
+import { getHomeTemplateSearchText } from "./Homepage/Component/homeTemplatePresentation";
+import { auth } from "../Firebase";
+import { toast } from "@heroui/react";
+
+const PULL_REFRESH_TRIGGER = 64;
+const PULL_REFRESH_MAX = 96;
+const PULL_REFRESH_ACTIVE_HEIGHT = 48;
 
 function WhatsAppBadge() {
   const [visible, setVisible] = useState(true);
@@ -120,7 +131,7 @@ function SearchBar({ value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search templates..."
         maxLength={50}
-        className="w-full pl-9 pr-9 py-2.5 h-[45px] rounded-xl  border border-accent/20 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+        className="w-full pl-9 pr-9 py-2.5 h-[35px] rounded-xl  border border-accent/20 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
       />
       {value && (
         <button
@@ -160,11 +171,18 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [homeDataVersion, setHomeDataVersion] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pullDistance, setPullDistance] = useState(0);
+  const [pullRefreshing, setPullRefreshing] = useState(false);
+  const homeRootRef = useRef(null);
   const loadingRef = useRef(false);
   const groupIndexRef = useRef(cachedGroupIndex);
   const loadTemplatesRef = useRef(null);
   const activeLoadTokenRef = useRef(null);
   const activeCompanyIdRef = useRef(companyId);
+  const pullStartYRef = useRef(0);
+  const pullStartXRef = useRef(0);
+  const pullDistanceRef = useRef(0);
+  const isPullingRef = useRef(false);
   activeCompanyIdRef.current = companyId;
 
   const loadTemplates = useCallback(async () => {
@@ -285,6 +303,36 @@ function Home() {
     refreshCompany,
   ]);
 
+  const runPullRefresh = useCallback(async () => {
+    if (pullRefreshing || loadingRef.current) {
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      return;
+    }
+
+    const limit = consumeRefreshAttempt(auth.currentUser?.uid);
+    if (!limit.allowed) {
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      toast.warning(refreshLimitMessage(limit.retryAfterMs));
+      return;
+    }
+
+    setPullRefreshing(true);
+    pullDistanceRef.current = PULL_REFRESH_ACTIVE_HEIGHT;
+    setPullDistance(PULL_REFRESH_ACTIVE_HEIGHT);
+
+    try {
+      await refreshHomeData();
+    } catch {
+      toast.danger("Refresh failed. Please try again.");
+    } finally {
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+      setPullRefreshing(false);
+    }
+  }, [pullRefreshing, refreshHomeData]);
+
   useEffect(() => {
     const handlePageRefresh = (event) => {
       if (event.detail?.target !== "home") return;
@@ -297,6 +345,93 @@ function Home() {
     window.addEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
     return () => window.removeEventListener(PAGE_REFRESH_EVENT, handlePageRefresh);
   }, [refreshHomeData]);
+
+  useEffect(() => {
+    const scrollEl = homeRootRef.current?.closest(
+      ".mlm-main-scroll-container",
+    );
+    if (!scrollEl) return;
+
+    const resetPull = () => {
+      isPullingRef.current = false;
+      pullDistanceRef.current = 0;
+      setPullDistance(0);
+    };
+
+    const handleTouchStart = (event) => {
+      const touch = event.touches?.[0];
+      if (
+        !touch ||
+        pullRefreshing ||
+        loadingRef.current ||
+        scrollEl.scrollTop > 1 ||
+        event.target?.closest?.("input, textarea, select, [contenteditable='true']")
+      ) {
+        isPullingRef.current = false;
+        return;
+      }
+
+      pullStartYRef.current = touch.clientY;
+      pullStartXRef.current = touch.clientX;
+      pullDistanceRef.current = 0;
+      isPullingRef.current = true;
+    };
+
+    const handleTouchMove = (event) => {
+      if (!isPullingRef.current) return;
+      const touch = event.touches?.[0];
+      if (!touch || scrollEl.scrollTop > 1) {
+        resetPull();
+        return;
+      }
+
+      const deltaY = touch.clientY - pullStartYRef.current;
+      const deltaX = touch.clientX - pullStartXRef.current;
+      if (deltaY <= 0) {
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+        return;
+      }
+      if (Math.abs(deltaX) > deltaY) {
+        resetPull();
+        return;
+      }
+
+      event.preventDefault();
+      const easedDistance = Math.min(PULL_REFRESH_MAX, deltaY * 0.55);
+      pullDistanceRef.current = easedDistance;
+      setPullDistance(easedDistance);
+    };
+
+    const handleTouchEnd = () => {
+      if (!isPullingRef.current) return;
+      const shouldRefresh = pullDistanceRef.current >= PULL_REFRESH_TRIGGER;
+      isPullingRef.current = false;
+
+      if (shouldRefresh) {
+        void runPullRefresh();
+      } else {
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+      }
+    };
+
+    scrollEl.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    scrollEl.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+    scrollEl.addEventListener("touchend", handleTouchEnd, { passive: true });
+    scrollEl.addEventListener("touchcancel", resetPull, { passive: true });
+
+    return () => {
+      scrollEl.removeEventListener("touchstart", handleTouchStart);
+      scrollEl.removeEventListener("touchmove", handleTouchMove);
+      scrollEl.removeEventListener("touchend", handleTouchEnd);
+      scrollEl.removeEventListener("touchcancel", resetPull);
+    };
+  }, [pullRefreshing, runPullRefresh]);
 
   useEffect(() => {
     const scrollEl = document.querySelector(".mlm-main-scroll-container");
@@ -329,8 +464,7 @@ function Home() {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return cachedTemplates;
     return cachedTemplates.filter((group) => {
-      const typeName = (group.type || "").toLowerCase().replaceAll("_", " ");
-      const matchesType = typeName.includes(q);
+      const matchesType = getHomeTemplateSearchText(group.type).includes(q);
       const matchesSubtype = group.templates?.some((t) =>
         (t.Subtype || "").toLowerCase().includes(q),
       );
@@ -338,19 +472,65 @@ function Home() {
     });
   }, [cachedTemplates, searchQuery]);
 
+  const pullIndicatorHeight = pullRefreshing
+    ? PULL_REFRESH_ACTIVE_HEIGHT
+    : pullDistance;
+  const pullLabel = pullRefreshing
+    ? "Refreshing..."
+    : pullDistance >= PULL_REFRESH_TRIGGER
+      ? "Release to refresh"
+      : "Pull to refresh";
+
   return (
-    <div className="flex flex-col h-full w-full bg-background pt-4 md:pt-6">
-      <div className="px-4 md:px-6 w-full max-w-7xl mx-auto space-y-4 md:space-y-6">
-        <section className="w-full" data-guide="home-search">
+    <div
+      ref={homeRootRef}
+      className="flex h-full w-full flex-col bg-background"
+    >
+      <div className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/95 p-3 backdrop-blur-md md:px-6 md:pt-6">
+        <section className="mx-auto w-full max-w-7xl" data-guide="home-search">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
         </section>
+      </div>
 
+      <div
+        className="flex w-full shrink-0 items-center justify-center overflow-hidden text-xs font-medium text-muted-foreground"
+        style={{
+          height: `${pullIndicatorHeight}px`,
+          opacity: pullRefreshing || pullDistance > 8 ? 1 : 0,
+          transition:
+            pullRefreshing || pullDistance === 0
+              ? "height 180ms ease, opacity 160ms ease"
+              : "none",
+        }}
+        aria-live="polite"
+        aria-hidden={!pullRefreshing && pullDistance <= 8}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className={`h-4 w-4 rounded-full border-2 border-accent/25 border-t-accent ${
+              pullRefreshing ? "animate-spin" : ""
+            }`}
+            style={
+              pullRefreshing
+                ? undefined
+                : {
+                    transform: `rotate(${Math.min(
+                      270,
+                      (pullDistance / PULL_REFRESH_TRIGGER) * 270,
+                    )}deg)`,
+                  }
+            }
+          />
+          <span>{pullLabel}</span>
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 pt-4 md:space-y-6 md:px-6">
         <section className="w-full" data-guide="home-carousel">
           <Carosel
             key={`carousel-${companyId}-${templateDataVersion}-${homeDataVersion}`}
           />
         </section>
-
         <section className="w-full" data-guide="home-templates">
           <Festival
             key={`festival-${companyId}-${templateDataVersion}-${homeDataVersion}`}

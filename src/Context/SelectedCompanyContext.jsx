@@ -300,6 +300,10 @@ export function SelectedCompanyProvider({ children }) {
       invalidateVerifiedMlmProfileCache();
       clearCompanyScopedStorage();
       commitSelectedCompany(null, "mlm-profile-deleted");
+      // If a company refresh was still in flight, invalidating its request means
+      // its finally block can no longer clear this flag. Release the route guard
+      // here so Select Company never remains on a blank loading screen.
+      setLoading(false);
     },
     [commitSelectedCompany, user],
   );

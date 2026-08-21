@@ -978,6 +978,7 @@ function GeneralEditPage({
   const isRank_B = Template_Type === "Rank_Promotion_B";
   const isRank = isRankPromotionType(Template_Type) || isTraining;
   const isMlmToday = selll?.type === "Today_Trending";
+  const isAwpl = mlmProfile?.companyName === "AWPL";
 
   const showImageFooter = !NO_FOOTER_TYPES.has(Template_Type);
 
@@ -2904,13 +2905,15 @@ function GeneralEditPage({
               />
               {/* )} */}
               {/* {isMlmToday ? null : ( */}
-              <Image
-                image={Imagel3}
-                x={logo2size === "square" ? 292 : 268}
-                y={2}
-                width={woflogo2}
-                height={hoflogo2}
-              />
+              {isAwpl ? null : (
+                <Image
+                  image={Imagel3}
+                  x={logo2size === "square" ? 292 : 268}
+                  y={2}
+                  width={woflogo2}
+                  height={hoflogo2}
+                />
+              )}
               {/* )} */}
 
               {(() => {

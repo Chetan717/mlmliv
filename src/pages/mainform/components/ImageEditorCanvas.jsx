@@ -897,7 +897,7 @@ export default function ImageEditorCanvas({
         width: "100%",
         backgroundColor: "#181818",
         userSelect: "none",
-        fontFamily: "'Roboto', sans-serif",
+        fontFamily: "'Figtree', sans-serif",
       }}
     >
       {/* Top bar */}

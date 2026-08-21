@@ -34,6 +34,10 @@ import {
   hasCompleteCompanyIdentity,
   selectPreferredMlmProfile,
 } from "../src/utils/mlmProfileCompanyIdentity.js";
+import {
+  createProfileDeletedNavigationState,
+  isProfileDeletedNavigation,
+} from "../src/utils/profileDeletionNavigation.js";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const read = (relativePath) =>
@@ -289,12 +293,21 @@ test("selected-company logo edit and delete redirect are production-safe", () =>
   const deleteHandler = profileForm.match(
     /const handleDeleteConfirm[\s\S]*?\/\/ ═+/,
   )?.[0] || "";
-  assert.match(deleteHandler, /navigate\("\/selectcomp", \{ replace: true \}\)/);
+  assert.match(deleteHandler, /navigate\("\/selectcomp", \{/);
+  assert.match(deleteHandler, /state: createProfileDeletedNavigationState\(\)/);
   assert.doesNotMatch(deleteHandler, /navigate\("\/logout"/);
 
   const context = read("src/Context/SelectedCompanyContext.jsx");
   assert.match(context, /clearCompanyScopedStorage\(\)/);
   assert.match(context, /invalidateVerifiedMlmProfileCache\(\)/);
+  assert.match(context, /commitSelectedCompany\(null, "mlm-profile-deleted"\);[\s\S]*?setLoading\(false\)/);
+
+  const guard = read("src/pages/SelectCompany/ProtectSelectComp.jsx");
+  assert.match(guard, /if \(isPostDeleteSelection\) return children/);
+
+  const state = createProfileDeletedNavigationState();
+  assert.equal(isProfileDeletedNavigation(state), true);
+  assert.equal(isProfileDeletedNavigation(null), false);
 });
 
 test("company template invalidation reports the exact company transition", () => {

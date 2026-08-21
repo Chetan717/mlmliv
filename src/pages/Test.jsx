@@ -373,7 +373,7 @@ export default function ImageAudioToVideo() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white" style={{ fontFamily: "'Roboto', sans-serif" }}>
+    <div className="min-h-screen bg-[#0a0a0f] text-white" style={{ fontFamily: "'Figtree', sans-serif" }}>
 
       {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -386,7 +386,7 @@ export default function ImageAudioToVideo() {
         {/* Header */}
         <div className="mb-10 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-300 text-xs font-medium mb-6"
-            style={{ fontFamily: "'Roboto', sans-serif" }}>
+            style={{ fontFamily: "'Figtree', sans-serif" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
             CLIENT-SIDE · NO UPLOAD · FFMPEG.WASM
           </div>
@@ -459,7 +459,7 @@ export default function ImageAudioToVideo() {
             <ProgressBar progress={displayProgress} label={progressLabel} />
             {logs.length > 0 && (
               <div className="text-[11px] text-white/20 leading-relaxed border-t border-white/5 pt-3 space-y-0.5 overflow-hidden"
-                style={{ fontFamily: "'Roboto', sans-serif" }}>
+                style={{ fontFamily: "'Figtree', sans-serif" }}>
                 {logs.map((l, i) => <div key={i} className="truncate">{l}</div>)}
               </div>
             )}
@@ -472,7 +472,7 @@ export default function ImageAudioToVideo() {
             <span className="text-lg mt-0.5">⚠️</span>
             <div>
               <p className="font-semibold mb-1">Export failed</p>
-              <p className="text-red-400/70 text-xs" style={{ fontFamily: "'Roboto', sans-serif" }}>{errorMsg}</p>
+              <p className="text-red-400/70 text-xs" style={{ fontFamily: "'Figtree', sans-serif" }}>{errorMsg}</p>
             </div>
           </div>
         )}
@@ -542,7 +542,7 @@ export default function ImageAudioToVideo() {
           )}
         </div>
 
-        <p className="text-center text-white/15 text-xs mt-8" style={{ fontFamily: "'Roboto', sans-serif" }}>
+        <p className="text-center text-white/15 text-xs mt-8" style={{ fontFamily: "'Figtree', sans-serif" }}>
           Processed locally · No data leaves your device
         </p>
       </div>
