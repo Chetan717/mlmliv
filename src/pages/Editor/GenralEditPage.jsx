@@ -3098,7 +3098,7 @@ function GeneralEditPage({
                             ? 7
                             : 138
                           : isAchievement
-                            ? 83
+                            ? 77
                             : isClosing
                               ? isRight
                                 ? 6
@@ -3178,7 +3178,7 @@ function GeneralEditPage({
                             ? 75
                             : 205
                           : isAchievement
-                            ? 140
+                            ? 110
                             : isClosing
                               ? isRight
                                 ? 35
