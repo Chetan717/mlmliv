@@ -420,5 +420,48 @@
             "size": "rectangle"
           }
         ]
+      },
+      {
+        "ID": "Yl3Q6mwFChHOiqyjb4iQ",
+        "name": "SAFE DEAL",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787389334865_h68bf7.webp?alt=media&token=b178cb87-ad91-4afa-bcb8-3438c7910d36",
+            "size": "square"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787389334865_h68bf7.webp?alt=media&token=b178cb87-ad91-4afa-bcb8-3438c7910d36",
+            "size": "square"
+          }
+        ]
+      },
+      {
+        "ID": "djtUCu4Tvib9pOgojNoX",
+        "name": "RIYANSH",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787304415502_soyg60.webp?alt=media&token=690ac962-1293-4977-a610-6db3a17c2d9a",
+            "size": "rectangle"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787304415502_soyg60.webp?alt=media&token=690ac962-1293-4977-a610-6db3a17c2d9a",
+            "size": "rectangle"
+          }
+        ]
+      },
+      {
+        "ID": "aXwGLrCjITuYdBVqOaOF",
+        "name": "SHOPNET",
+        "logos": [
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787298739550_toanvm.webp?alt=media&token=6c83726b-65d3-46ad-92c2-08f3335e549c",
+            "size": "rectangle"
+          },
+          {
+            "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1787298752375_9633xj.webp?alt=media&token=ff27d870-f684-4e5a-ba47-a4ba74a93f6f",
+            "size": "square"
+          }
+        ]
       }
+     
 ]

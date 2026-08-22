@@ -3110,7 +3110,7 @@ function GeneralEditPage({
                                 : isBonanza
                                   ? isRight
                                     ? 4
-                                    : 150
+                                    : 156
                                   : isRank_B
                                     ? isRight
                                       ? 4
@@ -3189,8 +3189,8 @@ function GeneralEditPage({
                                   : 185
                                 : isBonanza
                                   ? isRight
-                                    ? 54
-                                    : 212
+                                    ? 40
+                                    : 190
                                   : isRank_B
                                     ? isRight
                                       ? 35
