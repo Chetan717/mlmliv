@@ -6,7 +6,7 @@ import TabBar from "./components/TabBar";
 import ExpiryAlertBanner from "./components/ExpiryAlertBanner";
 import AppGuide from "./components/AppGuide";
 import DeviceImageUploadLoader from "./components/DeviceImageUploadLoader";
-export default function Layout({ children }) {
+export default function Layout({ children, mainScrollRef, onMainScroll }) {
   const [collapsed, setCollapsed]     = useState(false);
   const [mobileOpen, setMobileOpen]   = useState(false);
   const { pathname }                  = useLocation();
@@ -36,7 +36,11 @@ export default function Layout({ children }) {
           setMobileOpen={setMobileOpen}
         />
 
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain layout-scroll-container mlm-main-scroll-container bg-background">
+        <div
+          ref={mainScrollRef}
+          onScroll={onMainScroll}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain layout-scroll-container mlm-main-scroll-container bg-background"
+        >
           <div className={`mx-auto w-full max-w-7xl ${hideTabBar ? "pb-0" : "pb-20 md:pb-4"}`}>
             {children}
           </div>

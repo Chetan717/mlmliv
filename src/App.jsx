@@ -1,4 +1,12 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router";
 import Layout from "./Layout";
 import ProtectedRoute from "./Auth/ProtectedR";
@@ -11,6 +19,10 @@ import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { useAuth } from "./Auth/AuthContext";
 import { useSelectedCompany } from "./Context/SelectedCompanyContext";
 import { runAppBackNavigation } from "./utils/appBackNavigation";
+import {
+  getPersistentPageScrollKey,
+  getPersistentPageScrollTop,
+} from "./utils/persistentPageScroll";
 
 const Home = lazy(() => import("./pages/Home"));
 const AllTemplates = lazy(
@@ -108,9 +120,21 @@ function PageSpinner() {
   );
 }
 
-function PersistentPages({ pathname, authenticated, ready, companyId }) {
+function PersistentPages({
+  pathname,
+  search,
+  authenticated,
+  ready,
+  companyId,
+}) {
   const isHome    = pathname === "/";
   const isAllTemp = pathname === "/alltemp";
+  const scrollContainerRef = useRef(null);
+  const scrollPositionsRef = useRef({});
+  const previousLocationRef = useRef({ pathname, search });
+  const activeScrollKeyRef = useRef(
+    getPersistentPageScrollKey(pathname, search),
+  );
 
   const [homeReady, setHomeReady] = useState(
     () => isHome && authenticated && ready,
@@ -130,6 +154,36 @@ function PersistentPages({ pathname, authenticated, ready, companyId }) {
     if (isAllTemp && !allTempReady) setAllTempReady(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, isHome, isAllTemp, ready]);
+
+  const handlePersistentScroll = useCallback((event) => {
+    const activeKey = activeScrollKeyRef.current;
+    if (!activeKey) return;
+    scrollPositionsRef.current[activeKey] = event.currentTarget.scrollTop;
+  }, []);
+
+  useLayoutEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const previousLocation = previousLocationRef.current;
+    const nextKey = getPersistentPageScrollKey(pathname, search);
+
+    activeScrollKeyRef.current = nextKey;
+    previousLocationRef.current = { pathname, search };
+    if (!scrollContainer) return;
+
+    const nextTop = getPersistentPageScrollTop({
+      previousPathname: previousLocation.pathname,
+      previousSearch: previousLocation.search,
+      pathname,
+      search,
+      positions: scrollPositionsRef.current,
+    });
+
+    if (nextTop !== null) {
+      scrollPositionsRef.current[nextKey] = nextTop;
+      scrollContainer.scrollTop = nextTop;
+      scrollContainer.scrollLeft = 0;
+    }
+  }, [pathname, search]);
   
   if (!homeReady && !allTempReady) return null;
 
@@ -147,7 +201,10 @@ function PersistentPages({ pathname, authenticated, ready, companyId }) {
       }}
     >
       {(homeReady || allTempReady) && (
-        <Layout>
+        <Layout
+          mainScrollRef={scrollContainerRef}
+          onMainScroll={handlePersistentScroll}
+        >
           <Suspense fallback={<PageSpinner />}>
             {homeReady && (
               <div
@@ -378,6 +435,7 @@ function App() {
       {/* ── Keep-alive pages: Home + AllTemplates always stay in DOM ── */}
       <PersistentPages
         pathname={pathname}
+        search={location.search}
         authenticated={!!firebaseUser}
         ready={!!firebaseUser && !companyLoading && !!selectedCompany}
         companyId={selectedCompany?.id || ""}
