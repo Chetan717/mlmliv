@@ -1,46 +1,75 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useGeneralData } from "../../.././Context/GeneralContext";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { ArrowLeft, Check, ChevronRight, Compass } from "lucide-react";
+import { useGeneralData } from "../../../Context/GeneralContext";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
-import "./stylec.css";
-import { Alltemplateservice } from "./Services/Alltemplateservice";
-import { useNavigate } from "react-router";
-import { ArrowLeft, Check, Compass } from "lucide-react";
-import { seenImages, markImageSeen, isNewTemplate } from "./templateCacheUtils";
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
 import {
   isDirectEditorTemplate,
   rememberEditorBackTarget,
 } from "../../../utils/editorNavigation";
+import {
+  buildAllTemplatesReturnPath,
+  buildAllTemplatesSubtypePath,
+  getAllTemplatesBackTarget,
+  getAllTemplatesSubtype,
+} from "../../../utils/allTemplatesNavigation";
+import {
+  getEditorGraphicSelectionKey,
+  storeEditorTemplateSeed,
+} from "../../../utils/editorTemplateSelection";
 import { subscribeToCompanyTemplateInvalidation } from "../../../utils/companyTemplateState";
+import { AllTemplateGraphicsService } from "./Services/Alltemplateservice";
+import {
+  GRAPHICS_ROW_LIMIT,
+  getSubtypeRowItems,
+  groupTemplateGraphicsBySubtype,
+} from "./templateGraphicsView";
+import {
+  isNewTemplate,
+  markImageSeen,
+  preloadImage,
+  seenImages,
+} from "./templateCacheUtils";
+import "./stylec.css";
 
-const SkeletonCard = () => (
-  <div className="rounded-[24px] overflow-hidden bg-muted aspect-square w-full relative border border-border">
-    <div className="absolute inset-0 shimmer-bar" />
-  </div>
-);
+function readSelectedType(contextSelectedType) {
+  if (contextSelectedType?.type) return contextSelectedType;
+  try {
+    const stored = localStorage.getItem("selType");
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
 
-const NewBadge = () => (
-  <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500 shadow-md pointer-events-none">
-    <span className="relative flex h-1.5 w-1.5 shrink-0">
-      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-70" />
-      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-    </span>
-    <span className="text-[8px] font-bold text-white uppercase tracking-wide leading-none">
-      New
-    </span>
-  </div>
-);
+function displayLabel(value, fallback = "Templates") {
+  const text = String(value || "").trim();
+  return text ? text.replaceAll("_", " ") : fallback;
+}
 
-function TemplateImage({ src, alt }) {
-  const [loaded, setLoaded] = useState(() => seenImages.has(src));
+function ShowcaseImage({ src, alt }) {
+  const [loaded, setLoaded] = useState(() =>
+    Boolean(src && seenImages.has(src)),
+  );
+
+  if (!src) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-muted/40 text-muted-foreground">
+        <Compass className="h-6 w-6" />
+      </div>
+    );
+  }
+
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0 bg-muted/40">
       {!loaded && <div className="absolute inset-0 shimmer-bar" />}
       <img
         src={src}
         alt={alt}
-        className={`w-full h-full object-cover ${loaded ? "opacity-100" : "opacity-0"}`}
-        style={{ transition: loaded ? "none" : "opacity 0.15s" }}
+        className={`h-full w-full object-cover transition-opacity duration-150 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
         loading="lazy"
         decoding="async"
         onLoad={() => {
@@ -52,321 +81,442 @@ function TemplateImage({ src, alt }) {
   );
 }
 
-const getSelType = (selType) => {
-  if (selType?.type) return selType;
-  try {
-    const stored = localStorage.getItem("selType");
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-};
+function ShowcaseCard({ graphic, selected, onSelect }) {
+  const template = graphic?._template;
+  const preview =
+    graphic?.suggestionImage ||
+    graphic?.url ||
+    graphic?.backgroundVideoUrl ||
+    "";
+
+  return (
+    <button
+      type="button"
+      onPointerEnter={() => graphic?.url && preloadImage(graphic.url)}
+      onPointerDown={() => graphic?.url && preloadImage(graphic.url)}
+      onClick={() => onSelect(graphic)}
+      aria-label={`Select ${displayLabel(template?.Subtype, "template")} background`}
+      className={`relative h-[110px] w-[110px] shrink-0 snap-start overflow-hidden rounded-md border bg-white text-left shadow-sm transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent card-press dark:bg-black/20 ${
+        selected
+          ? "border-accent ring-2 ring-accent ring-offset-1 dark:ring-offset-[#0b0f19]"
+          : "border-border"
+      }`}
+    >
+      <ShowcaseImage src={preview} alt="GraphicsLink showcase" />
+      {isNewTemplate(template?.serial) && (
+        <span className="absolute left-1.5 top-1.5 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white shadow">
+          New
+        </span>
+      )}
+      {selected && (
+        <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-accent shadow-md dark:border-[#0b0f19]">
+          <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+        </span>
+      )}
+    </button>
+  );
+}
+
+function LoadingRows() {
+  return (
+    <div className="space-y-8">
+      {Array.from({ length: 3 }).map((_, sectionIndex) => (
+        <div key={sectionIndex}>
+          <div className="mb-3 h-5 w-36 overflow-hidden rounded-md bg-muted/50">
+            <div className="h-full w-full shimmer-bar" />
+          </div>
+          <div className="flex gap-3 overflow-hidden">
+            {Array.from({ length: 5 }).map((__, cardIndex) => (
+              <div
+                key={cardIndex}
+                className="relative h-[110px] w-[110px] shrink-0 overflow-hidden rounded-md border border-border bg-muted/40"
+              >
+                <div className="absolute inset-0 shimmer-bar" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LoadingGrid() {
+  return (
+    <div className="grid grid-cols-2 justify-items-center gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <div
+          key={index}
+          className="relative h-[110px] w-[110px] overflow-hidden rounded-md border border-border bg-muted/40"
+        >
+          <div className="absolute inset-0 shimmer-bar" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({ message }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-28 text-center">
+      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-border bg-white shadow-sm dark:bg-black/20">
+        <Compass className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <h3 className="mb-2 text-xl font-display font-bold text-foreground">
+        No backgrounds found
+      </h3>
+      <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
+    </div>
+  );
+}
 
 export default function AllTemplates() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const lastAllTemplatesSearchRef = useRef(
+    location.pathname === "/alltemp" ? location.search : "",
+  );
   const { selectedCompany } = useSelectedCompany();
   const {
-    selType: contextSelType,
+    selType: contextSelectedType,
     setSelType,
     allTemplatesCache,
     setAllTemplatesCache,
   } = useGeneralData();
-  const companyName = selectedCompany?.id || "";
 
-  const selType = getSelType(contextSelType);
+  const selectedType = readSelectedType(contextSelectedType);
+  const templateType = selectedType?.type || "";
+  const companyId = selectedCompany?.id || "";
+  const allTemplatesSearch =
+    location.pathname === "/alltemp"
+      ? location.search
+      : lastAllTemplatesSearchRef.current;
+  const requestedSubtype = getAllTemplatesSubtype(allTemplatesSearch);
+  const isSubtypeGrid = Boolean(requestedSubtype);
+  const templateFlowReturnTarget = buildAllTemplatesReturnPath(
+    allTemplatesSearch,
+  );
 
-  const [tempdata, setTempData] = useState([]);
-  const [lastDoc, setLastDoc] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [isInitialLoading, setInitialLoad] = useState(true);
-  const [isFetchingMore, setFetchingMore] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-
-  const observerRef = useRef(null);
-  const sentinelRef = useRef(null);
-  const lastKeyRef = useRef(null);
-  const fetchingMoreRef = useRef(false);
-  const mountedRef = useRef(false);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-      lastKeyRef.current = null;
-      fetchingMoreRef.current = false;
-    };
-  }, []);
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retryId, setRetryId] = useState(0);
+  const [selectedGraphicKey, setSelectedGraphicKey] = useState("");
+  const requestSequenceRef = useRef(0);
+  const lastKeyRef = useRef("");
 
   useEffect(() => {
-    const invalidateCurrentCompany = () => {
-      // Invalidate the request key synchronously. An older Firestore response
-      // must not restore the previous company's cards after the shared cache
-      // has already been cleared.
-      lastKeyRef.current = null;
-      fetchingMoreRef.current = false;
-      setTempData([]);
-      setLastDoc(null);
-      setHasMore(true);
-      setInitialLoad(true);
-      setFetchingMore(false);
-    };
-
-    return subscribeToCompanyTemplateInvalidation(invalidateCurrentCompany);
-  }, []);
-
-  useEffect(() => {
-    if (!contextSelType?.type) return;
+    if (!contextSelectedType?.type) return;
     try {
-      localStorage.setItem("selType", JSON.stringify(contextSelType));
-    } catch {}
-  }, [contextSelType]);
+      localStorage.setItem("selType", JSON.stringify(contextSelectedType));
+    } catch {
+      // The in-memory selection still keeps navigation functional.
+    }
+  }, [contextSelectedType]);
 
-  const loadFirstPage = useCallback(
-    async (type, cacheKey) => {
-      try {
-        const {
-          templates,
-          lastDoc: ld,
-          hasMore: more,
-        } = await Alltemplateservice(type, null, 12, companyName);
-        if (!mountedRef.current || lastKeyRef.current !== cacheKey) return;
-        setTempData(templates);
-        setLastDoc(ld);
-        setHasMore(more);
-        setAllTemplatesCache((prev) => ({
-          ...prev,
-          [cacheKey]: { templates, lastDoc: ld, hasMore: more },
-        }));
-      } catch (err) {
-        
-      } finally {
-        if (mountedRef.current && lastKeyRef.current === cacheKey) {
-          setInitialLoad(false);
-        }
-      }
-    },
-    [companyName, setAllTemplatesCache],
+  useEffect(() => {
+    if (location.pathname === "/alltemp") {
+      lastAllTemplatesSearchRef.current = location.search;
+    }
+  }, [location.pathname, location.search]);
+
+  useEffect(
+    () =>
+      subscribeToCompanyTemplateInvalidation(() => {
+        requestSequenceRef.current += 1;
+        lastKeyRef.current = "";
+        setTemplates([]);
+        setSelectedGraphicKey("");
+        setError("");
+        setLoading(true);
+      }),
+    [],
   );
 
   useEffect(() => {
-    const activeType = getSelType(contextSelType);
-    if (!activeType?.type) return;
-
-    const key = `${companyName}::${activeType.type}`;
-    if (lastKeyRef.current === key) return;
-    lastKeyRef.current = key;
-
-    const cached = allTemplatesCache[key];
-    if (cached) {
-      setTempData(cached.templates);
-      setLastDoc(cached.lastDoc);
-      setHasMore(cached.hasMore);
-      setInitialLoad(false);
+    if (!templateType) {
+      lastKeyRef.current = "";
+      setTemplates([]);
+      setLoading(false);
+      setError("");
       return;
     }
 
-    setTempData([]);
-    setLastDoc(null);
-    setHasMore(true);
-    setInitialLoad(true);
-    void loadFirstPage(activeType.type, key);
-  }, [
-    allTemplatesCache,
-    companyName,
-    contextSelType,
-    loadFirstPage,
-  ]);
-
-  const loadMorePage = useCallback(async () => {
-    const activeType = getSelType(contextSelType);
-    if (!activeType?.type || !lastDoc || fetchingMoreRef.current) return;
-    fetchingMoreRef.current = true;
-    setFetchingMore(true);
-    try {
-      const requestKey = `${companyName}::${activeType.type}`;
-      const {
-        templates,
-        lastDoc: ld,
-        hasMore: more,
-      } = await Alltemplateservice(activeType.type, lastDoc, 6, companyName);
-      if (!mountedRef.current || lastKeyRef.current !== requestKey) return;
-      const next = [...tempdata, ...templates];
-      const cacheKey = requestKey;
-      setTempData(next);
-      setAllTemplatesCache((cached) => ({
-        ...cached,
-        [cacheKey]: { templates: next, lastDoc: ld, hasMore: more },
-      }));
-      setLastDoc(ld);
-      setHasMore(more);
-    } catch (err) {
-      
-    } finally {
-      const activeType = getSelType(contextSelType);
-      const requestKey = activeType?.type
-        ? `${companyName}::${activeType.type}`
-        : "";
-      if (mountedRef.current && lastKeyRef.current === requestKey) {
-        fetchingMoreRef.current = false;
-        setFetchingMore(false);
-      }
+    setSelectedGraphicKey("");
+    const cacheKey = `graphics::${companyId}::${templateType}`;
+    lastKeyRef.current = cacheKey;
+    const cached = allTemplatesCache[cacheKey];
+    if (Array.isArray(cached?.templates)) {
+      setTemplates(cached.templates);
+      setLoading(false);
+      setError("");
+      return;
     }
-  }, [
-    companyName,
-    contextSelType,
-    lastDoc,
-    setAllTemplatesCache,
-    tempdata,
-  ]);
 
-  const handleObserver = useCallback(
-    (entries) => {
-      if (
-        entries[0].isIntersecting &&
-        hasMore &&
-        !isFetchingMore &&
-        !isInitialLoading
-      ) {
-        loadMorePage();
+    const requestId = ++requestSequenceRef.current;
+    let cancelled = false;
+    setTemplates([]);
+    setLoading(true);
+    setError("");
+
+    const loadTemplates = async () => {
+      try {
+        const nextTemplates = await AllTemplateGraphicsService(
+          templateType,
+          companyId,
+        );
+        if (
+          cancelled ||
+          requestSequenceRef.current !== requestId ||
+          lastKeyRef.current !== cacheKey
+        ) {
+          return;
+        }
+
+        setTemplates(nextTemplates);
+        setAllTemplatesCache((current) => ({
+          ...current,
+          [cacheKey]: { templates: nextTemplates },
+        }));
+      } catch {
+        if (!cancelled && requestSequenceRef.current === requestId) {
+          setError("Backgrounds could not be loaded. Please try again.");
+        }
+      } finally {
+        if (!cancelled && requestSequenceRef.current === requestId) {
+          setLoading(false);
+        }
       }
-    },
-    [hasMore, isFetchingMore, isInitialLoading, loadMorePage],
+    };
+
+    void loadTemplates();
+    return () => {
+      cancelled = true;
+    };
+  }, [companyId, retryId, templateType]);
+
+  const subtypeSections = useMemo(
+    () => groupTemplateGraphicsBySubtype(templates),
+    [templates],
+  );
+  const activeSubtypeSection = useMemo(
+    () =>
+      subtypeSections.find(
+        (section) => section.subtype === requestedSubtype,
+      ) || null,
+    [requestedSubtype, subtypeSections],
+  );
+  const totalBackgrounds = useMemo(
+    () =>
+      subtypeSections.reduce(
+        (total, section) => total + section.items.length,
+        0,
+      ),
+    [subtypeSections],
   );
 
-  useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-    observerRef.current = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: "100px",
-      threshold: 0.1,
-    });
-    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
-    return () => observerRef.current?.disconnect();
-  }, [handleObserver]);
+  const goBack = useCallback(() => {
+    navigate(getAllTemplatesBackTarget(allTemplatesSearch), { replace: true });
+  }, [allTemplatesSearch, navigate]);
 
-  const onImageSelect = (item) => {
-    setSelectedId(item.id);
-    if (hasMlmProfileInStorage()) {
-      const seltype = {
-        MainType: item.MainType,
-        id: item.id,
-        type: item.type,
-        serial: item.serial,
-        ShowCaseForm: item.ShowCaseForm,
-        Subtype: item.Subtype,
+  const selectGraphic = useCallback(
+    (graphic) => {
+      const template = graphic?._template;
+      if (!template) return;
+      lastAllTemplatesSearchRef.current = allTemplatesSearch;
+
+      const nextGraphicKey = getEditorGraphicSelectionKey(
+        graphic,
+        template.id,
+      );
+      setSelectedGraphicKey(nextGraphicKey);
+
+      if (!hasMlmProfileInStorage()) {
+        navigate("/mlmprofile");
+        return;
+      }
+
+      const nextSelectedType = {
+        MainType: template.MainType,
+        id: template.id,
+        type: template.type,
+        serial: template.serial,
+        ShowCaseForm: template.ShowCaseForm,
+        Subtype: template.Subtype,
+        selectedGraphicKey: nextGraphicKey,
+        templateFlowReturnTarget,
       };
-      setSelType(seltype);
-      localStorage.setItem("selType", JSON.stringify(seltype));
-      const isDirectEditor = isDirectEditorTemplate(item.type);
+
+      setSelType(nextSelectedType);
+      try {
+        localStorage.setItem("selType", JSON.stringify(nextSelectedType));
+      } catch {
+        // React context remains the fallback when storage is unavailable.
+      }
+      storeEditorTemplateSeed({
+        template,
+        selectedGraphic: graphic,
+        companyId,
+      });
+      if (graphic?.url) preloadImage(graphic.url);
+
+      const isDirectEditor = isDirectEditorTemplate(template.type);
       if (!isDirectEditor) localStorage.removeItem("mlmform");
+
       if (isDirectEditor) {
-        rememberEditorBackTarget("/", seltype);
+        rememberEditorBackTarget(templateFlowReturnTarget, nextSelectedType);
         navigate("/editor", {
           replace: true,
-          state: { editorBackTarget: "/" },
+          state: { editorBackTarget: templateFlowReturnTarget },
         });
       } else {
-        navigate("/mlmform", { replace: true });
+        rememberEditorBackTarget(templateFlowReturnTarget, nextSelectedType);
+        navigate("/mlmform", {
+          replace: true,
+          state: { templateFlowReturnTarget },
+        });
       }
-    } else {
-      navigate("/mlmprofile");
-    }
-  };
-  const displayName = selType?.type?.replaceAll("_", " ") || "Templates";
+    },
+    [
+      allTemplatesSearch,
+      companyId,
+      navigate,
+      setSelType,
+      templateFlowReturnTarget,
+    ],
+  );
+
+  const headerTitle = isSubtypeGrid
+    ? displayLabel(requestedSubtype)
+    : displayLabel(templateType);
+  const headerSubtitle = isSubtypeGrid
+    ? displayLabel(templateType)
+    : !loading && totalBackgrounds > 0
+      ? `${subtypeSections.length} subtypes · ${totalBackgrounds} backgrounds`
+      : "Choose a subtype and background";
 
   return (
-    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-accent/10 to-transparent pointer-events-none z-0" />
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-64 bg-gradient-to-b from-accent/10 to-transparent" />
 
-      {/* Header */}
-      <div className="flex items-center gap-4 px-4 md:px-8 py-4 md:py-6 sticky top-0 bg-background/80 backdrop-blur-xl border-b border-border z-20">
+      <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/85 px-4 py-4 backdrop-blur-xl md:px-8 md:py-6">
         <button
-          onClick={() => navigate("/", { replace: true })}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-black/20 border border-border shadow-sm shrink-0"
+          type="button"
+          onClick={goBack}
+          aria-label="Go back"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-white shadow-sm dark:bg-black/20"
         >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
+          <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
-        <div className="flex flex-col">
-          <h1 className="text-xl md:text-2xl font-display font-bold text-foreground leading-tight truncate">
-            {displayName}
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-display font-bold leading-tight text-foreground md:text-2xl">
+            {headerTitle}
           </h1>
-          {!isInitialLoading && tempdata.length > 0 && (
-            <p className="text-xs font-medium text-muted-foreground mt-0.5">
-              {tempdata.length}+ designs available
-            </p>
+          <p className="mt-0.5 truncate text-xs font-medium text-muted-foreground">
+            {headerSubtitle}
+          </p>
+        </div>
+      </header>
+
+      <main className="layout-scroll-container z-10 flex-1 overflow-y-auto px-4 py-6 md:px-8">
+        {loading && (isSubtypeGrid ? <LoadingGrid /> : <LoadingRows />)}
+
+        {!loading && error && (
+          <div className="flex flex-col items-center justify-center gap-4 py-28 text-center">
+            <p className="text-sm font-medium text-danger">{error}</p>
+            <button
+              type="button"
+              onClick={() => setRetryId((value) => value + 1)}
+              className="rounded-full bg-accent px-5 py-2 text-sm font-bold text-white shadow-sm"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          !isSubtypeGrid &&
+          subtypeSections.length === 0 && (
+            <EmptyState message="Check back later for new designs in this category." />
           )}
-        </div>
-      </div>
 
-      {/* Grid */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 z-10 layout-scroll-container">
-        {!isInitialLoading && tempdata.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="w-20 h-20 bg-white dark:bg-black/20 rounded-full flex items-center justify-center shadow-sm border border-border mb-4">
-              <Compass className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-display font-bold text-foreground mb-2">
-              No templates found
-            </h3>
-            <p className="text-muted-foreground">
-              Check back later for new designs in this category.
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-          {tempdata?.map((card) => {
-            const isSelected = selectedId === card.id;
-            return (
-              <div
-                key={card.id}
-                onClick={() => onImageSelect(card)}
-                className={`relative rounded-[24px] overflow-hidden cursor-pointer aspect-square bg-white dark:bg-black/20 card-press
-                  ${
-                    isSelected
-                      ? "ring-2 ring-accent ring-offset-2 dark:ring-offset-[#0b0f19] shadow-lg scale-[0.98]"
-                      : "border border-border shadow-sm"
-                  }`}
-              >
-                <TemplateImage
-                  src={card.image}
-                  alt={card.Subtype || "Template design"}
-                />
-                {!isSelected && isNewTemplate(card.serial) && <NewBadge />}
-                {isSelected && (
-                  <>
-                    <div className="absolute inset-0 border-4 border-accent rounded-[24px] pointer-events-none" />
-                    <div className="absolute top-3 right-3 w-8 h-8 bg-accent rounded-full flex items-center justify-center shadow-lg border-2 border-white dark:border-[#0b0f19]">
-                      <Check className="w-4 h-4 text-white" strokeWidth={3} />
+        {!loading &&
+          !error &&
+          !isSubtypeGrid &&
+          subtypeSections.length > 0 && (
+            <div className="space-y-8 pb-8">
+              {subtypeSections.map((section) => (
+                <section key={section.subtype}>
+                  <div className="mb-3 flex items-center justify-between gap-3 px-0.5">
+                    <div className="min-w-0">
+                      <h2 className="truncate text-base font-display font-bold text-foreground">
+                        {displayLabel(section.subtype)}
+                      </h2>
+                      <p className="text-[11px] font-medium text-muted-foreground">
+                        {section.items.length} backgrounds
+                      </p>
                     </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(buildAllTemplatesSubtypePath(section.subtype))
+                      }
+                      className="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent dark:text-white"
+                    >
+                      View All
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
 
-          {isInitialLoading &&
-            Array.from({ length: 12 }).map((_, i) => (
-              <SkeletonCard key={`init-skel-${i}`} />
-            ))}
-          {isFetchingMore &&
-            Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonCard key={`more-skel-${i}`} />
-            ))}
-        </div>
-
-        <div ref={sentinelRef} className="h-10 w-full" />
-
-        {!hasMore && !isInitialLoading && tempdata.length > 0 && (
-          <div className="flex items-center justify-center py-8">
-            <div className="bg-accent/5 dark:bg-accent/10 border border-accent/10 rounded-full px-6 py-2">
-              <p className="text-xs font-semibold text-accent/80 uppercase tracking-widest">
-                End of templates
-              </p>
+                  <div className="hide-scrollbar scroll-gpu flex snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
+                    {getSubtypeRowItems(section, GRAPHICS_ROW_LIMIT).map(
+                      (graphic) => {
+                        const key = getEditorGraphicSelectionKey(
+                          graphic,
+                          graphic?._template?.id,
+                        );
+                        return (
+                          <ShowcaseCard
+                            key={key}
+                            graphic={graphic}
+                            selected={selectedGraphicKey === key}
+                            onSelect={selectGraphic}
+                          />
+                        );
+                      },
+                    )}
+                  </div>
+                </section>
+              ))}
             </div>
+          )}
+
+        {!loading && !error && isSubtypeGrid && !activeSubtypeSection && (
+          <EmptyState
+            message="This subtype is no longer available. Go back and choose another subtype."
+          />
+        )}
+
+        {!loading && !error && isSubtypeGrid && activeSubtypeSection && (
+          <div className="grid grid-cols-2 justify-items-center gap-3 pb-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {activeSubtypeSection.items.map((graphic) => {
+              const key = getEditorGraphicSelectionKey(
+                graphic,
+                graphic?._template?.id,
+              );
+              return (
+                <ShowcaseCard
+                  key={key}
+                  graphic={graphic}
+                  selected={selectedGraphicKey === key}
+                  onSelect={selectGraphic}
+                />
+              );
+            })}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

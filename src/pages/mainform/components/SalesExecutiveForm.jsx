@@ -36,7 +36,10 @@ import {
   Modal,
   toast,
 } from "@heroui/react";
-import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
+import {
+  getTemplateFlowReturnTarget,
+  rememberEditorBackTarget,
+} from "../../../utils/editorNavigation";
 import { db, app } from "@firebase-config";
 import {
   arrayRemove,
@@ -676,9 +679,12 @@ export default function SalesExecutiveForm() {
     };
 
     localStorage.setItem("mlmform", JSON.stringify(formData));
-    rememberEditorBackTarget("/mlmform");
+    const editorBackTarget = getTemplateFlowReturnTarget({
+      fallback: "/mlmform",
+    });
+    rememberEditorBackTarget(editorBackTarget);
     navigate("/editor", {
-      state: { editorBackTarget: "/mlmform" },
+      state: { editorBackTarget },
     });
   };
 

@@ -9,7 +9,10 @@ import {
   limit,
   startAfter,
 } from "firebase/firestore";
-import { getGeneralTemplatesPage } from "./generalTemplateIndex";
+import {
+  getAllGeneralTemplates,
+  getGeneralTemplatesPage,
+} from "./generalTemplateIndex";
 
 const normalizeDoc = (doc) => {
   const data = doc.data();
@@ -22,7 +25,37 @@ const normalizeDoc = (doc) => {
     ShowCaseForm: data?.ShowCaseForm,
     serial: data?.serial,
     MainType: data.MainType,
+    GraphicsLink: data.GraphicsLink || [],
   };
+};
+
+export const AllTemplateGraphicsService = async (
+  selectedType,
+  companyName,
+) => {
+  try {
+    const generalTemplates = getAllGeneralTemplates(selectedType);
+    let mlmTemplates = [];
+
+    if (companyName) {
+      const mlmSnapshot = await getDocs(
+        query(
+          collection(db, COLLECTIONS.MLMTEMPLATE),
+          where("SelectType", "==", `${selectedType}`),
+          where("MainType", "==", "MLM"),
+          where("Company", "==", companyName),
+          where("Active", "==", true),
+          where("Launched", "==", true),
+          orderBy("serial"),
+        ),
+      );
+      mlmTemplates = mlmSnapshot.docs.map(normalizeDoc);
+    }
+
+    return [...mlmTemplates, ...generalTemplates];
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const Alltemplateservice = async (

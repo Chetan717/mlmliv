@@ -106,17 +106,17 @@ test("Home keeps special layouts and applies the new default tile dimensions", (
   assert.match(list, /const CIRCLE_TYPES/);
   assert.match(list, /w-\[100px\] card-press/);
   assert.match(list, /h-\[130px\] w-full rounded-md/);
-  assert.match(list, /w-\[60px\] h-\[60px\] rounded-full/);
+  assert.match(list, /w-\[80px\] h-\[80px\] rounded-full/);
 });
 
-test("Festival precedes trending and Home has sticky search plus pull refresh", () => {
+test("Carousel precedes Festival and Home has sticky search plus pull refresh", () => {
   const home = read("src/pages/Home.jsx");
   const renderStart = home.indexOf("const pullIndicatorHeight");
   const festivalIndex = home.indexOf("<Festival", renderStart);
   const carouselIndex = home.indexOf("<Carosel", renderStart);
 
-  assert.ok(festivalIndex > renderStart);
-  assert.ok(carouselIndex > festivalIndex);
+  assert.ok(carouselIndex > renderStart);
+  assert.ok(festivalIndex > carouselIndex);
   assert.match(home, /sticky top-0 z-40/);
   assert.match(home, /addEventListener\("touchmove", handleTouchMove/);
   assert.match(home, /consumeRefreshAttempt\(auth\.currentUser\?\.uid\)/);

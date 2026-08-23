@@ -1,9 +1,13 @@
-import { getEditorBackTarget } from "./editorNavigation.js";
+import {
+  getEditorBackTarget,
+  getTemplateFlowReturnTarget,
+} from "./editorNavigation.js";
 import { runProfileNavigationGuard } from "./profileNavigation.js";
 import {
   getBannerSettingsReturn,
   isBannerSettingsRoute,
 } from "./bannerSettingsNavigation.js";
+import { getAllTemplatesBackTarget } from "./allTemplatesNavigation.js";
 
 const HOME_BACK_ROUTES = new Set([
   "/alltemp",
@@ -39,6 +43,16 @@ export function getAppBackTarget(
   }
   if (isBannerSettingsRoute(pathname, search)) {
     return getBannerSettingsReturn(navigationState).to;
+  }
+  if (pathname === "/alltemp") {
+    return getAllTemplatesBackTarget(search);
+  }
+  if (pathname === "/mlmform") {
+    return getTemplateFlowReturnTarget({
+      selectedType,
+      navigationState,
+      fallback: "/",
+    });
   }
   if (HOME_BACK_ROUTES.has(pathname)) return "/";
   if (ROOT_ROUTES.has(pathname)) return null;

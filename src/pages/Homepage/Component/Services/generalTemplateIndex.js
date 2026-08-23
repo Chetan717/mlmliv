@@ -39,6 +39,10 @@ export function getGeneralTemplatesForHome(type, pageSize) {
   return (templatesByType.get(type) || []).slice(0, pageSize);
 }
 
+export function getAllGeneralTemplates(type) {
+  return templatesByType.get(type) || [];
+}
+
 export function getGeneralTemplatesPage(
   type,
   pageSize,

@@ -5,9 +5,12 @@ import { COLLECTIONS } from "../../../collections";
 import genaral_template_json from "../../Homepage/Component/Services/genaral_template_firestore_data.json";
 import { PAGE_REFRESH_EVENT } from "../../../utils/pageRefresh";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
+import {
+  EDITOR_TEMPLATE_SEED_KEY,
+  getEditorGraphicSelectionKey,
+} from "../../../utils/editorTemplateSelection";
 
 const BATCH_SIZE = 20;
-const EDITOR_TEMPLATE_SEED_KEY = "editorTemplateSeed";
 
 const PRESET_VIDEO_ITEMS = [];
 const _editorTemplateCache = new Map();
@@ -44,7 +47,7 @@ function preloadCanvasAsset(item) {
 function readEditorTemplateSeed({ type, subType, mainType, companyId }) {
   try {
     const raw = sessionStorage.getItem(EDITOR_TEMPLATE_SEED_KEY);
-    if (!raw) return [];
+    if (!raw) return { items: [], selectedGraphicKey: "" };
     const seed = JSON.parse(raw);
     const sameSelection =
       seed?.type === type &&
@@ -52,17 +55,22 @@ function readEditorTemplateSeed({ type, subType, mainType, companyId }) {
       String(seed?.mainType || "") === String(mainType || "") &&
       String(seed?.companyId || "") === String(companyId || "");
 
-    if (!sameSelection || !Array.isArray(seed?.items)) return [];
+    if (!sameSelection || !Array.isArray(seed?.items)) {
+      return { items: [], selectedGraphicKey: "" };
+    }
 
-    return seed.items.filter(Boolean).map((item) => ({
-      ...item,
-      _template: {
-        id: seed.templateId || "",
-        serial: seed.serial || 0,
-      },
-    }));
+    return {
+      selectedGraphicKey: seed.selectedGraphicKey || "",
+      items: seed.items.filter(Boolean).map((item) => ({
+        ...item,
+        _template: {
+          id: seed.templateId || "",
+          serial: seed.serial || 0,
+        },
+      })),
+    };
   } catch {
-    return [];
+    return { items: [], selectedGraphicKey: "" };
   }
 }
 
@@ -107,6 +115,37 @@ function cleanItem(item) {
   if (!item) return null;
   const { _template, ...clean } = item;
   return clean;
+}
+
+function findItemBySelectionKey(items, selectionKey) {
+  if (!selectionKey) return null;
+  return (
+    items.find(
+      (item) => getEditorGraphicSelectionKey(item) === selectionKey,
+    ) || null
+  );
+}
+
+function prepareItemsForSelection(items, selectionKey, fallbackItems = []) {
+  const nextItems = Array.isArray(items) ? [...items] : [];
+  if (!selectionKey) return nextItems;
+
+  let selectedIndex = nextItems.findIndex(
+    (item) => getEditorGraphicSelectionKey(item) === selectionKey,
+  );
+  if (selectedIndex === -1) {
+    const fallback = findItemBySelectionKey(fallbackItems, selectionKey);
+    if (fallback) {
+      nextItems.unshift(fallback);
+      selectedIndex = 0;
+    }
+  }
+
+  if (selectedIndex > 0) {
+    const [selectedItem] = nextItems.splice(selectedIndex, 1);
+    nextItems.unshift(selectedItem);
+  }
+  return nextItems;
 }
 
 function getGeneralItemsFromJson(type, subType) {
@@ -420,7 +459,7 @@ export default function ListOfTemplates({
   const [activeTab, setActiveTab] = useState("image");
   const [refreshRequestId, setRefreshRequestId] = useState(0);
 
-  const [pendingSelectedId, setPendingSelectedId] = useState(null);
+  const [pendingSelectedKey, setPendingSelectedKey] = useState(null);
   const [meetingHostMode, setMeetingHostMode] = useState(() => getMeetingHostMode());
   const [closeFilter, setCloseFilter] = useState(() => getCloseFilter());
 
@@ -429,6 +468,8 @@ export default function ListOfTemplates({
   const refreshSequenceRef = useRef(0);
   const pendingRefreshRef = useRef(null);
   const selectedRef = useRef(selected);
+  const selectedKeyRef = useRef("");
+  const selectionScopeRef = useRef("");
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -490,12 +531,22 @@ export default function ListOfTemplates({
 
       const isGeneralTemplate = mainTypeLower === "General";
 
-      const seededItems = readEditorTemplateSeed({
+      const editorSeed = readEditorTemplateSeed({
         type: filterType,
         subType: filterSubType,
         mainType: selType?.MainType,
         companyId: filterCompanyId,
       });
+      const seededItems = editorSeed.items;
+      const requestedSelectionKey =
+        editorSeed.selectedGraphicKey || selType?.selectedGraphicKey || "";
+      const selectionScope = `${filterType}__${filterSubType}__${selType?.MainType || ""}__${filterCompanyId}`;
+
+      if (selectionScopeRef.current !== selectionScope) {
+        selectionScopeRef.current = selectionScope;
+        selectedKeyRef.current = requestedSelectionKey;
+        setPendingSelectedKey(requestedSelectionKey || null);
+      }
 
       if (seededItems.length > 0) {
         setAllItems(seededItems);
@@ -503,25 +554,39 @@ export default function ListOfTemplates({
         setVisibleItems(seededItems.slice(0, BATCH_SIZE));
 
         const seededDefault =
+          findItemBySelectionKey(
+            seededItems,
+            selectedKeyRef.current || requestedSelectionKey,
+          ) ||
           seededItems.find((item) => !item.backgroundVideoUrl) ||
           seededItems[0];
         const nextSeeded = cleanItem(seededDefault);
+        const nextSeededKey = getEditorGraphicSelectionKey(seededDefault);
         selectedRef.current = nextSeeded;
+        selectedKeyRef.current = nextSeededKey;
         setSelected(nextSeeded);
-        setPendingSelectedId(nextSeeded?.id ?? null);
+        setPendingSelectedKey(nextSeededKey || null);
+        if (seededDefault?.backgroundVideoUrl) setActiveTab("video");
         setLoading(false);
       }
 
       const cacheKey = `${filterType}__${filterSubType}__${isGeneralTemplate ? "General" : "MLM"}__${filterCompanyId}__${meetingHostMode}__${closeFilter}`;
 
       if (_editorTemplateCache?.has(cacheKey)) {
-        const filteredItems = _editorTemplateCache.get(cacheKey);
+        const cachedItems = _editorTemplateCache.get(cacheKey);
+        const preferredSelectionKey =
+          selectedKeyRef.current || requestedSelectionKey;
+        const filteredItems = prepareItemsForSelection(
+          cachedItems,
+          preferredSelectionKey,
+          seededItems,
+        );
         setAllItems(filteredItems);
         renderedCount.current = 0;
 
-        const currentSelectedItem = filteredItems.find(
-          (i) => i.id === selectedRef.current?.id,
-        );
+        const currentSelectedItem =
+          findItemBySelectionKey(filteredItems, preferredSelectionKey) ||
+          filteredItems.find((i) => i.id === selectedRef.current?.id);
         const defaultItem =
           currentSelectedItem ||
           filteredItems.find((i) => !i.backgroundVideoUrl) ||
@@ -529,9 +594,12 @@ export default function ListOfTemplates({
           null;
 
         const nextSelected = defaultItem ? cleanItem(defaultItem) : null;
+        const nextSelectedKey = getEditorGraphicSelectionKey(defaultItem);
         selectedRef.current = nextSelected;
+        selectedKeyRef.current = nextSelectedKey;
         setSelected(nextSelected);
-        setPendingSelectedId(nextSelected?.id ?? null);
+        setPendingSelectedKey(nextSelectedKey || null);
+        if (defaultItem?.backgroundVideoUrl) setActiveTab("video");
 
         const firstBatch = filteredItems.slice(0, BATCH_SIZE);
         setVisibleItems(firstBatch);
@@ -614,29 +682,41 @@ export default function ListOfTemplates({
           }
         }
 
-        _editorTemplateCache.set(cacheKey, filteredItems);
+        const cachedFilteredItems = [...filteredItems];
+        _editorTemplateCache.set(cacheKey, cachedFilteredItems);
 
-        setAllItems(filteredItems);
+        const preferredSelectionKey =
+          selectedKeyRef.current || requestedSelectionKey;
+        const displayItems = prepareItemsForSelection(
+          cachedFilteredItems,
+          preferredSelectionKey,
+          [...seededItems, ...items],
+        );
+
+        setAllItems(displayItems);
         renderedCount.current = 0;
 
-        const currentSelectedItem = filteredItems.find(
-          (i) => i.id === selectedRef.current?.id,
-        );
+        const currentSelectedItem =
+          findItemBySelectionKey(displayItems, preferredSelectionKey) ||
+          displayItems.find((i) => i.id === selectedRef.current?.id);
         const defaultItem =
           currentSelectedItem ||
-          filteredItems.find((i) => !i.backgroundVideoUrl) ||
-          filteredItems[0] ||
+          displayItems.find((i) => !i.backgroundVideoUrl) ||
+          displayItems[0] ||
           null;
 
         const nextSelected = defaultItem
           ? cleanItem(defaultItem)
           : null;
+        const nextSelectedKey = getEditorGraphicSelectionKey(defaultItem);
 
         selectedRef.current = nextSelected;
+        selectedKeyRef.current = nextSelectedKey;
         setSelected(nextSelected);
-        setPendingSelectedId(nextSelected?.id ?? null);
+        setPendingSelectedKey(nextSelectedKey || null);
+        if (defaultItem?.backgroundVideoUrl) setActiveTab("video");
 
-        const firstBatch = filteredItems.slice(0, BATCH_SIZE);
+        const firstBatch = displayItems.slice(0, BATCH_SIZE);
         setVisibleItems(firstBatch);
         renderedCount.current = firstBatch.length;
       } catch (err) {
@@ -731,8 +811,11 @@ export default function ListOfTemplates({
       setActiveTab(tab);
       if (onTabChange) onTabChange(tab);
       const items = tab === "video" ? videoItems : imageItems;
-      const next = items.length > 0 ? cleanItem(items[0]) : null;
-      setPendingSelectedId(next?.id ?? null);
+      const nextItem = items[0] || null;
+      const next = nextItem ? cleanItem(nextItem) : null;
+      const nextSelectionKey = getEditorGraphicSelectionKey(nextItem);
+      selectedKeyRef.current = nextSelectionKey;
+      setPendingSelectedKey(nextSelectionKey || null);
       // Update the canvas immediately — startTransition was marking this
       // as low priority, so the selected template could sit behind other
       // pending work and take a visible beat to appear on the canvas.
@@ -744,7 +827,9 @@ export default function ListOfTemplates({
 
   const handleSelect = useCallback(
     (item) => {
-      setPendingSelectedId(item.id);
+      const nextSelectionKey = getEditorGraphicSelectionKey(item);
+      selectedKeyRef.current = nextSelectionKey;
+      setPendingSelectedKey(nextSelectionKey || null);
       const nextSelected = cleanItem(item);
       selectedRef.current = nextSelected;
       setSelected(nextSelected);
@@ -752,10 +837,13 @@ export default function ListOfTemplates({
     [setSelected],
   );
 
-  const selectedId = pendingSelectedId ?? selected?.id;
+  const selectedSelectionKey = pendingSelectedKey || selectedKeyRef.current;
   const isItemSelected = useCallback(
-    (item) => selectedId === item.id,
-    [selectedId],
+    (item) =>
+      selectedSelectionKey
+        ? selectedSelectionKey === getEditorGraphicSelectionKey(item)
+        : selected?.id === item.id,
+    [selected?.id, selectedSelectionKey],
   );
 
   return (

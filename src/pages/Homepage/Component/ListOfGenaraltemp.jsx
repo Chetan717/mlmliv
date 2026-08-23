@@ -626,7 +626,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
             className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 snap-start w-[110px] card-press"
           >
             <div
-              className={`relative h-[120px] w-full rounded-md overflow-hidden border bg-white dark:bg-black/20 ${
+              className={`relative h-[110px] w-full rounded-md overflow-hidden border bg-white dark:bg-black/20 ${
                 selectedTemp?.id === item?.id
                   ? "ring-offset-1 dark:ring-offset-[#0b0f19] shadow-md scale-95"
                   : "border-border shadow-sm"

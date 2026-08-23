@@ -15,7 +15,19 @@ const GENERAL_TEMPLATE_TYPES = new Set([
 ]);
 
 const EDITOR_BACK_TARGET_KEY = "mlmlive-editor-back-target";
-const VALID_BACK_TARGETS = new Set(["/", "/mlmform"]);
+const STATIC_BACK_TARGETS = new Set(["/", "/mlmform", "/alltemp"]);
+
+export function isValidEditorBackTarget(target) {
+  if (typeof target !== "string" || !target) return false;
+  if (STATIC_BACK_TARGETS.has(target)) return true;
+  if (!target.startsWith("/alltemp?") || target.includes("#")) return false;
+
+  try {
+    return Boolean(new URLSearchParams(target.slice(target.indexOf("?"))).get("subtype"));
+  } catch {
+    return false;
+  }
+}
 
 function readSelectedType() {
   try {
@@ -30,7 +42,7 @@ function readRememberedBackTarget(current) {
     const remembered = JSON.parse(
       sessionStorage.getItem(EDITOR_BACK_TARGET_KEY) || "{}",
     );
-    if (!VALID_BACK_TARGETS.has(remembered?.target)) return null;
+    if (!isValidEditorBackTarget(remembered?.target)) return null;
 
     // Ignore an origin left behind by a previously selected template.
     if (
@@ -55,7 +67,7 @@ function readRememberedBackTarget(current) {
 }
 
 export function rememberEditorBackTarget(target, selectedType) {
-  if (!VALID_BACK_TARGETS.has(target)) return;
+  if (!isValidEditorBackTarget(target)) return;
   const current = selectedType?.type ? selectedType : readSelectedType();
 
   try {
@@ -72,8 +84,25 @@ export function rememberEditorBackTarget(target, selectedType) {
   }
 }
 
+export function getTemplateFlowReturnTarget({
+  selectedType,
+  navigationState,
+  fallback = "/mlmform",
+} = {}) {
+  if (isValidEditorBackTarget(navigationState?.templateFlowReturnTarget)) {
+    return navigationState.templateFlowReturnTarget;
+  }
+
+  const current = selectedType?.type ? selectedType : readSelectedType();
+  if (isValidEditorBackTarget(current?.templateFlowReturnTarget)) {
+    return current.templateFlowReturnTarget;
+  }
+
+  return isValidEditorBackTarget(fallback) ? fallback : null;
+}
+
 export function getEditorBackTarget(selectedType, navigationState) {
-  if (VALID_BACK_TARGETS.has(navigationState?.editorBackTarget)) {
+  if (isValidEditorBackTarget(navigationState?.editorBackTarget)) {
     return navigationState.editorBackTarget;
   }
 
@@ -83,6 +112,12 @@ export function getEditorBackTarget(selectedType, navigationState) {
   const current = storedSelectedType?.type ? storedSelectedType : selectedType;
   const rememberedTarget = readRememberedBackTarget(current);
   if (rememberedTarget) return rememberedTarget;
+
+  const templateFlowReturnTarget = getTemplateFlowReturnTarget({
+    selectedType: current,
+    fallback: "",
+  });
+  if (templateFlowReturnTarget) return templateFlowReturnTarget;
 
   return GENERAL_TEMPLATE_TYPES.has(current?.type) ? "/" : "/mlmform";
 }

@@ -11,7 +11,10 @@ import {
   sanitizeFormValue,
   sanitizeName,
 } from "../utils/inputSanitize";
-import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
+import {
+  getTemplateFlowReturnTarget,
+  rememberEditorBackTarget,
+} from "../../../utils/editorNavigation";
 
 const toBase64 = (blob) =>
   new Promise((resolve) => {
@@ -293,9 +296,12 @@ export default function MeetingForm() {
     try {
       localStorage.setItem("Meeting", JSON.stringify(payload));
       setSavedMessage("Meeting saved successfully.");
-      rememberEditorBackTarget("/mlmform");
+      const editorBackTarget = getTemplateFlowReturnTarget({
+        fallback: "/mlmform",
+      });
+      rememberEditorBackTarget(editorBackTarget);
       navigate("/editor", {
-        state: { editorBackTarget: "/mlmform" },
+        state: { editorBackTarget },
       });
       setIsSaved(true);
     } catch (err) {
