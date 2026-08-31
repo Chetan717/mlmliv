@@ -15,6 +15,7 @@ import {
 } from "./Homepage/Component/Services/GeneralTemplateService";
 import { clearTrendingCache } from "./Homepage/Component/Services/TTrend_templateService";
 import { clearFestivalTemplateCache } from "./Homepage/Component/Services/Festival_template";
+import { clearAllTemplateGraphicsCache } from "./Homepage/Component/Services/Alltemplateservice";
 import { useGeneralData } from "../Context/GeneralContext";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
 import {
@@ -257,6 +258,7 @@ function Home() {
     clearTemplateCache();
     clearTrendingCache();
     clearFestivalTemplateCache();
+    clearAllTemplateGraphicsCache();
     setCachedTemplates([]);
     setCachedGroupIndex(0);
     setCachedFestivalData({});

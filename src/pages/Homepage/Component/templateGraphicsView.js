@@ -1,5 +1,3 @@
-export const GRAPHICS_ROW_LIMIT = 10;
-
 export function normalizeTemplateSubtype(value) {
   return String(value || "").trim() || "Other";
 }
@@ -28,9 +26,6 @@ export function groupTemplateGraphicsBySubtype(templates = []) {
   return Array.from(sections.values());
 }
 
-export function getSubtypeRowItems(section, limit = GRAPHICS_ROW_LIMIT) {
-  const safeLimit = Math.max(0, Number(limit) || 0);
-  return Array.isArray(section?.items)
-    ? section.items.slice(0, safeLimit)
-    : [];
+export function getSubtypeRowItems(section) {
+  return Array.isArray(section?.items) ? section.items : [];
 }

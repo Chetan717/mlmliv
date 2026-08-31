@@ -1,3 +1,5 @@
+export const EVERYDAY_MOMENTS_GROUP_KEY = "everyday-moments";
+
 export const EVERYDAY_MOMENT_ENTRIES = Object.freeze([
   { type: "Good_Morning", label: "Good Morning" },
   { type: "Sport", label: "Sport" },

@@ -55,6 +55,32 @@ test("subtype View All opens its full grid at the top", () => {
   );
 });
 
+test("Everyday Moments group and its subtype grid each open at the top", () => {
+  const groupSearch = "?group=everyday-moments";
+  const subtypeSearch =
+    "?group=everyday-moments&type=Good_Morning&subtype=Monday";
+
+  assert.equal(
+    getPersistentPageScrollTop({
+      previousPathname: "/",
+      pathname: "/alltemp",
+      search: groupSearch,
+      positions: { [`/alltemp${groupSearch}`]: 810 },
+    }),
+    0,
+  );
+  assert.equal(
+    getPersistentPageScrollTop({
+      previousPathname: "/alltemp",
+      previousSearch: groupSearch,
+      pathname: "/alltemp",
+      search: subtypeSearch,
+      positions: { [`/alltemp${subtypeSearch}`]: 920 },
+    }),
+    0,
+  );
+});
+
 test("back and Editor return restore the correct saved page position", () => {
   const subtypeSearch = "?subtype=Training";
   const positions = {

@@ -34,10 +34,11 @@ export function shouldResetPersistentPageScroll(
   if (!nextKey?.startsWith(ALL_TEMPLATES_PATH)) return false;
 
   const opensCategoryFromHome =
-    previousKey === HOME_PATH && nextKey === ALL_TEMPLATES_PATH;
+    previousKey === HOME_PATH && nextKey.startsWith(ALL_TEMPLATES_PATH);
   const opensSubtypeFromCategory =
-    previousKey === ALL_TEMPLATES_PATH &&
-    nextKey.startsWith(`${ALL_TEMPLATES_PATH}?`);
+    previousKey?.startsWith(ALL_TEMPLATES_PATH) &&
+    !String(previousSearch || "").includes("subtype=") &&
+    String(search || "").includes("subtype=");
 
   return opensCategoryFromHome || opensSubtypeFromCategory;
 }

@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
+  buildEverydayMomentsAllTemplatesPath,
   buildAllTemplatesReturnPath,
   buildAllTemplatesSubtypePath,
   getAllTemplatesBackTarget,
+  getAllTemplatesGroup,
   getAllTemplatesSubtype,
+  getAllTemplatesType,
+  isValidAllTemplatesReturnPath,
 } from "../src/utils/allTemplatesNavigation.js";
 import {
   buildEditorTemplateSeed,
@@ -13,10 +17,10 @@ import {
 } from "../src/utils/editorTemplateSelection.js";
 import { getAppBackTarget } from "../src/utils/appBackNavigation.js";
 import {
-  GRAPHICS_ROW_LIMIT,
   getSubtypeRowItems,
   groupTemplateGraphicsBySubtype,
 } from "../src/pages/Homepage/Component/templateGraphicsView.js";
+import { EVERYDAY_MOMENTS_GROUP_KEY } from "../src/utils/everydayMoments.js";
 
 const graphic = (id) => ({
   id,
@@ -24,7 +28,7 @@ const graphic = (id) => ({
   suggestionImage: `https://cdn.example/showcase-${id}.jpg`,
 });
 
-test("category data is grouped by subtype and each horizontal row is capped at 10", () => {
+test("category data is grouped by subtype and horizontal rows expose every background", () => {
   const sections = groupTemplateGraphicsBySubtype([
     {
       id: "parent-a",
@@ -50,8 +54,7 @@ test("category data is grouped by subtype and each horizontal row is capped at 1
       ["SILVER", 1],
     ],
   );
-  assert.equal(GRAPHICS_ROW_LIMIT, 10);
-  assert.equal(getSubtypeRowItems(sections[0]).length, 10);
+  assert.equal(getSubtypeRowItems(sections[0]).length, 13);
   assert.equal(sections[0].items[12]._template.id, "parent-c");
 });
 
@@ -101,6 +104,31 @@ test("subtype grid URL round-trips and its back target is the category page", ()
   assert.equal(getAppBackTarget("/alltemp", null, null, ""), "/");
 });
 
+test("Everyday Moments group and subtype URLs preserve the complete return flow", () => {
+  const groupPath = buildEverydayMomentsAllTemplatesPath();
+  const groupSearch = groupPath.slice(groupPath.indexOf("?"));
+  const subtypePath = buildAllTemplatesSubtypePath("Monday Morning", {
+    group: EVERYDAY_MOMENTS_GROUP_KEY,
+    type: "Good_Morning",
+  });
+  const subtypeSearch = subtypePath.slice(subtypePath.indexOf("?"));
+
+  assert.equal(getAllTemplatesGroup(groupSearch), EVERYDAY_MOMENTS_GROUP_KEY);
+  assert.equal(getAllTemplatesBackTarget(groupSearch), "/");
+  assert.equal(buildAllTemplatesReturnPath(groupSearch), groupPath);
+  assert.equal(isValidAllTemplatesReturnPath(groupPath), true);
+
+  assert.equal(getAllTemplatesType(subtypeSearch), "Good_Morning");
+  assert.equal(getAllTemplatesSubtype(subtypeSearch), "Monday Morning");
+  assert.equal(getAllTemplatesBackTarget(subtypeSearch), groupPath);
+  assert.equal(buildAllTemplatesReturnPath(subtypeSearch), subtypePath);
+  assert.equal(isValidAllTemplatesReturnPath(subtypePath), true);
+  assert.equal(
+    getAppBackTarget("/alltemp", null, null, subtypeSearch),
+    groupPath,
+  );
+});
+
 test("View All renders GraphicsLink showcases instead of parent Showcase_url cards", async () => {
   const [source, editorListSource] = await Promise.all([
     readFile(
@@ -117,11 +145,62 @@ test("View All renders GraphicsLink showcases instead of parent Showcase_url car
   ]);
 
   assert.match(source, /groupTemplateGraphicsBySubtype/);
-  assert.match(source, /getSubtypeRowItems\(section, GRAPHICS_ROW_LIMIT\)/);
+  assert.match(source, /getSubtypeRowItems\(section\)/);
+  assert.doesNotMatch(source, /GRAPHICS_ROW_LIMIT/);
   assert.match(source, /h-\[110px\] w-\[110px\]/);
+  assert.match(source, /grid grid-cols-3/);
+  assert.match(source, /layout="grid"/);
+  assert.doesNotMatch(source, /grid grid-cols-2 justify-items-center/);
   assert.doesNotMatch(source, /aspect-\[4\/5\]/);
   assert.match(source, /storeEditorTemplateSeed/);
   assert.doesNotMatch(source, /Showcase_url/);
+  assert.match(source, /EVERYDAY_MOMENT_ENTRIES/);
+  assert.match(source, /IntersectionObserver/);
   assert.match(editorListSource, /findEditorItemBySelectionKey/);
   assert.match(editorListSource, /selectedSelectionKey === getEditorGraphicSelectionKey/);
+});
+
+test("Graphics reads are shared across Home, group, subtype, and Editor navigation", async () => {
+  const [
+    serviceSource,
+    homeServiceSource,
+    homeSource,
+    contextSource,
+    editorListSource,
+  ] = await Promise.all([
+    readFile(
+      new URL(
+        "../src/pages/Homepage/Component/Services/Alltemplateservice.jsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../src/pages/Homepage/Component/Services/GeneralTemplateService.jsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(new URL("../src/pages/Home.jsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/Context/GeneralContext.jsx", import.meta.url), "utf8"),
+    readFile(
+      new URL(
+        "../src/pages/Editor/components/ListOfTemplates.jsx",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  ]);
+
+  assert.match(serviceSource, /ALL_TEMPLATE_GRAPHICS_CACHE_TTL_MS/);
+  assert.match(serviceSource, /_graphicsRequests/);
+  assert.match(serviceSource, /if \(pending\) return pending/);
+  assert.match(serviceSource, /primeAllTemplateGraphicsCache/);
+  assert.match(homeServiceSource, /mlmTemplates\.length < HOME_LIMIT/);
+  assert.match(homeServiceSource, /getAllGeneralTemplates\(type\)/);
+  assert.match(homeServiceSource, /primeAllTemplateGraphicsCache\(/);
+  assert.match(homeSource, /clearAllTemplateGraphicsCache\(\)/);
+  assert.match(contextSource, /clearAllTemplateGraphicsCache\(\)/);
+  assert.match(editorListSource, /clearAllTemplateGraphicsCache\(\)/);
 });

@@ -5,7 +5,10 @@ import { COLLECTIONS } from "../../../collections";
 import genaral_template_json from "../../Homepage/Component/Services/genaral_template_firestore_data.json";
 import { PAGE_REFRESH_EVENT } from "../../../utils/pageRefresh";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
-import { AllTemplateGraphicsService } from "../../Homepage/Component/Services/Alltemplateservice";
+import {
+  AllTemplateGraphicsService,
+  clearAllTemplateGraphicsCache,
+} from "../../Homepage/Component/Services/Alltemplateservice";
 import {
   EDITOR_TEMPLATE_SEED_KEY,
   getEditorGraphicSelectionKey,
@@ -455,6 +458,7 @@ export default function ListOfTemplates({
       event.detail.handled = true;
 
       _editorTemplateCache.clear();
+      clearAllTemplateGraphicsCache();
       refreshSequenceRef.current += 1;
       const id = refreshSequenceRef.current;
       pendingRefreshRef.current = {

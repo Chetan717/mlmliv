@@ -11,6 +11,7 @@ import {
 import { hasMlmProfileInStorage } from "../../../utils/companyStorage";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
 import { rememberEditorBackTarget } from "../../../utils/editorNavigation";
+import { buildEverydayMomentsAllTemplatesPath } from "../../../utils/allTemplatesNavigation";
 import {
   buildHomeTemplateSections,
   getTemplateTypeDisplayName,
@@ -330,6 +331,10 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     [navigate, setSelType],
   );
 
+  const handleEverydayMomentsViewAll = useCallback(() => {
+    navigate(buildEverydayMomentsAllTemplatesPath());
+  }, [navigate]);
+
   const handleReset = useCallback(() => {
     const mlmProfile = JSON.parse(sessionStorage.getItem("mlmProfile"));
     const formDAta = {
@@ -513,6 +518,17 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
   const renderViewAllButton = (group) => (
     <button
       onClick={() => handleViewAll(group)}
+      className="flex items-center gap-1 text-xs font-bold text-accent dark:text-white bg-accent/10 dark:bg-white/10 px-3 py-1.5 rounded-full"
+    >
+      View All
+      <ArrowUpRight className="w-3 h-3" />
+    </button>
+  );
+
+  const renderEverydayMomentsViewAllButton = () => (
+    <button
+      type="button"
+      onClick={handleEverydayMomentsViewAll}
       className="flex items-center gap-1 text-xs font-bold text-accent dark:text-white bg-accent/10 dark:bg-white/10 px-3 py-1.5 rounded-full"
     >
       View All
@@ -750,7 +766,9 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
                     : section.title}
                 </h2>
               </div>
-              {canViewHeaderGroup && renderViewAllButton(headerGroup)}
+              {isEverydayMoments
+                ? renderEverydayMomentsViewAllButton()
+                : canViewHeaderGroup && renderViewAllButton(headerGroup)}
             </div>
 
             {isEverydayMoments

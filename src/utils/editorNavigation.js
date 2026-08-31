@@ -1,3 +1,5 @@
+import { isValidAllTemplatesReturnPath } from "./allTemplatesNavigation.js";
+
 const GENERAL_TEMPLATE_TYPES = new Set([
   "Trending",
   "Festival",
@@ -20,13 +22,7 @@ const STATIC_BACK_TARGETS = new Set(["/", "/mlmform", "/alltemp"]);
 export function isValidEditorBackTarget(target) {
   if (typeof target !== "string" || !target) return false;
   if (STATIC_BACK_TARGETS.has(target)) return true;
-  if (!target.startsWith("/alltemp?") || target.includes("#")) return false;
-
-  try {
-    return Boolean(new URLSearchParams(target.slice(target.indexOf("?"))).get("subtype"));
-  } catch {
-    return false;
-  }
+  return isValidAllTemplatesReturnPath(target);
 }
 
 function readSelectedType() {

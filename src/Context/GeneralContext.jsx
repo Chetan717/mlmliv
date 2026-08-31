@@ -9,6 +9,7 @@ import {
 import { clearTemplateCache } from "../pages/Homepage/Component/Services/GeneralTemplateService";
 import { clearTrendingCache } from "../pages/Homepage/Component/Services/TTrend_templateService";
 import { clearFestivalTemplateCache } from "../pages/Homepage/Component/Services/Festival_template";
+import { clearAllTemplateGraphicsCache } from "../pages/Homepage/Component/Services/Alltemplateservice";
 import { subscribeToCompanyTemplateInvalidation } from "../utils/companyTemplateState";
 const DataContextGen = createContext();
 
@@ -47,6 +48,7 @@ function GeneralContext({ children }) {
     clearTemplateCache();
     clearTrendingCache();
     clearFestivalTemplateCache();
+    clearAllTemplateGraphicsCache();
     setSelType({});
     setCachedTemplates([]);
     setCachedGroupIndex(0);

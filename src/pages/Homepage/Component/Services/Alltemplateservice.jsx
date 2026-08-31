@@ -14,6 +14,35 @@ import {
   getGeneralTemplatesPage,
 } from "./generalTemplateIndex";
 
+export const ALL_TEMPLATE_GRAPHICS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const _graphicsCache = new Map();
+const _graphicsRequests = new Map();
+let _graphicsCacheGeneration = 0;
+
+function getGraphicsCacheKey(selectedType, companyName) {
+  return `${String(companyName || "").trim()}::${String(selectedType || "").trim()}`;
+}
+
+export function clearAllTemplateGraphicsCache() {
+  _graphicsCacheGeneration += 1;
+  _graphicsCache.clear();
+  _graphicsRequests.clear();
+}
+
+export function primeAllTemplateGraphicsCache(
+  selectedType,
+  companyName,
+  templates,
+) {
+  if (!Array.isArray(templates)) return;
+
+  _graphicsCache.set(getGraphicsCacheKey(selectedType, companyName), {
+    timestamp: Date.now(),
+    templates,
+  });
+}
+
 const normalizeDoc = (doc) => {
   const data = doc.data();
   return {
@@ -33,7 +62,20 @@ export const AllTemplateGraphicsService = async (
   selectedType,
   companyName,
 ) => {
-  try {
+  const cacheKey = getGraphicsCacheKey(selectedType, companyName);
+  const cached = _graphicsCache.get(cacheKey);
+  if (
+    cached &&
+    Date.now() - cached.timestamp < ALL_TEMPLATE_GRAPHICS_CACHE_TTL_MS
+  ) {
+    return cached.templates;
+  }
+
+  const pending = _graphicsRequests.get(cacheKey);
+  if (pending) return pending;
+
+  const requestGeneration = _graphicsCacheGeneration;
+  const request = (async () => {
     const generalTemplates = getAllGeneralTemplates(selectedType);
     let mlmTemplates = [];
 
@@ -52,9 +94,23 @@ export const AllTemplateGraphicsService = async (
       mlmTemplates = mlmSnapshot.docs.map(normalizeDoc);
     }
 
-    return [...mlmTemplates, ...generalTemplates];
-  } catch (error) {
-    throw error;
+    const templates = [...mlmTemplates, ...generalTemplates];
+    if (requestGeneration === _graphicsCacheGeneration) {
+      _graphicsCache.set(cacheKey, {
+        timestamp: Date.now(),
+        templates,
+      });
+    }
+    return templates;
+  })();
+
+  _graphicsRequests.set(cacheKey, request);
+  try {
+    return await request;
+  } finally {
+    if (_graphicsRequests.get(cacheKey) === request) {
+      _graphicsRequests.delete(cacheKey);
+    }
   }
 };
 

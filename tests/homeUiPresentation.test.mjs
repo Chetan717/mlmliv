@@ -126,6 +126,18 @@ test("Everyday Moments uses one nameless showcase tile per type in a 3-column gr
   assert.doesNotMatch(gridSource, /renderViewAllButton/);
 });
 
+test("only the Everyday Moments heading opens the complete grouped View All flow", () => {
+  const list = read("src/pages/Homepage/Component/ListOfGenaraltemp.jsx");
+
+  assert.match(list, /buildEverydayMomentsAllTemplatesPath/);
+  assert.match(list, /const handleEverydayMomentsViewAll/);
+  assert.match(list, /const renderEverydayMomentsViewAllButton/);
+  assert.match(
+    list,
+    /isEverydayMoments\s*\? renderEverydayMomentsViewAllButton\(\)/,
+  );
+});
+
 test("Carousel precedes Festival and Home has sticky search plus pull refresh", () => {
   const home = read("src/pages/Home.jsx");
   const renderStart = home.indexOf("const pullIndicatorHeight");

@@ -8,7 +8,11 @@ import {
   limit,
 } from "firebase/firestore";
 import { COLLECTIONS } from "../../../../collections";
-import { getGeneralTemplatesForHome } from "./generalTemplateIndex";
+import {
+  getAllGeneralTemplates,
+  getGeneralTemplatesForHome,
+} from "./generalTemplateIndex";
+import { primeAllTemplateGraphicsCache } from "./Alltemplateservice";
 import { RANK_PROMOTION_TYPES } from "../../../../utils/templateTypeConfig";
 
 const TYPE_GROUPS = [
@@ -108,16 +112,38 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
 
         const mlmTemplates = mlmSnapshot.docs.map(normalizeDoc);
 
-        return { type, templates: [...mlmTemplates, ...generalTemplates] };
+        return {
+          type,
+          templates: [...mlmTemplates, ...generalTemplates],
+          // A short Firestore result proves that Home already received every
+          // matching company template. Reuse it with the complete local JSON
+          // set on View All. Exactly HOME_LIMIT remains intentionally
+          // unprimed because more remote documents may exist.
+          completeTemplates:
+            mlmTemplates.length < HOME_LIMIT
+              ? [...mlmTemplates, ...getAllGeneralTemplates(type)]
+              : null,
+        };
       }),
     );
+
+    const data = results.map(({ type, templates }) => ({ type, templates }));
 
     // A company switch may have cleared the cache while Firestore was still
     // responding. Never let that obsolete request repopulate the cache.
     if (requestGeneration === _cacheGeneration) {
-      _cache.set(cacheKey, { ts: Date.now(), data: results });
+      for (const result of results) {
+        if (result.completeTemplates) {
+          primeAllTemplateGraphicsCache(
+            result.type,
+            company,
+            result.completeTemplates,
+          );
+        }
+      }
+      _cache.set(cacheKey, { ts: Date.now(), data });
     }
-    return results;
+    return data;
   } catch (error) {
     
     return [];

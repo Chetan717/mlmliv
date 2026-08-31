@@ -12,16 +12,25 @@ import {
   buildAllTemplatesReturnPath,
   buildAllTemplatesSubtypePath,
   getAllTemplatesBackTarget,
+  getAllTemplatesGroup,
   getAllTemplatesSubtype,
+  getAllTemplatesType,
 } from "../../../utils/allTemplatesNavigation";
+import {
+  EVERYDAY_MOMENT_ENTRIES,
+  EVERYDAY_MOMENTS_GROUP_KEY,
+  isEverydayMomentType,
+} from "../../../utils/everydayMoments";
 import {
   getEditorGraphicSelectionKey,
   storeEditorTemplateSeed,
 } from "../../../utils/editorTemplateSelection";
 import { subscribeToCompanyTemplateInvalidation } from "../../../utils/companyTemplateState";
-import { AllTemplateGraphicsService } from "./Services/Alltemplateservice";
 import {
-  GRAPHICS_ROW_LIMIT,
+  ALL_TEMPLATE_GRAPHICS_CACHE_TTL_MS,
+  AllTemplateGraphicsService,
+} from "./Services/Alltemplateservice";
+import {
   getSubtypeRowItems,
   groupTemplateGraphicsBySubtype,
 } from "./templateGraphicsView";
@@ -49,39 +58,72 @@ function displayLabel(value, fallback = "Templates") {
 }
 
 function ShowcaseImage({ src, alt }) {
+  const wrapperRef = useRef(null);
   const [loaded, setLoaded] = useState(() =>
     Boolean(src && seenImages.has(src)),
   );
+  const [shouldLoad, setShouldLoad] = useState(() =>
+    Boolean(src && seenImages.has(src)),
+  );
+
+  useEffect(() => {
+    const alreadySeen = Boolean(src && seenImages.has(src));
+    setLoaded(alreadySeen);
+    setShouldLoad(alreadySeen);
+    if (!src || alreadySeen) return;
+
+    const element = wrapperRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: "260px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [src]);
 
   if (!src) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-muted/40 text-muted-foreground">
+      <div
+        ref={wrapperRef}
+        className="absolute inset-0 flex items-center justify-center bg-muted/40 text-muted-foreground"
+      >
         <Compass className="h-6 w-6" />
       </div>
     );
   }
 
   return (
-    <div className="absolute inset-0 bg-muted/40">
+    <div ref={wrapperRef} className="absolute inset-0 bg-muted/40">
       {!loaded && <div className="absolute inset-0 shimmer-bar" />}
-      <img
-        src={src}
-        alt={alt}
-        className={`h-full w-full object-cover transition-opacity duration-150 ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
-        loading="lazy"
-        decoding="async"
-        onLoad={() => {
-          markImageSeen(src);
-          setLoaded(true);
-        }}
-      />
+      {shouldLoad && (
+        <img
+          src={src}
+          alt={alt}
+          className={`h-full w-full object-cover transition-opacity duration-150 ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => {
+            markImageSeen(src);
+            setLoaded(true);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function ShowcaseCard({ graphic, selected, onSelect }) {
+function ShowcaseCard({ graphic, selected, onSelect, layout = "row" }) {
   const template = graphic?._template;
   const preview =
     graphic?.suggestionImage ||
@@ -96,7 +138,11 @@ function ShowcaseCard({ graphic, selected, onSelect }) {
       onPointerDown={() => graphic?.url && preloadImage(graphic.url)}
       onClick={() => onSelect(graphic)}
       aria-label={`Select ${displayLabel(template?.Subtype, "template")} background`}
-      className={`relative h-[110px] w-[110px] shrink-0 snap-start overflow-hidden rounded-md border bg-white text-left shadow-sm transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent card-press dark:bg-black/20 ${
+      className={`relative overflow-hidden rounded-md border bg-white text-left shadow-sm transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent card-press dark:bg-black/20 ${
+        layout === "grid"
+          ? "aspect-square w-full max-w-[110px]"
+          : "h-[110px] w-[110px] shrink-0 snap-start"
+      } ${
         selected
           ? "border-accent ring-2 ring-accent ring-offset-1 dark:ring-offset-[#0b0f19]"
           : "border-border"
@@ -114,6 +160,93 @@ function ShowcaseCard({ graphic, selected, onSelect }) {
         </span>
       )}
     </button>
+  );
+}
+
+function SubtypeRow({
+  section,
+  parentType,
+  selectedGraphicKey,
+  onSelect,
+  onOpenGrid,
+}) {
+  const rowRef = useRef(null);
+  const [renderItems, setRenderItems] = useState(false);
+
+  useEffect(() => {
+    if (renderItems) return;
+
+    const element = rowRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") {
+      setRenderItems(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setRenderItems(true);
+        observer.disconnect();
+      },
+      { rootMargin: "500px 0px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [renderItems]);
+
+  return (
+    <section
+      ref={rowRef}
+      style={{
+        contentVisibility: "auto",
+        containIntrinsicSize: "160px",
+      }}
+    >
+      <div className="mb-3 flex items-center justify-between gap-3 px-0.5">
+        <div className="min-w-0">
+          <h3 className="truncate text-base font-display font-bold text-foreground">
+            {displayLabel(section.subtype)}
+          </h3>
+          <p className="text-[11px] font-medium text-muted-foreground">
+            {section.items.length} backgrounds
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onOpenGrid(section.subtype, parentType)}
+          className="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent dark:text-white"
+        >
+          View All
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {renderItems ? (
+        <div className="hide-scrollbar scroll-gpu flex snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
+          {getSubtypeRowItems(section).map((graphic) => {
+            const key = getEditorGraphicSelectionKey(
+              graphic,
+              graphic?._template?.id,
+            );
+            return (
+              <ShowcaseCard
+                key={key}
+                graphic={graphic}
+                selected={selectedGraphicKey === key}
+                onSelect={onSelect}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div
+          className="relative h-[112px] overflow-hidden rounded-md bg-muted/30"
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 shimmer-bar" />
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -143,11 +276,11 @@ function LoadingRows() {
 
 function LoadingGrid() {
   return (
-    <div className="grid grid-cols-2 justify-items-center gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    <div className="grid grid-cols-3 justify-items-center gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
       {Array.from({ length: 12 }).map((_, index) => (
         <div
           key={index}
-          className="relative h-[110px] w-[110px] overflow-hidden rounded-md border border-border bg-muted/40"
+          className="relative aspect-square w-full max-w-[110px] overflow-hidden rounded-md border border-border bg-muted/40"
         >
           <div className="absolute inset-0 shimmer-bar" />
         </div>
@@ -185,19 +318,44 @@ export default function AllTemplates() {
   } = useGeneralData();
 
   const selectedType = readSelectedType(contextSelectedType);
-  const templateType = selectedType?.type || "";
   const companyId = selectedCompany?.id || "";
   const allTemplatesSearch =
     location.pathname === "/alltemp"
       ? location.search
       : lastAllTemplatesSearchRef.current;
+  const requestedGroup = getAllTemplatesGroup(allTemplatesSearch);
+  const isEverydayGroup =
+    requestedGroup === EVERYDAY_MOMENTS_GROUP_KEY;
+  const requestedType = getAllTemplatesType(allTemplatesSearch);
+  const templateType = isEverydayGroup
+    ? isEverydayMomentType(requestedType)
+      ? requestedType
+      : ""
+    : selectedType?.type || "";
   const requestedSubtype = getAllTemplatesSubtype(allTemplatesSearch);
   const isSubtypeGrid = Boolean(requestedSubtype);
   const templateFlowReturnTarget = buildAllTemplatesReturnPath(
     allTemplatesSearch,
   );
+  const typeEntries = useMemo(() => {
+    if (isEverydayGroup) {
+      if (isSubtypeGrid) {
+        return isEverydayMomentType(templateType)
+          ? EVERYDAY_MOMENT_ENTRIES.filter(
+              (entry) => entry.type === templateType,
+            )
+          : [];
+      }
+      return EVERYDAY_MOMENT_ENTRIES;
+    }
 
-  const [templates, setTemplates] = useState([]);
+    return templateType
+      ? [{ type: templateType, label: displayLabel(templateType) }]
+      : [];
+  }, [isEverydayGroup, isSubtypeGrid, templateType]);
+  const typeRequestKey = typeEntries.map((entry) => entry.type).join("|");
+
+  const [templatesByType, setTemplatesByType] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryId, setRetryId] = useState(0);
@@ -225,7 +383,7 @@ export default function AllTemplates() {
       subscribeToCompanyTemplateInvalidation(() => {
         requestSequenceRef.current += 1;
         lastKeyRef.current = "";
-        setTemplates([]);
+        setTemplatesByType({});
         setSelectedGraphicKey("");
         setError("");
         setLoading(true);
@@ -234,20 +392,38 @@ export default function AllTemplates() {
   );
 
   useEffect(() => {
-    if (!templateType) {
+    if (!typeRequestKey) {
       lastKeyRef.current = "";
-      setTemplates([]);
+      setTemplatesByType({});
       setLoading(false);
       setError("");
       return;
     }
 
     setSelectedGraphicKey("");
-    const cacheKey = `graphics::${companyId}::${templateType}`;
+    const cacheKey = `graphics-set::${companyId}::${typeRequestKey}`;
     lastKeyRef.current = cacheKey;
-    const cached = allTemplatesCache[cacheKey];
-    if (Array.isArray(cached?.templates)) {
-      setTemplates(cached.templates);
+    const cachedTemplatesByType = {};
+    const missingTypes = [];
+    const now = Date.now();
+
+    for (const entry of typeEntries) {
+      const typeCacheKey = `graphics::${companyId}::${entry.type}`;
+      const cached = allTemplatesCache[typeCacheKey];
+      const cacheIsFresh =
+        Array.isArray(cached?.templates) &&
+        (!cached?.timestamp ||
+          now - cached.timestamp < ALL_TEMPLATE_GRAPHICS_CACHE_TTL_MS);
+
+      if (cacheIsFresh) {
+        cachedTemplatesByType[entry.type] = cached.templates;
+      } else {
+        missingTypes.push(entry.type);
+      }
+    }
+
+    setTemplatesByType(cachedTemplatesByType);
+    if (missingTypes.length === 0) {
       setLoading(false);
       setError("");
       return;
@@ -255,15 +431,16 @@ export default function AllTemplates() {
 
     const requestId = ++requestSequenceRef.current;
     let cancelled = false;
-    setTemplates([]);
     setLoading(true);
     setError("");
 
     const loadTemplates = async () => {
       try {
-        const nextTemplates = await AllTemplateGraphicsService(
-          templateType,
-          companyId,
+        const loadedEntries = await Promise.all(
+          missingTypes.map(async (type) => [
+            type,
+            await AllTemplateGraphicsService(type, companyId),
+          ]),
         );
         if (
           cancelled ||
@@ -273,10 +450,20 @@ export default function AllTemplates() {
           return;
         }
 
-        setTemplates(nextTemplates);
+        const loadedTemplatesByType = Object.fromEntries(loadedEntries);
+        setTemplatesByType({
+          ...cachedTemplatesByType,
+          ...loadedTemplatesByType,
+        });
+        const timestamp = Date.now();
         setAllTemplatesCache((current) => ({
           ...current,
-          [cacheKey]: { templates: nextTemplates },
+          ...Object.fromEntries(
+            loadedEntries.map(([type, templates]) => [
+              `graphics::${companyId}::${type}`,
+              { templates, timestamp },
+            ]),
+          ),
         }));
       } catch {
         if (!cancelled && requestSequenceRef.current === requestId) {
@@ -293,26 +480,53 @@ export default function AllTemplates() {
     return () => {
       cancelled = true;
     };
-  }, [companyId, retryId, templateType]);
+  }, [companyId, retryId, typeRequestKey]);
 
-  const subtypeSections = useMemo(
-    () => groupTemplateGraphicsBySubtype(templates),
-    [templates],
+  const typeSections = useMemo(
+    () =>
+      typeEntries.map((entry) => {
+        const templates = templatesByType[entry.type] || [];
+        const subtypeSections = groupTemplateGraphicsBySubtype(templates);
+        const totalBackgrounds = subtypeSections.reduce(
+          (total, section) => total + section.items.length,
+          0,
+        );
+        return {
+          ...entry,
+          templates,
+          subtypeSections,
+          totalBackgrounds,
+        };
+      }),
+    [templatesByType, typeEntries],
+  );
+  const activeTypeSection = useMemo(
+    () =>
+      typeSections.find((section) => section.type === templateType) || null,
+    [templateType, typeSections],
   );
   const activeSubtypeSection = useMemo(
     () =>
-      subtypeSections.find(
+      activeTypeSection?.subtypeSections.find(
         (section) => section.subtype === requestedSubtype,
       ) || null,
-    [requestedSubtype, subtypeSections],
+    [activeTypeSection, requestedSubtype],
   );
   const totalBackgrounds = useMemo(
     () =>
-      subtypeSections.reduce(
-        (total, section) => total + section.items.length,
+      typeSections.reduce(
+        (total, section) => total + section.totalBackgrounds,
         0,
       ),
-    [subtypeSections],
+    [typeSections],
+  );
+  const totalSubtypes = useMemo(
+    () =>
+      typeSections.reduce(
+        (total, section) => total + section.subtypeSections.length,
+        0,
+      ),
+    [typeSections],
   );
 
   const goBack = useCallback(() => {
@@ -386,14 +600,37 @@ export default function AllTemplates() {
     ],
   );
 
+  const openSubtypeGrid = useCallback(
+    (subtype, parentType) => {
+      navigate(
+        buildAllTemplatesSubtypePath(
+          subtype,
+          isEverydayGroup
+            ? {
+                group: EVERYDAY_MOMENTS_GROUP_KEY,
+                type: parentType,
+              }
+            : undefined,
+        ),
+      );
+    },
+    [isEverydayGroup, navigate],
+  );
+
   const headerTitle = isSubtypeGrid
     ? displayLabel(requestedSubtype)
-    : displayLabel(templateType);
+    : isEverydayGroup
+      ? "Everyday Moments"
+      : displayLabel(templateType);
   const headerSubtitle = isSubtypeGrid
     ? displayLabel(templateType)
     : !loading && totalBackgrounds > 0
-      ? `${subtypeSections.length} subtypes · ${totalBackgrounds} backgrounds`
-      : "Choose a subtype and background";
+      ? isEverydayGroup
+        ? `${typeSections.length} categories · ${totalSubtypes} subtypes · ${totalBackgrounds} backgrounds`
+        : `${totalSubtypes} subtypes · ${totalBackgrounds} backgrounds`
+      : isEverydayGroup
+        ? "All Everyday Moments categories"
+        : "Choose a subtype and background";
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
@@ -437,58 +674,69 @@ export default function AllTemplates() {
         {!loading &&
           !error &&
           !isSubtypeGrid &&
-          subtypeSections.length === 0 && (
+          !isEverydayGroup &&
+          totalSubtypes === 0 && (
             <EmptyState message="Check back later for new designs in this category." />
           )}
 
         {!loading &&
           !error &&
           !isSubtypeGrid &&
-          subtypeSections.length > 0 && (
-            <div className="space-y-8 pb-8">
-              {subtypeSections.map((section) => (
-                <section key={section.subtype}>
-                  <div className="mb-3 flex items-center justify-between gap-3 px-0.5">
-                    <div className="min-w-0">
-                      <h2 className="truncate text-base font-display font-bold text-foreground">
-                        {displayLabel(section.subtype)}
-                      </h2>
-                      <p className="text-[11px] font-medium text-muted-foreground">
-                        {section.items.length} backgrounds
-                      </p>
+          (isEverydayGroup || totalSubtypes > 0) && (
+            <div
+              className={
+                isEverydayGroup ? "space-y-10 pb-8" : "space-y-8 pb-8"
+              }
+            >
+              {typeSections.map((typeSection) =>
+                isEverydayGroup ? (
+                  <section key={typeSection.type}>
+                    <div className="mb-5 flex items-end justify-between gap-3 border-b border-border/70 pb-3">
+                      <div className="min-w-0">
+                        <h2 className="truncate text-lg font-display font-bold text-foreground">
+                          {typeSection.label}
+                        </h2>
+                        <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
+                          {typeSection.subtypeSections.length} subtypes ·{" "}
+                          {typeSection.totalBackgrounds} backgrounds
+                        </p>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigate(buildAllTemplatesSubtypePath(section.subtype))
-                      }
-                      className="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent dark:text-white"
-                    >
-                      View All
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
 
-                  <div className="hide-scrollbar scroll-gpu flex snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
-                    {getSubtypeRowItems(section, GRAPHICS_ROW_LIMIT).map(
-                      (graphic) => {
-                        const key = getEditorGraphicSelectionKey(
-                          graphic,
-                          graphic?._template?.id,
-                        );
-                        return (
-                          <ShowcaseCard
-                            key={key}
-                            graphic={graphic}
-                            selected={selectedGraphicKey === key}
+                    {typeSection.subtypeSections.length > 0 ? (
+                      <div className="space-y-7">
+                        {typeSection.subtypeSections.map((section) => (
+                          <SubtypeRow
+                            key={`${typeSection.type}-${section.subtype}`}
+                            section={section}
+                            parentType={typeSection.type}
+                            selectedGraphicKey={selectedGraphicKey}
                             onSelect={selectGraphic}
+                            onOpenGrid={openSubtypeGrid}
                           />
-                        );
-                      },
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs font-medium text-muted-foreground">
+                        No backgrounds available in this category.
+                      </div>
                     )}
+                  </section>
+                ) : (
+                  <div key={typeSection.type} className="space-y-8">
+                    {typeSection.subtypeSections.map((section) => (
+                      <SubtypeRow
+                        key={`${typeSection.type}-${section.subtype}`}
+                        section={section}
+                        parentType={typeSection.type}
+                        selectedGraphicKey={selectedGraphicKey}
+                        onSelect={selectGraphic}
+                        onOpenGrid={openSubtypeGrid}
+                      />
+                    ))}
                   </div>
-                </section>
-              ))}
+                ),
+              )}
             </div>
           )}
 
@@ -499,7 +747,7 @@ export default function AllTemplates() {
         )}
 
         {!loading && !error && isSubtypeGrid && activeSubtypeSection && (
-          <div className="grid grid-cols-2 justify-items-center gap-3 pb-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid grid-cols-3 justify-items-center gap-3 pb-8 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {activeSubtypeSection.items.map((graphic) => {
               const key = getEditorGraphicSelectionKey(
                 graphic,
@@ -511,6 +759,7 @@ export default function AllTemplates() {
                   graphic={graphic}
                   selected={selectedGraphicKey === key}
                   onSelect={selectGraphic}
+                  layout="grid"
                 />
               );
             })}

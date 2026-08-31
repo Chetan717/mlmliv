@@ -7,7 +7,10 @@ import {
   isValidEditorBackTarget,
 } from "../src/utils/editorNavigation.js";
 import { getAppBackTarget } from "../src/utils/appBackNavigation.js";
-import { buildAllTemplatesSubtypePath } from "../src/utils/allTemplatesNavigation.js";
+import {
+  buildAllTemplatesSubtypePath,
+  buildEverydayMomentsAllTemplatesPath,
+} from "../src/utils/allTemplatesNavigation.js";
 
 const subtypeReturnTarget = buildAllTemplatesSubtypePath("Rank & Gold");
 const selectedFromFlow = {
@@ -17,8 +20,10 @@ const selectedFromFlow = {
 };
 
 test("Editor accepts only safe in-app flow return targets", () => {
+  const everydayGroupTarget = buildEverydayMomentsAllTemplatesPath();
   assert.equal(isValidEditorBackTarget("/alltemp"), true);
   assert.equal(isValidEditorBackTarget(subtypeReturnTarget), true);
+  assert.equal(isValidEditorBackTarget(everydayGroupTarget), true);
   assert.equal(isValidEditorBackTarget("/alltemp?subtype="), false);
   assert.equal(isValidEditorBackTarget("//example.com/alltemp"), false);
   assert.equal(isValidEditorBackTarget("https://example.com/alltemp"), false);
