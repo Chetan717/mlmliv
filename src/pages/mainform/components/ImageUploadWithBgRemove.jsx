@@ -161,16 +161,17 @@ export default function ImageUploadWithBgRemove({
         
         console.error("[removeBg] Image processing failed:", err, err?.cause);
         toast.danger(
-          "Clean background removal पूरा नहीं हुआ. Internet check करके Done दबाकर Retry करें.",
+          "Background removal शुरू नहीं हो पाया. Photo दोबारा select करके Retry करें.",
         );
 
-        // Never let the opaque/original photo enter the final Done flow. Keep
-        // the same crop ready so the user can retry the professional model.
-        const retryPreview = URL.createObjectURL(croppedBlob);
+        // Never return the unchanged crop to another Done button. That looked
+        // like a successful result and trapped users in an endless retry loop
+        // whenever the AI runtime could not start. Exit cleanly to the form;
+        // the original/background photo is still never accepted as output.
         setEnhanceEnabled?.(false);
-        setEditingImage(retryPreview);
-        setOnImageDone(() => removeBackgroundAfterCrop);
-        setOpen(true);
+        setEditingImage(null);
+        setOnImageDone(null);
+        setOpen(false);
       } finally {
         if (processingId === processingIdRef.current) {
           abortRef.current = null;

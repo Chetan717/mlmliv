@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import test from "node:test";
 import { join, resolve } from "node:path";
 
@@ -149,7 +149,23 @@ test("all runtimes require the same continuous-alpha portrait model", () => {
   }
 });
 
-test("failed removal never advances the original photo to final Done", () => {
+test("the bundled ONNX Runtime WASM is complete, versioned, and not truncated", () => {
+  const runtimePath = join(
+    projectRoot,
+    "public/modnet/ort-wasm-simd-threaded.wasm",
+  );
+  const runtime = readFileSync(runtimePath);
+  const modnet = read("src/pages/mainform/utils/modnetBg.js");
+
+  assert.equal(runtime.subarray(0, 4).toString("hex"), "0061736d");
+  assert.ok(
+    statSync(runtimePath).size > 10_000_000,
+    "ONNX Runtime WASM appears truncated",
+  );
+  assert.match(modnet, /modnet-2026-08-31-runtime-repair-v2/);
+});
+
+test("failed removal exits cleanly and never advances the original photo", () => {
   const single = read(
     "src/pages/mainform/components/ImageUploadWithBgRemove.jsx",
   );
@@ -158,10 +174,14 @@ test("failed removal never advances the original photo to final Done", () => {
 
   assert.doesNotMatch(single, /processed\s*\|\|\s*croppedBlob/);
   assert.doesNotMatch(single, /finalImage\s*=\s*croppedBlob/);
-  assert.match(single, /setOnImageDone\(\(\) => removeBackgroundAfterCrop\)/);
+  assert.match(single, /setOnImageDone\(null\)/);
+  assert.match(single, /setOpen\(false\)/);
+  assert.doesNotMatch(single, /const retryPreview/);
   assert.doesNotMatch(multiple, /processed\s*\|\|\s*blob/);
-  assert.match(multiple, /setCropStage\("initial"\)/);
+  assert.match(multiple, /onCancel=\{cancelActiveProcessing\}/);
+  assert.match(multiple, /setCropOpen\(false\)/);
   assert.doesNotMatch(profile, /blob\s*=\s*blob\s*\|\|\s*file/);
+  assert.match(profile, /setStep\("form"\)/);
 });
 
 test("Income achiever photo uses the shared Remove-BG flow", () => {

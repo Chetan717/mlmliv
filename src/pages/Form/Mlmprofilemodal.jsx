@@ -954,7 +954,12 @@ export default function MLMProfilePage() {
       if (err?.name === "AbortError" || controller.signal.aborted) return;
       
       console.error("[removeBg] Top-up image processing failed:", err, err?.cause);
-      toast.danger("Image processing failed. Please try again.");
+      setEditorSrc(null);
+      setEditorStage("final");
+      setStep("form");
+      toast.danger(
+        "Background removal शुरू नहीं हो पाया. Photo दोबारा select करके Retry करें.",
+      );
     } finally {
       abortTopupRef.current = null;
       setRemovingTopupBg(false);
@@ -1061,7 +1066,13 @@ export default function MLMProfilePage() {
       if (err?.name === "AbortError" || controller.signal.aborted) return;
       
       console.error("[removeBg] Profile image processing failed:", err, err?.cause);
-      toast.danger("Image processing failed. Please try again.");
+      setEditorSrc(null);
+      setEditingProfileIndex(null);
+      setEditorStage("final");
+      setStep("form");
+      toast.danger(
+        "Background removal शुरू नहीं हो पाया. Photo दोबारा select करके Retry करें.",
+      );
     } finally {
       abortProfileRef.current = null;
       setRemovingBg(false);

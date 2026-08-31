@@ -11,7 +11,10 @@ let runtimePromise = null;
 let sessionPromise = null;
 let assetRevision = 0;
 let forceFreshModelFetch = false;
-const MODEL_ASSET_VERSION = "modnet-2026-08-quality";
+// Bump whenever either the model or its matching ONNX Runtime WASM changes.
+// The previous production archive contained a truncated WASM binary; a new
+// URL is required so WebViews cannot reuse that corrupt response from cache.
+const MODEL_ASSET_VERSION = "modnet-2026-08-31-runtime-repair-v2";
 const INFERENCE_REFERENCE_SIZE = 640;
 const MAX_INFERENCE_SIDE = 1024;
 const MAX_OUTPUT_SIDE = 2048;

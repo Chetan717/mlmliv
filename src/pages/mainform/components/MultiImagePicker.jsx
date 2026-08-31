@@ -85,6 +85,21 @@ export default function MultiImagePicker({
     });
   };
 
+  const cancelActiveProcessing = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setBgLoading(false);
+    setBgProgressMsg("");
+    setBgProgressPct(0);
+    setBgPreviewUrl(null);
+    setCropOpen(false);
+    setEditingImage(null);
+    setCropStage(null);
+    setActiveFile(null);
+    advanceQueue();
+    toast("Background removal cancelled.");
+  };
+
   // Adds newly selected files to the queue, starting processing immediately
   // if nothing is currently in flight.
   const enqueueFiles = (files) => {
@@ -145,11 +160,16 @@ export default function MultiImagePicker({
         if (err?.name === "AbortError" || controller.signal.aborted) return;
         
         toast.danger(
-          "Clean background removal पूरा नहीं हुआ. Internet check करके Done दबाकर Retry करें.",
+          "Background removal शुरू नहीं हो पाया. इस photo को छोड़कर आगे बढ़ रहे हैं—इसे दोबारा select करके Retry करें.",
         );
-        // Keep the item on its initial stage. The original/background image is
-        // never accepted into the final list as a successful Remove-BG result.
-        setCropStage("initial");
+        // Do not redisplay the same unchanged crop with another Done button.
+        // Skip only this failed item and continue the remaining queue; the
+        // original/background image is never accepted as a successful result.
+        setCropOpen(false);
+        setEditingImage(null);
+        setCropStage(null);
+        setActiveFile(null);
+        advanceQueue();
       } finally {
         abortRef.current = null;
         setBgLoading(false);
@@ -472,6 +492,7 @@ export default function MultiImagePicker({
           previewUrl={bgPreviewUrl}
           progressMessage={bgProgressMsg}
           progressPct={bgProgressPct}
+          onCancel={cancelActiveProcessing}
         />
       )}
 
