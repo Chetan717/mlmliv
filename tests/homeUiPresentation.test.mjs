@@ -86,8 +86,8 @@ test("Home template sections follow the product order and group related types", 
       "Sport",
       "Daily_Life",
       "Greeting_Wishes",
-      "Health_Tips",
       "Devotional_Spiritual",
+      "Health_Tips",
       "Leader_Quotes",
     ],
   );
@@ -104,9 +104,26 @@ test("Home keeps special layouts and applies the new default tile dimensions", (
   assert.match(list, /const GRID_TYPES/);
   assert.match(list, /const FULL_TYPES/);
   assert.match(list, /const CIRCLE_TYPES/);
-  assert.match(list, /w-\[100px\] card-press/);
-  assert.match(list, /h-\[130px\] w-full rounded-md/);
+  assert.match(list, /w-\[110px\] card-press/);
+  assert.match(list, /h-\[110px\] w-full rounded-md/);
   assert.match(list, /w-\[80px\] h-\[80px\] rounded-full/);
+});
+
+test("Everyday Moments uses one nameless showcase tile per type in a 3-column grid", () => {
+  const list = read("src/pages/Homepage/Component/ListOfGenaraltemp.jsx");
+  const gridStart = list.indexOf("const renderEverydayMomentsGrid");
+  const gridEnd = list.indexOf(
+    'return (\n    <div className="flex flex-col w-full',
+    gridStart,
+  );
+  const gridSource = list.slice(gridStart, gridEnd);
+
+  assert.match(gridSource, /grid grid-cols-3/);
+  assert.match(gridSource, /entry\.group\?\.templates\?\.\[0\]/);
+  assert.match(gridSource, /includeAllSubtypes: true/);
+  assert.match(gridSource, /aspect-square/);
+  assert.doesNotMatch(gridSource, /item\.Subtype/);
+  assert.doesNotMatch(gridSource, /renderViewAllButton/);
 });
 
 test("Carousel precedes Festival and Home has sticky search plus pull refresh", () => {

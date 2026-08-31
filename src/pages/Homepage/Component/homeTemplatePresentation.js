@@ -1,4 +1,5 @@
 import { RANK_PROMOTION_TYPES } from "../../../utils/templateTypeConfig.js";
+import { EVERYDAY_MOMENT_ENTRIES } from "../../../utils/everydayMoments.js";
 
 export const HOME_SECTION_DEFINITIONS = Object.freeze([
   {
@@ -79,18 +80,7 @@ export const HOME_SECTION_DEFINITIONS = Object.freeze([
   {
     id: "everyday-moments",
     title: "Everyday Moments",
-    entries: [
-      { type: "Good_Morning", label: "Good Morning" },
-      { type: "Sport", label: "Sport" },
-      { type: "Daily_Life", label: "Daily Life" },
-      { type: "Greeting_Wishes", label: "Greeting Wishes" },
-      { type: "Health_Tips", label: "Health Tips" },
-      {
-        type: "Devotional_Spiritual",
-        label: "Devotional & Spiritual",
-      },
-      { type: "Leader_Quotes", label: "Leader Quotes" },
-    ],
+    entries: EVERYDAY_MOMENT_ENTRIES,
   },
 ]);
 

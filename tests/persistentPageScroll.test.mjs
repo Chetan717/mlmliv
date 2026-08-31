@@ -4,8 +4,16 @@ import test from "node:test";
 import {
   getPersistentPageScrollKey,
   getPersistentPageScrollTop,
+  shouldHideHomeHeader,
   shouldResetPersistentPageScroll,
 } from "../src/utils/persistentPageScroll.js";
+
+test("Home header hides after scrolling and returns only at the top", () => {
+  assert.equal(shouldHideHomeHeader(0, false), false);
+  assert.equal(shouldHideHomeHeader(17, false), true);
+  assert.equal(shouldHideHomeHeader(8, true), true);
+  assert.equal(shouldHideHomeHeader(2, true), false);
+});
 
 test("Home View All always opens the All Templates category at the top", () => {
   const positions = { "/": 720, "/alltemp": 410 };
@@ -93,6 +101,8 @@ test("PersistentPages uses its own Layout scroll ref instead of a global selecto
   assert.match(appSource, /mainScrollRef=\{scrollContainerRef\}/);
   assert.match(appSource, /onMainScroll=\{handlePersistentScroll\}/);
   assert.match(appSource, /scrollContainer\.scrollTop = nextTop/);
+  assert.match(appSource, /hideHeader=\{isHome && homeHeaderHidden\}/);
   assert.match(layoutSource, /ref=\{mainScrollRef\}/);
   assert.match(layoutSource, /onScroll=\{onMainScroll\}/);
+  assert.match(layoutSource, /hidden=\{hideHeader\}/);
 });

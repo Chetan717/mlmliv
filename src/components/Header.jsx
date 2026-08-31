@@ -84,7 +84,12 @@ const REPORTING_TAB_LABELS = {
   leaderboard: "Leaderboard",
 };
 
-export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
+export default function Header({
+  collapsed,
+  setCollapsed,
+  setMobileOpen,
+  hidden = false,
+}) {
   const { selectedCompany } = useSelectedCompany();
   const { theme, toggleTheme, selType } = useGeneralData();
   const isDark = theme === "dark";
@@ -359,7 +364,14 @@ export default function Header({ collapsed, setCollapsed, setMobileOpen }) {
 
   return (
     <>
-      <header className="sticky top-0 z-20 h-[60px] flex items-center px-4 gap-3 bg-background/95 backdrop-blur-xl border-b border-border transition-colors duration-300">
+      <header
+        aria-hidden={hidden || undefined}
+        className={`sticky top-0 z-20 flex shrink-0 items-center overflow-hidden bg-background/95 backdrop-blur-xl transition-[height,opacity,padding,border-color] duration-200 ${
+          hidden
+            ? "pointer-events-none h-0 gap-0 border-b-0 border-transparent px-0 opacity-0"
+            : "h-[60px] gap-3 border-b border-border px-4 opacity-100"
+        }`}
+      >
         {isSubPage || isEditor ? (
           <button
             type="button"

@@ -122,6 +122,6 @@ test("View All renders GraphicsLink showcases instead of parent Showcase_url car
   assert.doesNotMatch(source, /aspect-\[4\/5\]/);
   assert.match(source, /storeEditorTemplateSeed/);
   assert.doesNotMatch(source, /Showcase_url/);
-  assert.match(editorListSource, /findItemBySelectionKey/);
+  assert.match(editorListSource, /findEditorItemBySelectionKey/);
   assert.match(editorListSource, /selectedSelectionKey === getEditorGraphicSelectionKey/);
 });

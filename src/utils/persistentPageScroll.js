@@ -1,5 +1,15 @@
 const HOME_PATH = "/";
 const ALL_TEMPLATES_PATH = "/alltemp";
+const HOME_HEADER_HIDE_AT = 16;
+const HOME_HEADER_SHOW_AT = 2;
+
+export function shouldHideHomeHeader(scrollTop, currentlyHidden = false) {
+  const top = Number(scrollTop);
+  const safeTop = Number.isFinite(top) ? Math.max(0, top) : 0;
+  return currentlyHidden
+    ? safeTop > HOME_HEADER_SHOW_AT
+    : safeTop > HOME_HEADER_HIDE_AT;
+}
 
 export function getPersistentPageScrollKey(pathname, search = "") {
   if (pathname === HOME_PATH) return HOME_PATH;

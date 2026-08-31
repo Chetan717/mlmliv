@@ -22,6 +22,7 @@ import { runAppBackNavigation } from "./utils/appBackNavigation";
 import {
   getPersistentPageScrollKey,
   getPersistentPageScrollTop,
+  shouldHideHomeHeader,
 } from "./utils/persistentPageScroll";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -135,6 +136,8 @@ function PersistentPages({
   const activeScrollKeyRef = useRef(
     getPersistentPageScrollKey(pathname, search),
   );
+  const homeHeaderHiddenRef = useRef(false);
+  const [homeHeaderHidden, setHomeHeaderHidden] = useState(false);
 
   const [homeReady, setHomeReady] = useState(
     () => isHome && authenticated && ready,
@@ -155,11 +158,25 @@ function PersistentPages({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, isHome, isAllTemp, ready]);
 
-  const handlePersistentScroll = useCallback((event) => {
-    const activeKey = activeScrollKeyRef.current;
-    if (!activeKey) return;
-    scrollPositionsRef.current[activeKey] = event.currentTarget.scrollTop;
-  }, []);
+  const handlePersistentScroll = useCallback(
+    (event) => {
+      const activeKey = activeScrollKeyRef.current;
+      if (!activeKey) return;
+
+      const scrollTop = event.currentTarget.scrollTop;
+      scrollPositionsRef.current[activeKey] = scrollTop;
+      if (activeKey !== "/") return;
+
+      const nextHidden = shouldHideHomeHeader(
+        scrollTop,
+        homeHeaderHiddenRef.current,
+      );
+      if (nextHidden === homeHeaderHiddenRef.current) return;
+      homeHeaderHiddenRef.current = nextHidden;
+      setHomeHeaderHidden(nextHidden);
+    },
+    [],
+  );
 
   useLayoutEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -183,6 +200,11 @@ function PersistentPages({
       scrollContainer.scrollTop = nextTop;
       scrollContainer.scrollLeft = 0;
     }
+
+    const nextHeaderHidden =
+      pathname === "/" && shouldHideHomeHeader(nextTop || 0, false);
+    homeHeaderHiddenRef.current = nextHeaderHidden;
+    setHomeHeaderHidden(nextHeaderHidden);
   }, [pathname, search]);
   
   if (!homeReady && !allTempReady) return null;
@@ -204,6 +226,7 @@ function PersistentPages({
         <Layout
           mainScrollRef={scrollContainerRef}
           onMainScroll={handlePersistentScroll}
+          hideHeader={isHome && homeHeaderHidden}
         >
           <Suspense fallback={<PageSpinner />}>
             {homeReady && (

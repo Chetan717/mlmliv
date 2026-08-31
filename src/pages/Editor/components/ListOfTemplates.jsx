@@ -5,10 +5,25 @@ import { COLLECTIONS } from "../../../collections";
 import genaral_template_json from "../../Homepage/Component/Services/genaral_template_firestore_data.json";
 import { PAGE_REFRESH_EVENT } from "../../../utils/pageRefresh";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
+import { AllTemplateGraphicsService } from "../../Homepage/Component/Services/Alltemplateservice";
 import {
   EDITOR_TEMPLATE_SEED_KEY,
   getEditorGraphicSelectionKey,
 } from "../../../utils/editorTemplateSelection";
+import {
+  findEditorItemBySelectionKey,
+  getGeneralItemsForEditor,
+  isEditorTemplateSeedForSelection,
+  normalizeEditorTemplateFilter,
+  prepareEditorItemsForSelection,
+} from "../../../utils/editorTemplateList";
+import {
+  filterEverydayMomentItems,
+  getEverydayMomentSubtypeKey,
+  getEverydayMomentSubtypeOptions,
+  groupEverydayMomentItemsBySubtype,
+  isEverydayMomentType,
+} from "../../../utils/everydayMoments";
 
 const BATCH_SIZE = 20;
 
@@ -49,11 +64,12 @@ function readEditorTemplateSeed({ type, subType, mainType, companyId }) {
     const raw = sessionStorage.getItem(EDITOR_TEMPLATE_SEED_KEY);
     if (!raw) return { items: [], selectedGraphicKey: "" };
     const seed = JSON.parse(raw);
-    const sameSelection =
-      seed?.type === type &&
-      String(seed?.subType || "") === String(subType || "") &&
-      String(seed?.mainType || "") === String(mainType || "") &&
-      String(seed?.companyId || "") === String(companyId || "");
+    const sameSelection = isEditorTemplateSeedForSelection(seed, {
+      type,
+      subType,
+      mainType,
+      companyId,
+    });
 
     if (!sameSelection || !Array.isArray(seed?.items)) {
       return { items: [], selectedGraphicKey: "" };
@@ -66,6 +82,10 @@ function readEditorTemplateSeed({ type, subType, mainType, companyId }) {
         _template: {
           id: seed.templateId || "",
           serial: seed.serial || 0,
+          MainType: seed.templateMainType || seed.mainType || "",
+          SelectType: seed.templateType || seed.type || "",
+          type: seed.templateType || seed.type || "",
+          Subtype: seed.templateSubType || seed.subType || "",
         },
       })),
     };
@@ -115,69 +135,6 @@ function cleanItem(item) {
   if (!item) return null;
   const { _template, ...clean } = item;
   return clean;
-}
-
-function findItemBySelectionKey(items, selectionKey) {
-  if (!selectionKey) return null;
-  return (
-    items.find(
-      (item) => getEditorGraphicSelectionKey(item) === selectionKey,
-    ) || null
-  );
-}
-
-function prepareItemsForSelection(items, selectionKey, fallbackItems = []) {
-  const nextItems = Array.isArray(items) ? [...items] : [];
-  if (!selectionKey) return nextItems;
-
-  let selectedIndex = nextItems.findIndex(
-    (item) => getEditorGraphicSelectionKey(item) === selectionKey,
-  );
-  if (selectedIndex === -1) {
-    const fallback = findItemBySelectionKey(fallbackItems, selectionKey);
-    if (fallback) {
-      nextItems.unshift(fallback);
-      selectedIndex = 0;
-    }
-  }
-
-  if (selectedIndex > 0) {
-    const [selectedItem] = nextItems.splice(selectedIndex, 1);
-    nextItems.unshift(selectedItem);
-  }
-  return nextItems;
-}
-
-function getGeneralItemsFromJson(type, subType) {
-  const allTemplates = Object.entries(genaral_template_json?.data || {}).map(
-    ([id, data]) => ({
-      id,
-      ...data,
-    }),
-  );
-
-  return allTemplates
-    .filter((template) => {
-      const mainType = String(template.MainType || "")
-        .trim()
-        .toLowerCase();
-      const templateType = String(template.SelectType || "").trim();
-      const templateSubType = String(template.Subtype || "").trim();
-      const isGeneral = mainType === "general" || mainType === "genaral";
-
-      return (
-        isGeneral &&
-        templateType === type &&
-        template.Active === true &&
-        template.Launched === true &&
-        (subType ? templateSubType === subType : true)
-      );
-    })
-    .sort((a, b) => (a.serial || 0) - (b.serial || 0))
-    .flatMap((template) => {
-      const graphics = template.GraphicsLink || [];
-      return graphics.map((g) => ({ ...g, _template: template }));
-    });
 }
 
 const SHIMMER_BG = {
@@ -446,10 +403,12 @@ export default function ListOfTemplates({
 }) {
   const { selectedCompany } = useSelectedCompany();
   const selType = getSelType();
-  const filterCompany = selectedCompany?.id || "";
-  const filterType = selType?.type || "";
-  const filterSubType = selType?.Subtype || "";
-  const filterCompanyId = `${filterCompany}` || "";
+  const filterCompany = normalizeEditorTemplateFilter(selectedCompany?.id);
+  const filterType = normalizeEditorTemplateFilter(selType?.type);
+  const rawFilterSubType = selType?.Subtype || "";
+  const filterSubType = normalizeEditorTemplateFilter(selType?.Subtype);
+  const filterCompanyId = filterCompany;
+  const isEverydayMoments = isEverydayMomentType(filterType);
 
   const [allItems, setAllItems] = useState([]);
   const [visibleItems, setVisibleItems] = useState([]);
@@ -457,6 +416,12 @@ export default function ListOfTemplates({
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("image");
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [categoryKey, setCategoryKey] = useState(() =>
+    isEverydayMoments && filterSubType
+      ? getEverydayMomentSubtypeKey(filterSubType)
+      : "",
+  );
   const [refreshRequestId, setRefreshRequestId] = useState(0);
 
   const [pendingSelectedKey, setPendingSelectedKey] = useState(null);
@@ -474,6 +439,15 @@ export default function ListOfTemplates({
   useEffect(() => {
     selectedRef.current = selected;
   }, [selected]);
+
+  useEffect(() => {
+    setCategoryOpen(false);
+    setCategoryKey(
+      isEverydayMoments && filterSubType
+        ? getEverydayMomentSubtypeKey(filterSubType)
+        : "",
+    );
+  }, [filterSubType, filterType, isEverydayMoments]);
 
   useEffect(() => {
     const handlePageRefresh = (event) => {
@@ -530,6 +504,7 @@ export default function ListOfTemplates({
         String(selType?.MainType);
 
       const isGeneralTemplate = mainTypeLower === "General";
+      const fetchSubType = isEverydayMoments ? "" : filterSubType;
 
       const editorSeed = readEditorTemplateSeed({
         type: filterType,
@@ -554,7 +529,7 @@ export default function ListOfTemplates({
         setVisibleItems(seededItems.slice(0, BATCH_SIZE));
 
         const seededDefault =
-          findItemBySelectionKey(
+          findEditorItemBySelectionKey(
             seededItems,
             selectedKeyRef.current || requestedSelectionKey,
           ) ||
@@ -570,22 +545,28 @@ export default function ListOfTemplates({
         setLoading(false);
       }
 
-      const cacheKey = `${filterType}__${filterSubType}__${isGeneralTemplate ? "General" : "MLM"}__${filterCompanyId}__${meetingHostMode}__${closeFilter}`;
+      const cacheSource = isEverydayMoments
+        ? "EverydayAll"
+        : isGeneralTemplate
+          ? "General"
+          : "MLM";
+      const cacheKey = `${filterType}__${fetchSubType}__${cacheSource}__${filterCompanyId}__${meetingHostMode}__${closeFilter}`;
 
       if (_editorTemplateCache?.has(cacheKey)) {
         const cachedItems = _editorTemplateCache.get(cacheKey);
         const preferredSelectionKey =
           selectedKeyRef.current || requestedSelectionKey;
-        const filteredItems = prepareItemsForSelection(
+        const filteredItems = prepareEditorItemsForSelection(
           cachedItems,
           preferredSelectionKey,
+          seededItems,
           seededItems,
         );
         setAllItems(filteredItems);
         renderedCount.current = 0;
 
         const currentSelectedItem =
-          findItemBySelectionKey(filteredItems, preferredSelectionKey) ||
+          findEditorItemBySelectionKey(filteredItems, preferredSelectionKey) ||
           filteredItems.find((i) => i.id === selectedRef.current?.id);
         const defaultItem =
           currentSelectedItem ||
@@ -614,16 +595,38 @@ export default function ListOfTemplates({
       try {
         let items = [];
 
-        if (isGeneralTemplate) {
-          items = getGeneralItemsFromJson(filterType, filterSubType);
+        if (isEverydayMoments) {
+          const everydayTemplates = await AllTemplateGraphicsService(
+            filterType,
+            filterCompanyId,
+          );
+          items = everydayTemplates.flatMap((template) => {
+            const graphics = Array.isArray(template?.GraphicsLink)
+              ? template.GraphicsLink.filter(Boolean)
+              : [];
+            return graphics.map((graphic) => ({
+              ...graphic,
+              _template: template,
+            }));
+          });
+        } else if (isGeneralTemplate) {
+          items = getGeneralItemsForEditor(
+            genaral_template_json,
+            filterType,
+            fetchSubType,
+          );
         } else {
           const constraints = [
             where("SelectType", "==", filterType),
             where("Active", "==", true),
           ];
 
-          if (filterSubType && filterSubType !== "") {
-            constraints.splice(1, 0, where("Subtype", "==", filterSubType));
+          if (rawFilterSubType && rawFilterSubType !== "") {
+            constraints.splice(
+              1,
+              0,
+              where("Subtype", "==", rawFilterSubType),
+            );
           }
 
           if (filterCompanyId) {
@@ -687,17 +690,18 @@ export default function ListOfTemplates({
 
         const preferredSelectionKey =
           selectedKeyRef.current || requestedSelectionKey;
-        const displayItems = prepareItemsForSelection(
+        const displayItems = prepareEditorItemsForSelection(
           cachedFilteredItems,
           preferredSelectionKey,
           [...seededItems, ...items],
+          seededItems,
         );
 
         setAllItems(displayItems);
         renderedCount.current = 0;
 
         const currentSelectedItem =
-          findItemBySelectionKey(displayItems, preferredSelectionKey) ||
+          findEditorItemBySelectionKey(displayItems, preferredSelectionKey) ||
           displayItems.find((i) => i.id === selectedRef.current?.id);
         const defaultItem =
           currentSelectedItem ||
@@ -733,19 +737,49 @@ export default function ListOfTemplates({
   }, [
     filterType,
     filterSubType,
+    rawFilterSubType,
     filterCompanyId,
+    isEverydayMoments,
     meetingHostMode,
     closeFilter,
     refreshRequestId,
   ]);
 
+  const categoryOptions = useMemo(
+    () =>
+      isEverydayMoments
+        ? getEverydayMomentSubtypeOptions(allItems)
+        : [],
+    [allItems, isEverydayMoments],
+  );
+
+  useEffect(() => {
+    if (
+      !isEverydayMoments ||
+      loading ||
+      !categoryKey ||
+      categoryOptions.some((option) => option.key === categoryKey)
+    ) {
+      return;
+    }
+    setCategoryKey("");
+  }, [categoryKey, categoryOptions, isEverydayMoments, loading]);
+
+  const categoryItems = useMemo(
+    () =>
+      isEverydayMoments
+        ? filterEverydayMomentItems(allItems, categoryKey)
+        : allItems,
+    [allItems, categoryKey, isEverydayMoments],
+  );
+
   const imageItems = useMemo(
-    () => allItems.filter((item) => !item.backgroundVideoUrl),
-    [allItems],
+    () => categoryItems.filter((item) => !item.backgroundVideoUrl),
+    [categoryItems],
   );
   const fbVideoItems = useMemo(
-    () => allItems.filter((item) => !!item.backgroundVideoUrl),
-    [allItems],
+    () => categoryItems.filter((item) => !!item.backgroundVideoUrl),
+    [categoryItems],
   );
   const videoItems = useMemo(
     () => (fbVideoItems.length > 0 ? fbVideoItems : PRESET_VIDEO_ITEMS),
@@ -769,7 +803,7 @@ export default function ListOfTemplates({
     const firstBatch = tabItems.slice(0, BATCH_SIZE);
     setVisibleTabItems(firstBatch);
     tabRenderedCount.current = firstBatch.length;
-  }, [activeTab, allItems]);
+  }, [tabItems]);
 
   useEffect(() => {
     // Preload only the first visible row to keep mobile data/memory controlled
@@ -837,6 +871,56 @@ export default function ListOfTemplates({
     [setSelected],
   );
 
+  const handleCategorySelect = useCallback(
+    (nextCategoryKey) => {
+      const nextCategoryItems = filterEverydayMomentItems(
+        allItems,
+        nextCategoryKey,
+      );
+      let nextTab = activeTab;
+      let nextTabItems = nextCategoryItems.filter((item) =>
+        nextTab === "video"
+          ? Boolean(item.backgroundVideoUrl)
+          : !item.backgroundVideoUrl,
+      );
+
+      if (nextTabItems.length === 0 && nextCategoryItems.length > 0) {
+        nextTab = nextCategoryItems.some((item) => !item.backgroundVideoUrl)
+          ? "image"
+          : "video";
+        nextTabItems = nextCategoryItems.filter((item) =>
+          nextTab === "video"
+            ? Boolean(item.backgroundVideoUrl)
+            : !item.backgroundVideoUrl,
+        );
+      }
+
+      setCategoryKey(nextCategoryKey);
+      setCategoryOpen(false);
+
+      if (nextTab !== activeTab) {
+        setActiveTab(nextTab);
+        onTabChange?.(nextTab);
+      }
+
+      const currentKey = selectedKeyRef.current;
+      const currentStillVisible = nextTabItems.find(
+        (item) => getEditorGraphicSelectionKey(item) === currentKey,
+      );
+      const nextItem = currentStillVisible || nextTabItems[0] || null;
+      if (nextItem) handleSelect(nextItem);
+    },
+    [activeTab, allItems, handleSelect, onTabChange],
+  );
+
+  const visibleSubtypeSections = useMemo(
+    () =>
+      isEverydayMoments
+        ? groupEverydayMomentItemsBySubtype(visibleTabItems)
+        : [],
+    [isEverydayMoments, visibleTabItems],
+  );
+
   const selectedSelectionKey = pendingSelectedKey || selectedKeyRef.current;
   const isItemSelected = useCallback(
     (item) =>
@@ -849,6 +933,32 @@ export default function ListOfTemplates({
   return (
     <div className="w-full h-full min-h-0 flex flex-col">
       <div className="flex items-center gap-1.5 p-2 bg-muted/20 border-t border-border flex-shrink-0">
+        {isEverydayMoments && (
+          <button
+            type="button"
+            onClick={() => setCategoryOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={categoryOpen}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border py-2 px-2 text-[12px] font-bold transition-all duration-200 ${
+              categoryKey
+                ? "border-accent bg-accent/10 text-accent dark:text-white"
+                : "border-border bg-background/70 text-foreground hover:border-accent/50"
+            }`}
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <path d="M4 6h16M7 12h10M10 18h4" />
+            </svg>
+            Categories
+          </button>
+        )}
         <TabBtn
           active={activeTab === "image"}
           onClick={() => handleTab("image")}
@@ -917,19 +1027,47 @@ export default function ListOfTemplates({
           />
         )}
 
-        {!loading && visibleTabItems.length > 0 && (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
-            {visibleTabItems.map((item, idx) => (
-              <Tile
-                key={`${item._template?.serial}-${item.id}-${idx}`}
-                item={item}
-                isSelected={isItemSelected(item)}
-                onSelect={handleSelect}
-                isVideo={activeTab === "video"}
-              />
-            ))}
-          </div>
-        )}
+        {!loading && visibleTabItems.length > 0 &&
+          (isEverydayMoments ? (
+            <div className="space-y-5">
+              {visibleSubtypeSections.map((section) => (
+                <section key={section.key}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="h-4 w-1 rounded-full bg-accent" />
+                    <h3 className="truncate text-[12px] font-bold text-foreground/85">
+                      {section.label}
+                    </h3>
+                    <span className="ml-auto rounded-full bg-muted/40 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {section.items.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
+                    {section.items.map((item, idx) => (
+                      <Tile
+                        key={`${item._template?.id}-${item._template?.serial}-${item.id}-${idx}`}
+                        item={item}
+                        isSelected={isItemSelected(item)}
+                        onSelect={handleSelect}
+                        isVideo={activeTab === "video"}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
+              {visibleTabItems.map((item, idx) => (
+                <Tile
+                  key={`${item._template?.serial}-${item.id}-${idx}`}
+                  item={item}
+                  isSelected={isItemSelected(item)}
+                  onSelect={handleSelect}
+                  isVideo={activeTab === "video"}
+                />
+              ))}
+            </div>
+          ))}
 
         <div ref={sentinelRef} className="h-1" />
 
@@ -947,6 +1085,92 @@ export default function ListOfTemplates({
           </div>
         )}
       </div>
+
+      {isEverydayMoments && categoryOpen && (
+        <div
+          className="fixed inset-0 z-[250] flex items-end justify-center bg-black/60 px-3 backdrop-blur-sm sm:items-center"
+          role="presentation"
+          onClick={() => setCategoryOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Select template category"
+            className="w-full max-w-md rounded-t-3xl border border-border bg-background p-4 pb-7 shadow-2xl sm:rounded-3xl sm:pb-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-[16px] font-bold text-foreground">
+                  Categories
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
+                  Select a subtype to filter templates
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCategoryOpen(false)}
+                aria-label="Close categories"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/40 text-foreground"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                >
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="max-h-[62vh] space-y-2 overflow-y-auto pr-0.5">
+              {[
+                { key: "", label: "All Categories" },
+                ...categoryOptions,
+              ].map((option) => {
+                const active = option.key === categoryKey;
+                return (
+                  <button
+                    key={option.key || "all-categories"}
+                    type="button"
+                    onClick={() => handleCategorySelect(option.key)}
+                    className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left text-[13px] font-semibold transition-colors ${
+                      active
+                        ? "border-accent bg-accent/10 text-accent dark:text-white"
+                        : "border-border bg-background text-foreground"
+                    }`}
+                  >
+                    <span className="truncate">{option.label}</span>
+                    {active && (
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                        >
+                          <path
+                            d="m2 6 2.5 2.5L10 3"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -366,6 +366,9 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
             mainType: selttype.MainType || "",
             type: selttype.type || "",
             subType: selttype.Subtype || "",
+            templateMainType: item?.MainType || "",
+            templateType: item?.type || "",
+            templateSubType: item?.Subtype || "",
             templateId: item?.id || "",
             serial: item?.serial || 0,
             companyId: selectedCompany?.id || "",
@@ -432,7 +435,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
   );
 
   const handleImagePress = useCallback(
-    (item) => {
+    (item, { includeAllSubtypes = false } = {}) => {
       setSelectedTemp(item);
       handleReset();
       const selttype = {
@@ -441,7 +444,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
         type: item.type,
         serial: item.serial,
         ShowCaseForm: item.ShowCaseForm,
-        Subtype: item.Subtype,
+        Subtype: includeAllSubtypes ? "" : item.Subtype,
       };
       localStorage.removeItem("achieve_form");
       setSelType(selttype);
@@ -650,6 +653,37 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
     );
   };
 
+  const renderEverydayMomentsGrid = (section) => (
+    <div className="grid grid-cols-3 gap-3 px-1 sm:gap-4">
+      {section.entries.map((entry) => {
+        const item = entry.group?.templates?.[0];
+        if (!item) return null;
+
+        return (
+          <button
+            key={entry.type}
+            type="button"
+            onClick={() =>
+              handleImagePress(item, { includeAllSubtypes: true })
+            }
+            aria-label={`Open ${entry.label || entry.type} templates`}
+            className={`relative aspect-square w-full max-w-[110px] justify-self-center overflow-hidden rounded-md border bg-white shadow-sm card-press dark:bg-black/20 ${
+              selectedTemp?.id === item?.id
+                ? "border-accent ring-2 ring-accent ring-offset-1 dark:ring-offset-[#0b0f19]"
+                : "border-border"
+            }`}
+          >
+            <ImageWithSkeleton
+              src={item.image}
+              className="h-full w-full object-cover"
+              alt={entry.label || entry.type}
+            />
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="flex flex-col w-full pb-8">
       {noResults && (
@@ -678,6 +712,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
       )}
 
       {homeSections.map((section) => {
+        const isEverydayMoments = section.id === "everyday-moments";
         const headerEntry = section.headerEntryType
           ? section.entries.find(
               (entry) => entry.type === section.headerEntryType,
@@ -718,31 +753,33 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
               {canViewHeaderGroup && renderViewAllButton(headerGroup)}
             </div>
 
-            {section.entries.map((entry, index) => {
-              const group = entry.group;
-              const displayName = getTemplateTypeDisplayName(group.type);
-              const canViewEntry =
-                entry.label &&
-                !GRID_TYPES.has(group.type) &&
-                !CIRCLE_TYPES.has(group.type);
+            {isEverydayMoments
+              ? renderEverydayMomentsGrid(section)
+              : section.entries.map((entry, index) => {
+                  const group = entry.group;
+                  const displayName = getTemplateTypeDisplayName(group.type);
+                  const canViewEntry =
+                    entry.label &&
+                    !GRID_TYPES.has(group.type) &&
+                    !CIRCLE_TYPES.has(group.type);
 
-              return (
-                <div
-                  key={group.type}
-                  className={index > 0 ? "mt-6" : undefined}
-                >
-                  {entry.label && (
-                    <div className="mb-3 flex items-center justify-between px-1">
-                      <h3 className="text-sm font-semibold text-foreground/80">
-                        {entry.label}
-                      </h3>
-                      {canViewEntry && renderViewAllButton(group)}
+                  return (
+                    <div
+                      key={group.type}
+                      className={index > 0 ? "mt-6" : undefined}
+                    >
+                      {entry.label && (
+                        <div className="mb-3 flex items-center justify-between px-1">
+                          <h3 className="text-sm font-semibold text-foreground/80">
+                            {entry.label}
+                          </h3>
+                          {canViewEntry && renderViewAllButton(group)}
+                        </div>
+                      )}
+                      {renderGroupTemplates(group, displayName)}
                     </div>
-                  )}
-                  {renderGroupTemplates(group, displayName)}
-                </div>
-              );
-            })}
+                  );
+                })}
           </div>
         );
       })}
