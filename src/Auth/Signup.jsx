@@ -444,12 +444,12 @@ export function Signup() {
               </Button>
 
               <p className="text-center text-sm font-medium text-muted-foreground">
-                Already have an account? / पहले से अकाउंट है?
+                Already have an account? 
                 <span
                   onClick={() => navigate("/login")}
                   className="ml-1.5 text-accent font-bold cursor-pointer hover:underline"
                 >
-                  Login / लॉग इन करें
+                  Login 
                 </span>
               </p>
             </Form>

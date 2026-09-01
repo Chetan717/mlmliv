@@ -226,14 +226,14 @@ export function Login() {
             <div className="flex flex-col gap-1 w-full">
               <div className="flex justify-between items-center mb-2">
                 <Label className="font-semibold text-[13px] text-foreground/70">
-                  Enter Your Password / पासवर्ड दर्ज करें
+                  Enter Your Password
                 </Label>
                 <span
                   onClick={() => navigate("/forgetpin")}
                   className="text-[12px] text-accent font-bold cursor-pointer"
                   style={{ touchAction: "manipulation" }}
                 >
-                  Forgot Password? / पासवर्ड भूल गए?
+                  Forgot Password? 
                 </span>
               </div>
               <div className="relative w-full">
