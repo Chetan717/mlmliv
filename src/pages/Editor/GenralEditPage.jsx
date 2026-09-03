@@ -61,6 +61,7 @@ import numRupee from "./amount_numberImage/Rupee.png";
 import numSlash from "./amount_numberImage/lash.png";
 import { COLLECTIONS } from "../../collections";
 import { celebrateDownload } from "../../utils/downloadCelebration";
+import { recordImageDownload } from "../../services/userActivityService";
 import { getAchieverDisplayName } from "./utils/canvasDataUtils";
 
 const fs = (n) => n;
@@ -1445,18 +1446,27 @@ function GeneralEditPage({
         collection(db, COLLECTIONS.USERS),
         where("mobileNo", "==", mobileNo),
       );
-      const [activeSnap, userSnap] = await Promise.all([
+      const [activeResult, userResult] = await Promise.allSettled([
         getDocs(activeQuery),
         getDocs(userQuery),
       ]);
-      const activeSubs = activeSnap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .sort(
-          (a, b) => (b.PurchaseAt?.seconds ?? 0) - (a.PurchaseAt?.seconds ?? 0),
-        );
-      setActiveSub(activeSubs[0] || null);
-      if (!userSnap.empty)
-        setUserData({ id: userSnap.docs[0].id, ...userSnap.docs[0].data() });
+      if (activeResult.status === "fulfilled") {
+        const activeSubs = activeResult.value.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort(
+            (a, b) =>
+              (b.PurchaseAt?.seconds ?? 0) - (a.PurchaseAt?.seconds ?? 0),
+          );
+        setActiveSub(activeSubs[0] || null);
+      }
+      if (userResult.status === "fulfilled" && !userResult.value.empty) {
+        const userDocument = userResult.value.docs[0];
+        setUserData({
+          ...userDocument.data(),
+          id: userDocument.id,
+          _documentId: userDocument.id,
+        });
+      }
     } catch (err) {
     } finally {
       setSubLoading(false);
@@ -1998,6 +2008,14 @@ function GeneralEditPage({
         link.click();
         document.body.removeChild(link);
       }
+      // Tracking is best-effort and never delays or blocks the user's file.
+      // The existing user document id is already loaded by this Editor, so
+      // this adds one write and no additional Firestore read/query.
+      void recordImageDownload({
+        userDocumentId: userData?._documentId || userData?.id,
+      }).catch((activityError) => {
+        console.warn("Last Download timestamp could not be saved.", activityError);
+      });
       // await deductCredits(IMAGE_CREDIT_COST, "Downloaded!"); {change for free}
       setExportedUri(uri);
       celebrateDownload();

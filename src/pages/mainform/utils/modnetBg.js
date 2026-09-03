@@ -14,7 +14,7 @@ let forceFreshModelFetch = false;
 // Bump whenever either the model or its matching ONNX Runtime WASM changes.
 // The previous production archive contained a truncated WASM binary; a new
 // URL is required so WebViews cannot reuse that corrupt response from cache.
-const MODEL_ASSET_VERSION = "modnet-2026-08-31-runtime-repair-v2";
+const MODEL_ASSET_VERSION = "modnet-2026-09-03-production-model-v3";
 const INFERENCE_REFERENCE_SIZE = 640;
 const MAX_INFERENCE_SIDE = 1024;
 const MAX_OUTPUT_SIDE = 2048;

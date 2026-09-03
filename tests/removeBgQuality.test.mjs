@@ -162,7 +162,7 @@ test("the bundled ONNX Runtime WASM is complete, versioned, and not truncated", 
     statSync(runtimePath).size > 10_000_000,
     "ONNX Runtime WASM appears truncated",
   );
-  assert.match(modnet, /modnet-2026-08-31-runtime-repair-v2/);
+  assert.match(modnet, /modnet-2026-09-03-production-model-v3/);
 });
 
 test("failed removal exits cleanly and never advances the original photo", () => {
