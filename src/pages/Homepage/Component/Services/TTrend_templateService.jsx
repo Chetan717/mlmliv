@@ -21,6 +21,7 @@ let _cacheTs = 0;
 let _cacheDate = "";
 let _cacheGeneration = 0;
 const CACHE_TTL = 10 * 60 * 1000;
+const SESSION_CACHE_PREFIX = "mlmlive_trending_v2:";
 
 export const TTrend_templateService = async (companyName) => {
   const requestedCompany = companyName || "";
@@ -36,6 +37,22 @@ export const TTrend_templateService = async (companyName) => {
   ) {
     return _cache;
   }
+
+  try {
+    const storageKey = `${SESSION_CACHE_PREFIX}${today}:${requestedCompany}`;
+    const raw = sessionStorage.getItem(storageKey);
+    if (raw) {
+      const entry = JSON.parse(raw);
+      if (Array.isArray(entry?.data) && now - Number(entry.ts || 0) < CACHE_TTL) {
+        _cache = entry.data;
+        _cacheCompany = requestedCompany;
+        _cacheDate = today;
+        _cacheTs = Number(entry.ts);
+        return _cache;
+      }
+      sessionStorage.removeItem(storageKey);
+    }
+  } catch {}
 
   try {
     const q1 = query(
@@ -79,6 +96,12 @@ export const TTrend_templateService = async (companyName) => {
       _cacheCompany = requestedCompany;
       _cacheDate = today;
       _cacheTs = now;
+      try {
+        sessionStorage.setItem(
+          `${SESSION_CACHE_PREFIX}${today}:${requestedCompany}`,
+          JSON.stringify({ ts: now, data: templates }),
+        );
+      } catch {}
     }
 
     return templates;
@@ -94,4 +117,10 @@ export function clearTrendingCache() {
   _cacheCompany = null;
   _cacheTs = 0;
   _cacheDate = "";
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i -= 1) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith(SESSION_CACHE_PREFIX)) sessionStorage.removeItem(key);
+    }
+  } catch {}
 }

@@ -35,11 +35,16 @@ const TABS = [
   },
 ];
 
-function useReportingBadge() {
+function useReportingBadge(enabled) {
   const [count, setCount] = useState(0);
   const unsubRef = useRef(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setCount(0);
+      return;
+    }
+
     let reportingProfile = null;
     try {
       const raw = localStorage.getItem("reportingProfile");
@@ -71,7 +76,7 @@ function useReportingBadge() {
     return () => {
       if (unsubRef.current) unsubRef.current();
     };
-  }, []);
+  }, [enabled]);
 
   return count;
 }
@@ -79,7 +84,8 @@ function useReportingBadge() {
 export default function TabBar() {
   const navigate        = useNavigate();
   const location        = useLocation();
-  const badgeCount      = useReportingBadge();
+  const reportingTabEnabled = TABS.some((tab) => tab.path === "/reporting");
+  const badgeCount      = useReportingBadge(reportingTabEnabled);
   const { hasNewTemplates } = useGeneralData();
 
   const hide = ["/editor", "/Editor", "/selectcomp", "/mlmform", "/mlmprofile"].includes(location.pathname);

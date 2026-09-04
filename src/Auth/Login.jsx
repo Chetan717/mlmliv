@@ -14,9 +14,7 @@ import { toast } from "@heroui/react";
 import { Eye, EyeOff } from "lucide-react";
 import { login, getAuthErrorMessage } from "../services/authService";
 import { setAuthFlowPending, setUser } from "../utils/authStorage";
-import { db } from "@firebase-config";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { COLLECTIONS } from "../collections";
+import { auth } from "@firebase-config";
 import { useSelectedCompany } from "../Context/SelectedCompanyContext";
 import {
   clearCompanyProfileStorage,
@@ -28,6 +26,7 @@ import {
   hasCompleteCompanyIdentity,
   selectPreferredMlmProfile,
 } from "../utils/mlmProfileCompanyIdentity";
+import { getVerifiedMlmProfile } from "../utils/mlmProfileVerification";
 
 export function Login() {
   const navigate = useNavigate();
@@ -109,22 +108,21 @@ export function Login() {
       // Never decide this flow from a browser-cached profile object.
       let mlmProfile = null;
       try {
-        const profileQuery = query(
-          collection(db, COLLECTIONS.MLMPROFILES),
-          where("mobile", "==", data.mobile),
+        const verificationUid =
+          auth.currentUser?.uid ||
+          result.user?.uid ||
+          result.user?.id ||
+          data.mobile;
+        mlmProfile = await getVerifiedMlmProfile(
+          verificationUid,
+          data.mobile,
         );
-        const profileSnapshot = await getDocs(profileQuery);
-        if (!profileSnapshot.empty) {
-          mlmProfile = selectPreferredMlmProfile(
-            profileSnapshot.docs.map((profileDoc) => ({
-              ...profileDoc.data(),
-              // The Firestore document id must win over stale/null data.
-              id: profileDoc.id,
-            })),
-          );
-        }
+        // Keep the same preferred-profile selection contract explicit at the
+        // login boundary. The shared verifier already applies this selection;
+        // re-applying it to the one returned profile is read-free and keeps
+        // legacy duplicate-profile behavior stable.
+        if (mlmProfile) mlmProfile = selectPreferredMlmProfile([mlmProfile]);
       } catch (profileLookupError) {
-        
         throw new Error("Profile verification failed. Please try login again.");
       }
 

@@ -1,12 +1,8 @@
 import {
-  collection,
   deleteDoc,
   doc,
   getDoc,
-  getDocs,
-  query,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import {
   createContext,
@@ -40,7 +36,6 @@ import {
   getProfileCompanyIdentity,
   getSelectedCompanyIdentity,
   hasCompleteCompanyIdentity,
-  selectPreferredMlmProfile,
 } from "../utils/mlmProfileCompanyIdentity";
 
 const SelectedCompanyContext = createContext({
@@ -142,17 +137,13 @@ export function SelectedCompanyProvider({ children }) {
       // incorrectly sent to the Update Profile page on its first template tap.
       let verifiedProfile = null;
       if (identity?.mobileNo) {
-        const profileSnapshot = await getDocs(
-          query(
-            collection(db, COLLECTIONS.MLMPROFILES),
-            where("mobile", "==", identity.mobileNo),
-          ),
-        );
-        verifiedProfile = selectPreferredMlmProfile(
-          profileSnapshot.docs.map((profileDoc) => ({
-            ...profileDoc.data(),
-            id: profileDoc.id,
-          })),
+        // Reuse the shared 2-minute verified-profile cache/request coalescer.
+        // Login and company bootstrap often run back-to-back for the same
+        // mobile; this keeps Firestore as source of truth while avoiding the
+        // duplicate query in that short transition.
+        verifiedProfile = await getVerifiedMlmProfile(
+          user.uid,
+          identity.mobileNo,
         );
         if (verifiedProfile) {
           saveMlmProfileToStorage(verifiedProfile);

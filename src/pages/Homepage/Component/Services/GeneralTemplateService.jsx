@@ -42,11 +42,47 @@ const TYPE_GROUPS = [
 ];
 export const TEMPLATE_GROUP_COUNT = TYPE_GROUPS.length;
 
-// In-memory only cache — cleared on every page reload so new data always shows
-// TTL: 5 minutes within a session to avoid redundant fetches during navigation
+// 5-minute memory + same-tab session cache to avoid duplicate Firestore reads.
+// Explicit refresh/company invalidation still clears the cache immediately.
 const _cache = new Map();
 let _cacheGeneration = 0;
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const SESSION_CACHE_PREFIX = "mlmlive_home_templates_v2:";
+
+function readSessionCache(cacheKey) {
+  try {
+    const raw = sessionStorage.getItem(`${SESSION_CACHE_PREFIX}${cacheKey}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.data) || Date.now() - Number(parsed.ts || 0) >= CACHE_TTL_MS) {
+      sessionStorage.removeItem(`${SESSION_CACHE_PREFIX}${cacheKey}`);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionCache(cacheKey, entry) {
+  try {
+    sessionStorage.setItem(
+      `${SESSION_CACHE_PREFIX}${cacheKey}`,
+      JSON.stringify(entry),
+    );
+  } catch {
+    // Storage quota/privacy mode: in-memory cache still works.
+  }
+}
+
+function clearSessionCache() {
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i -= 1) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith(SESSION_CACHE_PREFIX)) sessionStorage.removeItem(key);
+    }
+  } catch {}
+}
 
 export function getTemplateCache() {
   return _cache;
@@ -55,6 +91,7 @@ export function getTemplateCache() {
 export function clearTemplateCache() {
   _cacheGeneration += 1;
   _cache.clear();
+  clearSessionCache();
 }
 
 const normalizeDoc = (doc) => ({
@@ -83,6 +120,15 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
     }
     // Expired — remove and re-fetch
     _cache.delete(cacheKey);
+  }
+
+  // Preserve the same 5-minute freshness window across a hard page refresh.
+  // Pull-to-refresh/company changes call clearTemplateCache(), so explicit
+  // refresh behaviour remains fresh.
+  const persisted = readSessionCache(cacheKey);
+  if (persisted) {
+    _cache.set(cacheKey, persisted);
+    return persisted.data;
   }
 
   // Fetch fresh from Firestore
@@ -141,7 +187,9 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
           );
         }
       }
-      _cache.set(cacheKey, { ts: Date.now(), data });
+      const entry = { ts: Date.now(), data };
+      _cache.set(cacheKey, entry);
+      writeSessionCache(cacheKey, entry);
     }
     return data;
   } catch (error) {

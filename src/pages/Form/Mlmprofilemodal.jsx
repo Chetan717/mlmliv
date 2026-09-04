@@ -1267,14 +1267,14 @@ export default function MLMProfilePage() {
   const uploadFile = async (file, path) => {
     const webpBlob = await convertToWebP(file);
     const r = storageRef(storage, path.replace(/\.png$/, ".webp"));
-    await uploadBytes(r, webpBlob, { contentType: "image/webp" });
+    await uploadBytes(r, webpBlob, { contentType: "image/webp", cacheControl: "public,max-age=31536000,immutable" });
     return getDownloadURL(r);
   };
 
   const uploadBlob = async (blob, path) => {
     const webpBlob = await convertToWebP(blob);
     const r = storageRef(storage, path.replace(/\.png$/, ".webp"));
-    await uploadBytes(r, webpBlob, { contentType: "image/webp" });
+    await uploadBytes(r, webpBlob, { contentType: "image/webp", cacheControl: "public,max-age=31536000,immutable" });
     return getDownloadURL(r);
   };
 
@@ -1367,7 +1367,7 @@ export default function MLMProfilePage() {
 
       const uploadedTopupURLs = await Promise.all(
         form.topupCustomFiles.map((item, i) =>
-          uploadFile(item.file, `mlmprofiles/${uid}/topup_custom_${i}.png`),
+          uploadFile(item.file, `mlmprofiles/${uid}/topup_custom_${Date.now()}_${i}.png`),
         ),
       );
       const allTopupURLs = [...form.topupSelectedLinks, ...uploadedTopupURLs];

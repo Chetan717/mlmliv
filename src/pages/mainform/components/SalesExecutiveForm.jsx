@@ -531,7 +531,7 @@ export default function SalesExecutiveForm() {
             storage,
             `mlmprofiles/${profile.id}/topup_form_${Date.now()}_${index}.webp`,
           );
-          await uploadBytes(fileRef, webpBlob, { contentType: "image/webp" });
+          await uploadBytes(fileRef, webpBlob, { contentType: "image/webp", cacheControl: "public,max-age=31536000,immutable" });
           return getDownloadURL(fileRef);
         }),
       );
