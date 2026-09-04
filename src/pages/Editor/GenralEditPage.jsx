@@ -972,7 +972,7 @@ function GeneralEditPage({
   const isIncome = selll?.type === "Income";
   const isCapping = selll?.type === "Capping";
 
-  const isGurupornima = selll?.Subtype === "GURU PORNIMA";
+  const isGurupornima = selll?.Subtype === "TEACHER'S DAY" || selll?.Subtype === "GURUPURNIMA ";
 
   const isMeeting =
     selll?.type === "Meeting" || selll?.type === "General_Meeting";
