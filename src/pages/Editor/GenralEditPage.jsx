@@ -3270,9 +3270,9 @@ function GeneralEditPage({
                 <Image
                   ref={profileImageRef}
                   image={ImageProfile}
-                  x={isRight ? 165 : 0.5}
+                  x={isRight ? 190 : -10}
                   y={56}
-                  width={155}
+                  width={175}
                   height={230}
                   scaleX={profileAttrs.scaleX}
                   offsetX={profileAttrs.offsetX}
@@ -3798,16 +3798,16 @@ function GeneralEditPage({
               !ImageProfile
                 ? null
                 : (() => {
-                    const fW = isMeeting ? 60 : 96;
-                    const fH = isMeeting ? 70 : 110;
+                    const fW = isMeeting ? 60 : 87.5;
+                    const fH = isMeeting ? 70 : 115;
                     const fY = isMeeting ? 250 : 210;
                     const baseX = isRight
                       ? isMeeting
                         ? 60
-                        : 96
+                        : 86
                       : isMeeting
                         ? 260
-                        : 224;
+                        : 234;
                     const baseScaleX = isRight ? -1 : 1;
                     const leftEdge = baseScaleX === -1 ? baseX - fW : baseX;
                     const curScaleX = footerImgFlip ? -baseScaleX : baseScaleX;
@@ -4073,7 +4073,7 @@ function GeneralEditPage({
                       : 0;
                     const parentCenterX = isSubGeneralType
                       ? 140 - 300 / 2
-                      : 185 - 300 / 2;
+                      : 178 - 300 / 2;
                     return (
                       <Group
                         x={parentCenterX}
@@ -4179,7 +4179,7 @@ function GeneralEditPage({
                       : 0;
                     const parentCenterX = isSubGeneralType
                       ? 285 - 300 / 2
-                      : 196 - 300 / 2;
+                      : 200 - 300 / 2;
                     return (
                       <Group
                         x={parentCenterX}
