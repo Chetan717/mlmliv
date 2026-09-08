@@ -128,12 +128,12 @@ test("Everyday Moments group, type, and subtype URLs preserve the complete retur
 
   assert.equal(getAllTemplatesType(subtypeSearch), "Good_Morning");
   assert.equal(getAllTemplatesSubtype(subtypeSearch), "Monday Morning");
-  assert.equal(getAllTemplatesBackTarget(subtypeSearch), typePath);
+  assert.equal(getAllTemplatesBackTarget(subtypeSearch), groupPath);
   assert.equal(buildAllTemplatesReturnPath(subtypeSearch), subtypePath);
   assert.equal(isValidAllTemplatesReturnPath(subtypePath), true);
   assert.equal(
     getAppBackTarget("/alltemp", null, null, subtypeSearch),
-    typePath,
+    groupPath,
   );
 });
 
@@ -163,8 +163,10 @@ test("View All renders GraphicsLink showcases instead of parent Showcase_url car
   assert.match(source, /storeEditorTemplateSeed/);
   assert.doesNotMatch(source, /Showcase_url/);
   assert.match(source, /EVERYDAY_MOMENT_ENTRIES/);
-  assert.match(source, /buildEverydayMomentTypePath/);
+  assert.match(source, /SubtypeChoiceCard/);
   assert.match(source, /isEverydayLanding/);
+  assert.match(source, /typeSection\.subtypeSections\.map/);
+  assert.match(source, /View All/);
   assert.match(source, /previewLimit=\{isEverydayTypePage \? 4 : null\}/);
   assert.match(source, /visibleRowItems/);
   assert.match(source, /IntersectionObserver/);

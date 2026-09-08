@@ -11,7 +11,6 @@ import {
 import {
   buildAllTemplatesReturnPath,
   buildAllTemplatesSubtypePath,
-  buildEverydayMomentTypePath,
   getAllTemplatesBackTarget,
   getAllTemplatesGroup,
   getAllTemplatesSubtype,
@@ -259,6 +258,39 @@ function SubtypeRow({
   );
 }
 
+function SubtypeChoiceCard({ section, parentType, onOpenGrid }) {
+  const previewGraphic = getSubtypeRowItems(section)[0] || null;
+  const preview =
+    previewGraphic?.suggestionImage ||
+    previewGraphic?.url ||
+    previewGraphic?.backgroundVideoUrl ||
+    "";
+
+  return (
+    <button
+      type="button"
+      onPointerEnter={() => previewGraphic?.url && preloadImage(previewGraphic.url)}
+      onPointerDown={() => previewGraphic?.url && preloadImage(previewGraphic.url)}
+      onClick={() => onOpenGrid(section.subtype, parentType)}
+      aria-label={`View all ${displayLabel(section.subtype)} designs`}
+      className="w-[118px] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-white text-left shadow-sm card-press dark:bg-black/20"
+    >
+      <div className="relative aspect-square w-full overflow-hidden bg-muted/40">
+        <ShowcaseImage src={preview} alt={displayLabel(section.subtype)} />
+      </div>
+      <div className="px-2.5 py-2.5">
+        <p className="truncate text-xs font-bold text-foreground">
+          {displayLabel(section.subtype)}
+        </p>
+        <div className="mt-1 flex items-center justify-between gap-1 text-[10px] font-bold text-accent dark:text-white">
+          <span>View All</span>
+          <ChevronRight className="h-3 w-3 shrink-0" />
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function LoadingRows() {
   return (
     <div className="space-y-8">
@@ -324,7 +356,6 @@ export default function AllTemplates() {
     setSelType,
     allTemplatesCache,
     setAllTemplatesCache,
-    cachedTemplates,
   } = useGeneralData();
 
   const selectedType = readSelectedType(contextSelectedType);
@@ -352,18 +383,20 @@ export default function AllTemplates() {
   );
   const typeEntries = useMemo(() => {
     if (isEverydayGroup) {
-      if (isEverydayLanding) return [];
-      return isEverydayMomentType(templateType)
-        ? EVERYDAY_MOMENT_ENTRIES.filter(
-            (entry) => entry.type === templateType,
-          )
-        : [];
+      if (isSubtypeGrid || isEverydayTypePage) {
+        return isEverydayMomentType(templateType)
+          ? EVERYDAY_MOMENT_ENTRIES.filter(
+              (entry) => entry.type === templateType,
+            )
+          : [];
+      }
+      return EVERYDAY_MOMENT_ENTRIES;
     }
 
     return templateType
       ? [{ type: templateType, label: displayLabel(templateType) }]
       : [];
-  }, [isEverydayGroup, isEverydayLanding, templateType]);
+  }, [isEverydayGroup, isEverydayTypePage, isSubtypeGrid, templateType]);
   const typeRequestKey = typeEntries.map((entry) => entry.type).join("|");
 
   const [templatesByType, setTemplatesByType] = useState({});
@@ -373,20 +406,6 @@ export default function AllTemplates() {
   const [selectedGraphicKey, setSelectedGraphicKey] = useState("");
   const requestSequenceRef = useRef(0);
   const lastKeyRef = useRef("");
-
-  const everydayTypeCards = useMemo(() => {
-    const homeGroups = new Map(
-      (Array.isArray(cachedTemplates) ? cachedTemplates : [])
-        .filter((group) => group?.type)
-        .map((group) => [group.type, group]),
-    );
-
-    return EVERYDAY_MOMENT_ENTRIES.map((entry) => {
-      const homeItem = homeGroups.get(entry.type)?.templates?.[0] || null;
-      const fallbackItem = getAllGeneralTemplates(entry.type)?.[0] || null;
-      return { ...entry, item: homeItem || fallbackItem };
-    });
-  }, [cachedTemplates]);
 
   useEffect(() => {
     if (!contextSelectedType?.type) return;
@@ -558,14 +577,6 @@ export default function AllTemplates() {
     navigate(getAllTemplatesBackTarget(allTemplatesSearch), { replace: true });
   }, [allTemplatesSearch, navigate]);
 
-  const openEverydayType = useCallback(
-    (type) => {
-      if (!isEverydayMomentType(type)) return;
-      navigate(buildEverydayMomentTypePath(type));
-    },
-    [navigate],
-  );
-
   const selectGraphic = useCallback(
     (graphic) => {
       const template = graphic?._template;
@@ -663,10 +674,12 @@ export default function AllTemplates() {
   const headerSubtitle = isSubtypeGrid
     ? activeEverydayEntry?.label || displayLabel(templateType)
     : isEverydayLanding
-      ? "Choose a category"
+      ? !loading && totalSubtypes > 0
+        ? `${typeSections.length} main types · ${totalSubtypes} subtypes`
+        : "Choose a subtype"
       : !loading && totalBackgrounds > 0
         ? `${totalSubtypes} subtypes · ${totalBackgrounds} backgrounds`
-        : "Choose a subtype and background";
+        : "Choose a subtype";
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
@@ -692,9 +705,7 @@ export default function AllTemplates() {
       </header>
 
       <main className="layout-scroll-container z-10 flex-1 overflow-y-auto px-4 py-6 md:px-8">
-        {loading &&
-          !isEverydayLanding &&
-          (isSubtypeGrid ? <LoadingGrid /> : <LoadingRows />)}
+        {loading && (isSubtypeGrid ? <LoadingGrid /> : <LoadingRows />)}
 
         {!loading && error && (
           <div className="flex flex-col items-center justify-center gap-4 py-28 text-center">
@@ -709,23 +720,44 @@ export default function AllTemplates() {
           </div>
         )}
 
-        {!error && isEverydayLanding && (
-          <div className="grid grid-cols-3 gap-3 px-1 pb-8 sm:gap-4">
-            {everydayTypeCards.map((entry) => {
-              const preview = entry.item?.image || "";
-              return (
-                <button
-                  key={entry.type}
-                  type="button"
-                  onClick={() => openEverydayType(entry.type)}
-                  aria-label={`Open ${entry.label} subtypes`}
-                  className="relative aspect-square w-full max-w-[110px] justify-self-center overflow-hidden rounded-md border border-border bg-white shadow-sm card-press dark:bg-black/20"
-                >
-                  <ShowcaseImage src={preview} alt={entry.label} />
-                </button>
-              );
-            })}
+        {!loading && !error && isEverydayLanding && totalSubtypes > 0 && (
+          <div className="space-y-10 pb-8">
+            {typeSections.map((typeSection) => (
+              <section key={typeSection.type}>
+                <div className="mb-4 flex items-end justify-between gap-3 border-b border-border/70 pb-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate text-lg font-display font-bold text-foreground">
+                      {typeSection.label}
+                    </h2>
+                    <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
+                      {typeSection.subtypeSections.length} subtypes
+                    </p>
+                  </div>
+                </div>
+
+                {typeSection.subtypeSections.length > 0 ? (
+                  <div className="hide-scrollbar scroll-gpu flex snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
+                    {typeSection.subtypeSections.map((section) => (
+                      <SubtypeChoiceCard
+                        key={`${typeSection.type}-${section.subtype}`}
+                        section={section}
+                        parentType={typeSection.type}
+                        onOpenGrid={openSubtypeGrid}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs font-medium text-muted-foreground">
+                    No subtypes available in this category.
+                  </div>
+                )}
+              </section>
+            ))}
           </div>
+        )}
+
+        {!loading && !error && isEverydayLanding && totalSubtypes === 0 && (
+          <EmptyState message="No subtypes are available in Everyday Moments yet." />
         )}
 
         {!loading &&

@@ -57,7 +57,7 @@ export function getAllTemplatesBackTarget(search = "") {
     const subtype = getAllTemplatesSubtype(search);
     const type = getAllTemplatesType(search);
     if (subtype && isEverydayMomentType(type)) {
-      return buildEverydayMomentTypePath(type);
+      return buildEverydayMomentsAllTemplatesPath();
     }
     if (isEverydayMomentType(type)) {
       return buildEverydayMomentsAllTemplatesPath();
