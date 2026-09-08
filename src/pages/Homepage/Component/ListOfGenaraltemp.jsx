@@ -603,7 +603,7 @@ function ListOfGenaraltemp({ templates, loading, searchQuery, companyName }) {
               key={item.id}
               onClick={() => handleImagePress(item)}
               className="flex flex-col items-center gap-1.5 cursor-pointer shrink-0 snap-start card-press"
-              style={{ width: 72 }}
+              style={{ width: 92 }}
             >
               <div
                 className="rounded-full p-[2.5px]"

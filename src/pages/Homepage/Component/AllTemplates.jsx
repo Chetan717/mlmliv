@@ -58,20 +58,21 @@ function displayLabel(value, fallback = "Templates") {
   return text ? text.replaceAll("_", " ") : fallback;
 }
 
-function ShowcaseImage({ src, alt }) {
+function ShowcaseImage({ src, alt, aggressiveLazy = false }) {
   const wrapperRef = useRef(null);
   const [loaded, setLoaded] = useState(() =>
     Boolean(src && seenImages.has(src)),
   );
   const [shouldLoad, setShouldLoad] = useState(() =>
-    Boolean(src && seenImages.has(src)),
+    aggressiveLazy ? false : Boolean(src && seenImages.has(src)),
   );
 
   useEffect(() => {
     const alreadySeen = Boolean(src && seenImages.has(src));
     setLoaded(alreadySeen);
-    setShouldLoad(alreadySeen);
-    if (!src || alreadySeen) return;
+    setShouldLoad(aggressiveLazy ? false : alreadySeen);
+    if (!src) return;
+    if (!aggressiveLazy && alreadySeen) return;
 
     const element = wrapperRef.current;
     if (!element || typeof IntersectionObserver === "undefined") {
@@ -81,15 +82,22 @@ function ShowcaseImage({ src, alt }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (aggressiveLazy) {
+          // Everyday View All can contain many image cards. Keep only nearby
+          // <img> nodes mounted so vertical scrolling does not accumulate
+          // decoded images and repaint work. Browser cache makes re-entry cheap.
+          setShouldLoad(entry.isIntersecting);
+          return;
+        }
         if (!entry.isIntersecting) return;
         setShouldLoad(true);
         observer.disconnect();
       },
-      { rootMargin: "260px" },
+      { rootMargin: aggressiveLazy ? "180px" : "260px" },
     );
     observer.observe(element);
     return () => observer.disconnect();
-  }, [src]);
+  }, [aggressiveLazy, src]);
 
   if (!src) {
     return (
@@ -104,7 +112,9 @@ function ShowcaseImage({ src, alt }) {
 
   return (
     <div ref={wrapperRef} className="absolute inset-0 bg-muted/40">
-      {!loaded && <div className="absolute inset-0 shimmer-bar" />}
+      {!loaded && (!aggressiveLazy || shouldLoad) && (
+        <div className="absolute inset-0 shimmer-bar" />
+      )}
       {shouldLoad && (
         <img
           src={src}
@@ -114,6 +124,7 @@ function ShowcaseImage({ src, alt }) {
           }`}
           loading="lazy"
           decoding="async"
+          fetchPriority={aggressiveLazy ? "low" : "auto"}
           onLoad={() => {
             markImageSeen(src);
             setLoaded(true);
@@ -124,7 +135,13 @@ function ShowcaseImage({ src, alt }) {
   );
 }
 
-function ShowcaseCard({ graphic, selected, onSelect, layout = "row" }) {
+function ShowcaseCard({
+  graphic,
+  selected,
+  onSelect,
+  layout = "row",
+  aggressiveLazy = false,
+}) {
   const template = graphic?._template;
   const preview =
     graphic?.suggestionImage ||
@@ -139,6 +156,11 @@ function ShowcaseCard({ graphic, selected, onSelect, layout = "row" }) {
       onPointerDown={() => graphic?.url && preloadImage(graphic.url)}
       onClick={() => onSelect(graphic)}
       aria-label={`Select ${displayLabel(template?.Subtype, "template")} background`}
+      style={
+        layout === "grid" && aggressiveLazy
+          ? { contentVisibility: "auto", containIntrinsicSize: "110px 110px" }
+          : undefined
+      }
       className={`relative overflow-hidden rounded-md border bg-white text-left shadow-sm transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent card-press dark:bg-black/20 ${
         layout === "grid"
           ? "aspect-square w-full max-w-[110px]"
@@ -149,7 +171,11 @@ function ShowcaseCard({ graphic, selected, onSelect, layout = "row" }) {
           : "border-border"
       }`}
     >
-      <ShowcaseImage src={preview} alt="GraphicsLink showcase" />
+      <ShowcaseImage
+        src={preview}
+        alt="GraphicsLink showcase"
+        aggressiveLazy={aggressiveLazy}
+      />
       {isNewTemplate(template?.serial) && (
         <span className="absolute left-1.5 top-1.5 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white shadow">
           New
@@ -276,7 +302,11 @@ function SubtypeChoiceCard({ section, parentType, onOpenGrid }) {
       className="w-[118px] shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-white text-left shadow-sm card-press dark:bg-black/20"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-muted/40">
-        <ShowcaseImage src={preview} alt={displayLabel(section.subtype)} />
+        <ShowcaseImage
+          src={preview}
+          alt={displayLabel(section.subtype)}
+          aggressiveLazy
+        />
       </div>
       <div className="px-2.5 py-2.5">
         <p className="truncate text-xs font-bold text-foreground">
@@ -288,6 +318,132 @@ function SubtypeChoiceCard({ section, parentType, onOpenGrid }) {
         </div>
       </div>
     </button>
+  );
+}
+
+function EverydayTypeSubtypeSection({ typeSection, onOpenGrid }) {
+  const sectionRef = useRef(null);
+  const [renderChoices, setRenderChoices] = useState(false);
+
+  useEffect(() => {
+    const element = sectionRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") {
+      setRenderChoices(true);
+      return;
+    }
+
+    // Mount subtype cards only while their main-type section is near the
+    // viewport. A fixed-height placeholder keeps the vertical scroll position
+    // stable while off-screen image/card work is released.
+    const observer = new IntersectionObserver(
+      ([entry]) => setRenderChoices(entry.isIntersecting),
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      style={{ contentVisibility: "auto", containIntrinsicSize: "230px" }}
+    >
+      <div className="mb-4 flex items-end justify-between gap-3 border-b border-border/70 pb-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-display font-bold text-foreground">
+            {typeSection.label}
+          </h2>
+          <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
+            {typeSection.subtypeSections.length} subtypes
+          </p>
+        </div>
+      </div>
+
+      {typeSection.subtypeSections.length > 0 ? (
+        renderChoices ? (
+          <div className="hide-scrollbar scroll-gpu flex min-h-[183px] snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
+            {typeSection.subtypeSections.map((section) => (
+              <SubtypeChoiceCard
+                key={`${typeSection.type}-${section.subtype}`}
+                section={section}
+                parentType={typeSection.type}
+                onOpenGrid={onOpenGrid}
+              />
+            ))}
+          </div>
+        ) : (
+          <div
+            className="h-[183px] rounded-xl bg-muted/20"
+            aria-hidden="true"
+          />
+        )
+      ) : (
+        <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs font-medium text-muted-foreground">
+          No subtypes available in this category.
+        </div>
+      )}
+    </section>
+  );
+}
+
+function EverydayGraphicsGrid({
+  section,
+  selectedGraphicKey,
+  onSelect,
+}) {
+  const items = Array.isArray(section?.items) ? section.items : [];
+  const loadMoreRef = useRef(null);
+  const [visibleCount, setVisibleCount] = useState(() => Math.min(36, items.length));
+
+  useEffect(() => {
+    setVisibleCount(Math.min(36, items.length));
+  }, [items.length, section?.subtype]);
+
+  useEffect(() => {
+    if (visibleCount >= items.length) return;
+    const element = loadMoreRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") {
+      setVisibleCount(items.length);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setVisibleCount((current) => Math.min(current + 30, items.length));
+      },
+      { rootMargin: "900px 0px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [items.length, visibleCount]);
+
+  const visibleItems = items.slice(0, visibleCount);
+
+  return (
+    <>
+      <div className="grid grid-cols-3 justify-items-center gap-3 pb-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+        {visibleItems.map((graphic) => {
+          const key = getEditorGraphicSelectionKey(
+            graphic,
+            graphic?._template?.id,
+          );
+          return (
+            <ShowcaseCard
+              key={key}
+              graphic={graphic}
+              selected={selectedGraphicKey === key}
+              onSelect={onSelect}
+              layout="grid"
+              aggressiveLazy
+            />
+          );
+        })}
+      </div>
+      {visibleCount < items.length && (
+        <div ref={loadMoreRef} className="h-10" aria-hidden="true" />
+      )}
+    </>
   );
 }
 
@@ -682,10 +838,20 @@ export default function AllTemplates() {
         : "Choose a subtype";
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background">
+    <div
+      className={`relative flex flex-col bg-background ${
+        isEverydayGroup ? "min-h-full" : "min-h-screen overflow-hidden"
+      }`}
+    >
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-64 bg-gradient-to-b from-accent/10 to-transparent" />
 
-      <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/85 px-4 py-4 backdrop-blur-xl md:px-8 md:py-6">
+      <header
+        className={`sticky top-0 z-20 flex items-center gap-4 border-b border-border px-4 py-4 md:px-8 md:py-6 ${
+          isEverydayGroup
+            ? "bg-background"
+            : "bg-background/85 backdrop-blur-xl"
+        }`}
+      >
         <button
           type="button"
           onClick={goBack}
@@ -704,7 +870,13 @@ export default function AllTemplates() {
         </div>
       </header>
 
-      <main className="layout-scroll-container z-10 flex-1 overflow-y-auto px-4 py-6 md:px-8">
+      <main
+        className={
+          isEverydayGroup
+            ? "z-10 px-4 py-6 md:px-8"
+            : "layout-scroll-container z-10 flex-1 overflow-y-auto px-4 py-6 md:px-8"
+        }
+      >
         {loading && (isSubtypeGrid ? <LoadingGrid /> : <LoadingRows />)}
 
         {!loading && error && (
@@ -723,35 +895,11 @@ export default function AllTemplates() {
         {!loading && !error && isEverydayLanding && totalSubtypes > 0 && (
           <div className="space-y-10 pb-8">
             {typeSections.map((typeSection) => (
-              <section key={typeSection.type}>
-                <div className="mb-4 flex items-end justify-between gap-3 border-b border-border/70 pb-3">
-                  <div className="min-w-0">
-                    <h2 className="truncate text-lg font-display font-bold text-foreground">
-                      {typeSection.label}
-                    </h2>
-                    <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
-                      {typeSection.subtypeSections.length} subtypes
-                    </p>
-                  </div>
-                </div>
-
-                {typeSection.subtypeSections.length > 0 ? (
-                  <div className="hide-scrollbar scroll-gpu flex snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
-                    {typeSection.subtypeSections.map((section) => (
-                      <SubtypeChoiceCard
-                        key={`${typeSection.type}-${section.subtype}`}
-                        section={section}
-                        parentType={typeSection.type}
-                        onOpenGrid={openSubtypeGrid}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs font-medium text-muted-foreground">
-                    No subtypes available in this category.
-                  </div>
-                )}
-              </section>
+              <EverydayTypeSubtypeSection
+                key={typeSection.type}
+                typeSection={typeSection}
+                onOpenGrid={openSubtypeGrid}
+              />
             ))}
           </div>
         )}
@@ -806,23 +954,31 @@ export default function AllTemplates() {
         )}
 
         {!loading && !error && isSubtypeGrid && activeSubtypeSection && (
-          <div className="grid grid-cols-3 justify-items-center gap-3 pb-8 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-            {activeSubtypeSection.items.map((graphic) => {
-              const key = getEditorGraphicSelectionKey(
-                graphic,
-                graphic?._template?.id,
-              );
-              return (
-                <ShowcaseCard
-                  key={key}
-                  graphic={graphic}
-                  selected={selectedGraphicKey === key}
-                  onSelect={selectGraphic}
-                  layout="grid"
-                />
-              );
-            })}
-          </div>
+          isEverydayGroup ? (
+            <EverydayGraphicsGrid
+              section={activeSubtypeSection}
+              selectedGraphicKey={selectedGraphicKey}
+              onSelect={selectGraphic}
+            />
+          ) : (
+            <div className="grid grid-cols-3 justify-items-center gap-3 pb-8 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+              {activeSubtypeSection.items.map((graphic) => {
+                const key = getEditorGraphicSelectionKey(
+                  graphic,
+                  graphic?._template?.id,
+                );
+                return (
+                  <ShowcaseCard
+                    key={key}
+                    graphic={graphic}
+                    selected={selectedGraphicKey === key}
+                    onSelect={selectGraphic}
+                    layout="grid"
+                  />
+                );
+              })}
+            </div>
+          )
         )}
       </main>
     </div>
