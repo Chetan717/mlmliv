@@ -33,6 +33,13 @@ export function buildEverydayMomentsAllTemplatesPath() {
   return `/alltemp?${params.toString()}`;
 }
 
+export function buildEverydayMomentTypePath(type) {
+  const params = new URLSearchParams();
+  params.set("group", EVERYDAY_MOMENTS_GROUP_KEY);
+  params.set("type", String(type || ""));
+  return `/alltemp?${params.toString()}`;
+}
+
 export function buildAllTemplatesSubtypePath(
   subtype,
   { group = "", type = "" } = {},
@@ -47,9 +54,15 @@ export function buildAllTemplatesSubtypePath(
 export function getAllTemplatesBackTarget(search = "") {
   const group = getAllTemplatesGroup(search);
   if (group === EVERYDAY_MOMENTS_GROUP_KEY) {
-    return getAllTemplatesSubtype(search)
-      ? buildEverydayMomentsAllTemplatesPath()
-      : "/";
+    const subtype = getAllTemplatesSubtype(search);
+    const type = getAllTemplatesType(search);
+    if (subtype && isEverydayMomentType(type)) {
+      return buildEverydayMomentTypePath(type);
+    }
+    if (isEverydayMomentType(type)) {
+      return buildEverydayMomentsAllTemplatesPath();
+    }
+    return "/";
   }
   return getAllTemplatesSubtype(search) ? "/alltemp" : "/";
 }
@@ -62,6 +75,9 @@ export function buildAllTemplatesReturnPath(search = "") {
   if (group === EVERYDAY_MOMENTS_GROUP_KEY) {
     if (subtype && isEverydayMomentType(type)) {
       return buildAllTemplatesSubtypePath(subtype, { group, type });
+    }
+    if (isEverydayMomentType(type)) {
+      return buildEverydayMomentTypePath(type);
     }
     return buildEverydayMomentsAllTemplatesPath();
   }
@@ -92,7 +108,7 @@ export function isValidAllTemplatesReturnPath(target) {
 
     if (!group) return Boolean(subtype) && !type;
     if (group !== EVERYDAY_MOMENTS_GROUP_KEY) return false;
-    if (!subtype) return !type;
+    if (!subtype) return !type || isEverydayMomentType(type);
     return isEverydayMomentType(type);
   } catch {
     return false;

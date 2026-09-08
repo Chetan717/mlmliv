@@ -97,8 +97,8 @@ export default function SettingsMenu() {
           rightContent={<Toggle checked={isDark} onChange={toggleTheme} />}
         />
 
-        {/* ── HELP & SUPPORT ── */}
-        <SectionHeader title="Help & Support" />
+        {/* ── SETTINGS & SUPPORT ── */}
+        <SectionHeader title="Settings & Support" />
         <MenuRow
           onClick={() =>
             navigate(BANNER_SETTINGS_PATH, {

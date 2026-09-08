@@ -11,6 +11,7 @@ import {
 import {
   buildAllTemplatesReturnPath,
   buildAllTemplatesSubtypePath,
+  buildEverydayMomentTypePath,
   getAllTemplatesBackTarget,
   getAllTemplatesGroup,
   getAllTemplatesSubtype,
@@ -30,6 +31,7 @@ import {
   ALL_TEMPLATE_GRAPHICS_CACHE_TTL_MS,
   AllTemplateGraphicsService,
 } from "./Services/Alltemplateservice";
+import { getAllGeneralTemplates } from "./Services/generalTemplateIndex";
 import {
   getSubtypeRowItems,
   groupTemplateGraphicsBySubtype,
@@ -169,6 +171,7 @@ function SubtypeRow({
   selectedGraphicKey,
   onSelect,
   onOpenGrid,
+  previewLimit = null,
 }) {
   const rowRef = useRef(null);
   const [renderItems, setRenderItems] = useState(false);
@@ -193,6 +196,12 @@ function SubtypeRow({
     observer.observe(element);
     return () => observer.disconnect();
   }, [renderItems]);
+
+  const rowItems = getSubtypeRowItems(section);
+  const visibleRowItems =
+    Number.isInteger(previewLimit) && previewLimit > 0
+      ? rowItems.slice(0, previewLimit)
+      : rowItems;
 
   return (
     <section
@@ -223,7 +232,7 @@ function SubtypeRow({
 
       {renderItems ? (
         <div className="hide-scrollbar scroll-gpu flex snap-x gap-3 overflow-x-auto px-0.5 pb-2 pt-0.5">
-          {getSubtypeRowItems(section).map((graphic) => {
+          {visibleRowItems.map((graphic) => {
             const key = getEditorGraphicSelectionKey(
               graphic,
               graphic?._template?.id,
@@ -315,6 +324,7 @@ export default function AllTemplates() {
     setSelType,
     allTemplatesCache,
     setAllTemplatesCache,
+    cachedTemplates,
   } = useGeneralData();
 
   const selectedType = readSelectedType(contextSelectedType);
@@ -334,25 +344,26 @@ export default function AllTemplates() {
     : selectedType?.type || "";
   const requestedSubtype = getAllTemplatesSubtype(allTemplatesSearch);
   const isSubtypeGrid = Boolean(requestedSubtype);
+  const isEverydayLanding = isEverydayGroup && !templateType && !isSubtypeGrid;
+  const isEverydayTypePage =
+    isEverydayGroup && Boolean(templateType) && !isSubtypeGrid;
   const templateFlowReturnTarget = buildAllTemplatesReturnPath(
     allTemplatesSearch,
   );
   const typeEntries = useMemo(() => {
     if (isEverydayGroup) {
-      if (isSubtypeGrid) {
-        return isEverydayMomentType(templateType)
-          ? EVERYDAY_MOMENT_ENTRIES.filter(
-              (entry) => entry.type === templateType,
-            )
-          : [];
-      }
-      return EVERYDAY_MOMENT_ENTRIES;
+      if (isEverydayLanding) return [];
+      return isEverydayMomentType(templateType)
+        ? EVERYDAY_MOMENT_ENTRIES.filter(
+            (entry) => entry.type === templateType,
+          )
+        : [];
     }
 
     return templateType
       ? [{ type: templateType, label: displayLabel(templateType) }]
       : [];
-  }, [isEverydayGroup, isSubtypeGrid, templateType]);
+  }, [isEverydayGroup, isEverydayLanding, templateType]);
   const typeRequestKey = typeEntries.map((entry) => entry.type).join("|");
 
   const [templatesByType, setTemplatesByType] = useState({});
@@ -362,6 +373,20 @@ export default function AllTemplates() {
   const [selectedGraphicKey, setSelectedGraphicKey] = useState("");
   const requestSequenceRef = useRef(0);
   const lastKeyRef = useRef("");
+
+  const everydayTypeCards = useMemo(() => {
+    const homeGroups = new Map(
+      (Array.isArray(cachedTemplates) ? cachedTemplates : [])
+        .filter((group) => group?.type)
+        .map((group) => [group.type, group]),
+    );
+
+    return EVERYDAY_MOMENT_ENTRIES.map((entry) => {
+      const homeItem = homeGroups.get(entry.type)?.templates?.[0] || null;
+      const fallbackItem = getAllGeneralTemplates(entry.type)?.[0] || null;
+      return { ...entry, item: homeItem || fallbackItem };
+    });
+  }, [cachedTemplates]);
 
   useEffect(() => {
     if (!contextSelectedType?.type) return;
@@ -533,6 +558,14 @@ export default function AllTemplates() {
     navigate(getAllTemplatesBackTarget(allTemplatesSearch), { replace: true });
   }, [allTemplatesSearch, navigate]);
 
+  const openEverydayType = useCallback(
+    (type) => {
+      if (!isEverydayMomentType(type)) return;
+      navigate(buildEverydayMomentTypePath(type));
+    },
+    [navigate],
+  );
+
   const selectGraphic = useCallback(
     (graphic) => {
       const template = graphic?._template;
@@ -617,19 +650,22 @@ export default function AllTemplates() {
     [isEverydayGroup, navigate],
   );
 
+  const activeEverydayEntry = EVERYDAY_MOMENT_ENTRIES.find(
+    (entry) => entry.type === templateType,
+  );
   const headerTitle = isSubtypeGrid
     ? displayLabel(requestedSubtype)
-    : isEverydayGroup
-      ? "Everyday Moments"
-      : displayLabel(templateType);
-  const headerSubtitle = isSubtypeGrid
-    ? displayLabel(templateType)
-    : !loading && totalBackgrounds > 0
-      ? isEverydayGroup
-        ? `${typeSections.length} categories · ${totalSubtypes} subtypes · ${totalBackgrounds} backgrounds`
-        : `${totalSubtypes} subtypes · ${totalBackgrounds} backgrounds`
+    : isEverydayTypePage
+      ? activeEverydayEntry?.label || displayLabel(templateType)
       : isEverydayGroup
-        ? "All Everyday Moments categories"
+        ? "Everyday Moments"
+        : displayLabel(templateType);
+  const headerSubtitle = isSubtypeGrid
+    ? activeEverydayEntry?.label || displayLabel(templateType)
+    : isEverydayLanding
+      ? "Choose a category"
+      : !loading && totalBackgrounds > 0
+        ? `${totalSubtypes} subtypes · ${totalBackgrounds} backgrounds`
         : "Choose a subtype and background";
 
   return (
@@ -656,7 +692,9 @@ export default function AllTemplates() {
       </header>
 
       <main className="layout-scroll-container z-10 flex-1 overflow-y-auto px-4 py-6 md:px-8">
-        {loading && (isSubtypeGrid ? <LoadingGrid /> : <LoadingRows />)}
+        {loading &&
+          !isEverydayLanding &&
+          (isSubtypeGrid ? <LoadingGrid /> : <LoadingRows />)}
 
         {!loading && error && (
           <div className="flex flex-col items-center justify-center gap-4 py-28 text-center">
@@ -671,6 +709,25 @@ export default function AllTemplates() {
           </div>
         )}
 
+        {!error && isEverydayLanding && (
+          <div className="grid grid-cols-3 gap-3 px-1 pb-8 sm:gap-4">
+            {everydayTypeCards.map((entry) => {
+              const preview = entry.item?.image || "";
+              return (
+                <button
+                  key={entry.type}
+                  type="button"
+                  onClick={() => openEverydayType(entry.type)}
+                  aria-label={`Open ${entry.label} subtypes`}
+                  className="relative aspect-square w-full max-w-[110px] justify-self-center overflow-hidden rounded-md border border-border bg-white shadow-sm card-press dark:bg-black/20"
+                >
+                  <ShowcaseImage src={preview} alt={entry.label} />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {!loading &&
           !error &&
           !isSubtypeGrid &&
@@ -682,62 +739,32 @@ export default function AllTemplates() {
         {!loading &&
           !error &&
           !isSubtypeGrid &&
-          (isEverydayGroup || totalSubtypes > 0) && (
-            <div
-              className={
-                isEverydayGroup ? "space-y-10 pb-8" : "space-y-8 pb-8"
-              }
-            >
-              {typeSections.map((typeSection) =>
-                isEverydayGroup ? (
-                  <section key={typeSection.type}>
-                    <div className="mb-5 flex items-end justify-between gap-3 border-b border-border/70 pb-3">
-                      <div className="min-w-0">
-                        <h2 className="truncate text-lg font-display font-bold text-foreground">
-                          {typeSection.label}
-                        </h2>
-                        <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">
-                          {typeSection.subtypeSections.length} subtypes ·{" "}
-                          {typeSection.totalBackgrounds} backgrounds
-                        </p>
-                      </div>
-                    </div>
-
-                    {typeSection.subtypeSections.length > 0 ? (
-                      <div className="space-y-7">
-                        {typeSection.subtypeSections.map((section) => (
-                          <SubtypeRow
-                            key={`${typeSection.type}-${section.subtype}`}
-                            section={section}
-                            parentType={typeSection.type}
-                            selectedGraphicKey={selectedGraphicKey}
-                            onSelect={selectGraphic}
-                            onOpenGrid={openSubtypeGrid}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs font-medium text-muted-foreground">
-                        No backgrounds available in this category.
-                      </div>
-                    )}
-                  </section>
-                ) : (
-                  <div key={typeSection.type} className="space-y-8">
-                    {typeSection.subtypeSections.map((section) => (
-                      <SubtypeRow
-                        key={`${typeSection.type}-${section.subtype}`}
-                        section={section}
-                        parentType={typeSection.type}
-                        selectedGraphicKey={selectedGraphicKey}
-                        onSelect={selectGraphic}
-                        onOpenGrid={openSubtypeGrid}
-                      />
-                    ))}
-                  </div>
-                ),
-              )}
+          !isEverydayLanding &&
+          totalSubtypes > 0 && (
+            <div className="space-y-8 pb-8">
+              {typeSections.map((typeSection) => (
+                <div key={typeSection.type} className="space-y-8">
+                  {typeSection.subtypeSections.map((section) => (
+                    <SubtypeRow
+                      key={`${typeSection.type}-${section.subtype}`}
+                      section={section}
+                      parentType={typeSection.type}
+                      selectedGraphicKey={selectedGraphicKey}
+                      onSelect={selectGraphic}
+                      onOpenGrid={openSubtypeGrid}
+                      previewLimit={isEverydayTypePage ? 4 : null}
+                    />
+                  ))}
+                </div>
+              ))}
             </div>
+          )}
+
+        {!loading &&
+          !error &&
+          isEverydayTypePage &&
+          totalSubtypes === 0 && (
+            <EmptyState message="No subtypes are available in this category yet." />
           )}
 
         {!loading && !error && isSubtypeGrid && !activeSubtypeSection && (

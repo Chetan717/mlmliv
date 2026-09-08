@@ -4,7 +4,6 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import TabBar from "./components/TabBar";
 import ExpiryAlertBanner from "./components/ExpiryAlertBanner";
-import AppGuide from "./components/AppGuide";
 import DeviceImageUploadLoader from "./components/DeviceImageUploadLoader";
 export default function Layout({
   children,
@@ -56,7 +55,6 @@ export default function Layout({
         {!hideTabBar && <ExpiryAlertBanner />}
       </div>
 
-      <AppGuide />
       <DeviceImageUploadLoader />
 
     </div>

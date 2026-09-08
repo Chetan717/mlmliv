@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   buildEverydayMomentsAllTemplatesPath,
+  buildEverydayMomentTypePath,
   buildAllTemplatesReturnPath,
   buildAllTemplatesSubtypePath,
   getAllTemplatesBackTarget,
@@ -104,9 +105,11 @@ test("subtype grid URL round-trips and its back target is the category page", ()
   assert.equal(getAppBackTarget("/alltemp", null, null, ""), "/");
 });
 
-test("Everyday Moments group and subtype URLs preserve the complete return flow", () => {
+test("Everyday Moments group, type, and subtype URLs preserve the complete return flow", () => {
   const groupPath = buildEverydayMomentsAllTemplatesPath();
   const groupSearch = groupPath.slice(groupPath.indexOf("?"));
+  const typePath = buildEverydayMomentTypePath("Good_Morning");
+  const typeSearch = typePath.slice(typePath.indexOf("?"));
   const subtypePath = buildAllTemplatesSubtypePath("Monday Morning", {
     group: EVERYDAY_MOMENTS_GROUP_KEY,
     type: "Good_Morning",
@@ -118,14 +121,19 @@ test("Everyday Moments group and subtype URLs preserve the complete return flow"
   assert.equal(buildAllTemplatesReturnPath(groupSearch), groupPath);
   assert.equal(isValidAllTemplatesReturnPath(groupPath), true);
 
+  assert.equal(getAllTemplatesType(typeSearch), "Good_Morning");
+  assert.equal(getAllTemplatesBackTarget(typeSearch), groupPath);
+  assert.equal(buildAllTemplatesReturnPath(typeSearch), typePath);
+  assert.equal(isValidAllTemplatesReturnPath(typePath), true);
+
   assert.equal(getAllTemplatesType(subtypeSearch), "Good_Morning");
   assert.equal(getAllTemplatesSubtype(subtypeSearch), "Monday Morning");
-  assert.equal(getAllTemplatesBackTarget(subtypeSearch), groupPath);
+  assert.equal(getAllTemplatesBackTarget(subtypeSearch), typePath);
   assert.equal(buildAllTemplatesReturnPath(subtypeSearch), subtypePath);
   assert.equal(isValidAllTemplatesReturnPath(subtypePath), true);
   assert.equal(
     getAppBackTarget("/alltemp", null, null, subtypeSearch),
-    groupPath,
+    typePath,
   );
 });
 
@@ -155,6 +163,10 @@ test("View All renders GraphicsLink showcases instead of parent Showcase_url car
   assert.match(source, /storeEditorTemplateSeed/);
   assert.doesNotMatch(source, /Showcase_url/);
   assert.match(source, /EVERYDAY_MOMENT_ENTRIES/);
+  assert.match(source, /buildEverydayMomentTypePath/);
+  assert.match(source, /isEverydayLanding/);
+  assert.match(source, /previewLimit=\{isEverydayTypePage \? 4 : null\}/);
+  assert.match(source, /visibleRowItems/);
   assert.match(source, /IntersectionObserver/);
   assert.match(editorListSource, /findEditorItemBySelectionKey/);
   assert.match(editorListSource, /selectedSelectionKey === getEditorGraphicSelectionKey/);
