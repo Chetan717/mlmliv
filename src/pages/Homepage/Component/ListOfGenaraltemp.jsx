@@ -244,7 +244,7 @@ const GRID_TYPES = new Set([
   "ThankYou_Birthday_Anniversary",
 ]);
 const FULL_TYPES = new Set(["Capping"]);
-const CIRCLE_TYPES = new Set(["Today_Trending"]);
+const CIRCLE_TYPES = new Set([""]);
 
 const SkeletonCard = React.memo(() => (
   <div className="rounded-2xl overflow-hidden bg-muted aspect-square w-full relative border border-border">

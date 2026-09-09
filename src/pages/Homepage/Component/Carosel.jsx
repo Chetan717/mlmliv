@@ -102,7 +102,7 @@ export default function Carosel() {
           }}
           pagination={{ dynamicBullets: true, clickable: true }}
           effect="fade"
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
+          autoplay={{ delay: 2500, disableOnInteraction: false }}
           modules={[Pagination, EffectFade, Autoplay]}
           className="w-full aspect-[21/9] md:aspect-[3/1]"
         >
