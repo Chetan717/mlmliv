@@ -63,6 +63,7 @@ import { COLLECTIONS } from "../../collections";
 import { celebrateDownload } from "../../utils/downloadCelebration";
 import { recordImageDownload } from "../../services/userActivityService";
 import { getAchieverDisplayName } from "./utils/canvasDataUtils";
+import { getImageExportPixelRatio } from "./exportUtils";
 
 const fs = (n) => n;
 
@@ -1981,18 +1982,56 @@ function GeneralEditPage({
   const handleExport = async () => {
     if (exportInProgressRef.current) return;
     // if (!checkCredits(IMAGE_CREDIT_COST)) return; {change for free}
+
+    // Never export a half-rendered design while the main template image is
+    // still loading (or failed to load). This was previously possible because
+    // the Download button was enabled independently of bgStatus.
+    if (selected?.url && !bgImage) {
+      showToast(
+        bgStatus === "loading"
+          ? "Design is still loading. Please try again in a moment."
+          : "Design image could not load. Please try again.",
+        "error",
+      );
+      return;
+    }
+
+    const stage = stageRef.current;
+    if (!stage) {
+      showToast("Design is not ready yet. Please try again.", "error");
+      return;
+    }
+
     exportInProgressRef.current = true;
     setExportLoading(true);
     setIsImageSelected(false);
     setSelectedImageType(null);
     await new Promise((res) => setTimeout(res, 80));
     try {
-      const uri = stageRef.current.toDataURL({
-        pixelRatio: EXPORT_PIXEL_RATIO,
+      // Force the latest React/Konva changes to paint before capture. Two RAFs
+      // are cheap but avoid capturing the previous frame on slower WebViews.
+      stage.batchDraw();
+      if (typeof window.requestAnimationFrame === "function") {
+        await new Promise((resolve) =>
+          window.requestAnimationFrame(() =>
+            window.requestAnimationFrame(resolve),
+          ),
+        );
+      }
+
+      const isNativeWebView = Boolean(window.ReactNativeWebView?.postMessage);
+      const exportPixelRatio = getImageExportPixelRatio({
+        stageWidth: STAGE_WIDTH,
+        defaultPixelRatio: EXPORT_PIXEL_RATIO,
+        isNativeWebView,
+      });
+
+      const uri = stage.toDataURL({
+        pixelRatio: exportPixelRatio,
         mimeType: "image/png",
         quality: 1,
       });
-      if (window.ReactNativeWebView) {
+      if (isNativeWebView) {
         window.ReactNativeWebView.postMessage(
           JSON.stringify({
             type: "DOWNLOAD_IMAGE",
