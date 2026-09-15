@@ -1631,6 +1631,11 @@ function GeneralEditPage({
   const [imgTraining] = useImage(selll?.ShowCaseForm || "", "anonymous");
   const [tankyoubadge] = useImage(savedDesignation?.profileimage, "anonymous");
   const [rankbadge] = useImage(`${selected?.rankNameImageUrl}`, "anonymous");
+  const [tripbadge] = useImage(`${selected?.trip_batch_image}`, "anonymous");
+  const [trip_detail_image] = useImage(
+    `${selected?.trip_detail_image}`,
+    "anonymous",
+  );
   const [spdone] = useImage(spdoneimg, "anonymous");
   // const [rankbadge] = useImage(
   //   `https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Fprofiles%2F1783622139234_4w41zm.webp?alt=media&token=7a87aeba-624d-491d-88fe-63c188752a60`,
@@ -3408,6 +3413,7 @@ function GeneralEditPage({
                   height={55}
                 />
               ) : null}
+
               {isBonanza ? (
                 <Image
                   x={isRight ? 100 : 170}
@@ -3495,6 +3501,25 @@ function GeneralEditPage({
                   letterSpacing={0}
                   verticalAlign="center"
                   align="center"
+                />
+              ) : null}
+
+              {isRank ? (
+                <Image
+                  image={trip_detail_image}
+                  x={isRank_B ? (isRight ? -25 : 132) : isRight ? 12 : 145}
+                  y={isRank_B ? 198 : 134}
+                  width={215}
+                  height={11.3}
+                />
+              ) : null}
+              {isRank ? (
+                <Image
+                  image={tripbadge}
+                  x={isRank_B ? (isRight ? 105 : 132) : isRight ? 12 : 145}
+                  y={isRank_B ? 193 : 134}
+                  width={83}
+                  height={83}
                 />
               ) : null}
 
