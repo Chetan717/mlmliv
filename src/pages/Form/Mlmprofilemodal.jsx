@@ -1866,7 +1866,9 @@ export default function MLMProfilePage() {
                   onChange={(e) => setField("salutation", e.target.value)}
                   className="border border-border rounded-xl px-3 py-2.5 text-[13px] bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
                 >
-                  {["Mr", "Mrs", "Miss", "Ms", "Dr"].map((s) => (
+                  {["Mr", "Mrs", "Miss", "Ms", "Dr",
+                    "Prof","Er",
+                  ].map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>

@@ -84,12 +84,14 @@ const storage = getStorage(app);
 const RANK_PROMOTION_FORM_IMAGES = Object.freeze(
   Object.fromEntries(RANK_PROMOTION_TYPES.map((type) => [type, Rank])),
 );
-const ACHIEVER_TITLE_OPTIONS = Object.freeze(["Mr.", "Mrs.", "Miss", "Dr."]);
+const ACHIEVER_TITLE_OPTIONS = Object.freeze(["Mr.", "Mrs.", "Miss", "Dr.", "Prof.", "Er."]);
 const ACHIEVER_TITLE_BY_KEY = Object.freeze({
   mr: "Mr.",
   mrs: "Mrs.",
   miss: "Miss",
   dr: "Dr.",
+  prof: "Prof.",
+  er: "Er.",
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
