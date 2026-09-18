@@ -10,6 +10,7 @@ export const GENERAL_SELECT_TYPES_birthday = [
 
 export const GENERAL_SELECT_TYPES_bonanza = [
   { name: "Bonanza", value: "Bonanza" },
+  { name: "Domestic Trip", value: "Domestic_Trip" },
 ];
 
 export const clamp = (val, min, max) => Math.min(Math.max(val, min), max);

@@ -27,6 +27,11 @@ export const HOME_SECTION_DEFINITIONS = Object.freeze([
     entries: [{ type: "Bonanza" }],
   },
   {
+    id: "domestic-trip",
+    title: "Domestic Trip",
+    entries: [{ type: "Domestic_Trip" }],
+  },
+  {
     id: "welcome-closing",
     title: "Welcome Closing",
     entries: [{ type: "Welcome_Closing" }],

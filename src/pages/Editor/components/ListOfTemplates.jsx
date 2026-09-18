@@ -614,11 +614,34 @@ export default function ListOfTemplates({
             }));
           });
         } else if (isGeneralTemplate) {
-          items = getGeneralItemsForEditor(
-            genaral_template_json,
-            filterType,
-            fetchSubType,
-          );
+          if (filterType === "Domestic_Trip") {
+            const snap = await getDocs(
+              query(
+                collection(db, COLLECTIONS.MLMTEMPLATE),
+                where("SelectType", "==", filterType),
+              ),
+            );
+            snap.forEach((docSnap) => {
+              const template = { id: docSnap.id, ...docSnap.data() };
+              if (
+                template.MainType !== "General" ||
+                template.Active !== true ||
+                template.Launched !== true ||
+                (fetchSubType && String(template.Subtype || "").trim() !== String(fetchSubType).trim())
+              ) {
+                return;
+              }
+              (template.GraphicsLink || []).forEach((graphic) => {
+                items.push({ ...graphic, _template: template });
+              });
+            });
+          } else {
+            items = getGeneralItemsForEditor(
+              genaral_template_json,
+              filterType,
+              fetchSubType,
+            );
+          }
         } else {
           const constraints = [
             where("SelectType", "==", filterType),

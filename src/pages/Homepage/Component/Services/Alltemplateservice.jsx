@@ -21,6 +21,29 @@ const _graphicsRequests = new Map();
 let _graphicsCacheGeneration = 0;
 const GRAPHICS_SESSION_CACHE_PREFIX = "mlmlive_all_template_graphics_v2:";
 
+const LIVE_GENERAL_TEMPLATE_TYPES = new Set(["Domestic_Trip"]);
+
+async function fetchLiveGeneralTemplates(selectedType) {
+  if (!LIVE_GENERAL_TEMPLATE_TYPES.has(selectedType)) return [];
+  const snapshot = await getDocs(
+    query(
+      collection(db, COLLECTIONS.MLMTEMPLATE),
+      where("SelectType", "==", selectedType),
+    ),
+  );
+  return snapshot.docs
+    .filter((docSnap) => {
+      const data = docSnap.data();
+      return (
+        data?.MainType === "General" &&
+        data?.Active === true &&
+        data?.Launched === true
+      );
+    })
+    .map(normalizeDoc)
+    .sort((a, b) => Number(a.serial || 0) - Number(b.serial || 0));
+}
+
 function getGraphicsCacheKey(selectedType, companyName) {
   return `${String(companyName || "").trim()}::${String(selectedType || "").trim()}`;
 }
@@ -128,7 +151,9 @@ export const AllTemplateGraphicsService = async (
 
   const requestGeneration = _graphicsCacheGeneration;
   const request = (async () => {
-    const generalTemplates = getAllGeneralTemplates(selectedType);
+    const generalTemplates = LIVE_GENERAL_TEMPLATE_TYPES.has(selectedType)
+      ? await fetchLiveGeneralTemplates(selectedType)
+      : getAllGeneralTemplates(selectedType);
     let mlmTemplates = [];
 
     if (companyName) {
@@ -173,12 +198,26 @@ export const Alltemplateservice = async (
 ) => {
   try {
     const lastSerialForJson = lastDoc?._generalLastSerial ?? null;
+    const isLiveGeneralType = LIVE_GENERAL_TEMPLATE_TYPES.has(Selected_type);
 
-    const generalResult = getGeneralTemplatesPage(
-      Selected_type,
-      pageSize,
-      lastSerialForJson,
-    );
+    const liveGeneralTemplates = isLiveGeneralType
+      ? await fetchLiveGeneralTemplates(Selected_type)
+      : null;
+    const liveStartIndex = isLiveGeneralType
+      ? Number(lastDoc?._liveGeneralOffset || 0)
+      : 0;
+    const livePage = isLiveGeneralType
+      ? liveGeneralTemplates.slice(liveStartIndex, liveStartIndex + pageSize)
+      : null;
+    const generalResult = isLiveGeneralType
+      ? {
+          templates: livePage,
+          hasMore: liveStartIndex + pageSize < liveGeneralTemplates.length,
+          lastSerial: livePage.length
+            ? Number(livePage[livePage.length - 1]?.serial || 0)
+            : null,
+        }
+      : getGeneralTemplatesPage(Selected_type, pageSize, lastSerialForJson);
     const generalTemplates = generalResult.templates;
 
     let mlmTemplates = [];
@@ -211,6 +250,9 @@ export const Alltemplateservice = async (
 
     const newLastDoc = {
       _generalLastSerial: generalResult.lastSerial,
+      _liveGeneralOffset: isLiveGeneralType
+        ? liveStartIndex + generalTemplates.length
+        : undefined,
       _mlmLastDoc: mlmLastDoc,
     };
 

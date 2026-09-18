@@ -21,6 +21,7 @@ const TYPE_GROUPS = [
     "Motivational",
     ...RANK_PROMOTION_TYPES,
     "Bonanza",
+    "Domestic_Trip",
     "Welcome_Closing",
     "Training",
     "Meeting",
@@ -138,8 +139,18 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
 
     const results = await Promise.all(
       selectedTypes.map(async (type) => {
-        const [generalTemplates, mlmSnapshot] = await Promise.all([
-          Promise.resolve(getGeneralTemplatesForHome(type, HOME_LIMIT)),
+        const bundledGeneralTemplates = getGeneralTemplatesForHome(type, HOME_LIMIT);
+        const isLiveGeneralType = type === "Domestic_Trip";
+
+        const [liveGeneralSnapshot, mlmSnapshot] = await Promise.all([
+          isLiveGeneralType
+            ? getDocs(
+                query(
+                  collection(db, COLLECTIONS.MLMTEMPLATE),
+                  where("SelectType", "==", type),
+                ),
+              )
+            : Promise.resolve({ docs: [] }),
           company
             ? getDocs(
                 query(
@@ -156,6 +167,22 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
             : Promise.resolve({ docs: [] }),
         ]);
 
+        const liveGeneralTemplates = liveGeneralSnapshot.docs
+          .filter((docSnap) => {
+            const data = docSnap.data();
+            return (
+              data?.MainType === "General" &&
+              data?.Active === true &&
+              data?.Launched === true
+            );
+          })
+          .map(normalizeDoc)
+          .sort((a, b) => Number(a.serial || 0) - Number(b.serial || 0))
+          .slice(0, HOME_LIMIT);
+
+        const generalTemplates = isLiveGeneralType
+          ? liveGeneralTemplates
+          : bundledGeneralTemplates;
         const mlmTemplates = mlmSnapshot.docs.map(normalizeDoc);
 
         return {
@@ -166,7 +193,7 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
           // set on View All. Exactly HOME_LIMIT remains intentionally
           // unprimed because more remote documents may exist.
           completeTemplates:
-            mlmTemplates.length < HOME_LIMIT
+            !isLiveGeneralType && mlmTemplates.length < HOME_LIMIT
               ? [...mlmTemplates, ...getAllGeneralTemplates(type)]
               : null,
         };

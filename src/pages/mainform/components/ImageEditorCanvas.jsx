@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "@heroui/react";
 import { buildPhotoEnhanceFilter } from "../../../utils/photoEnhance";
-import { isRankPromotionType } from "../../../utils/templateTypeConfig";
+import { isBonanzaFlowType, isRankPromotionType } from "../../../utils/templateTypeConfig";
 
 // ── Helpers ───────────────────────────────────────────────────────
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -163,7 +163,7 @@ export default function ImageEditorCanvas({
   const isAnyversary = selll?.type === "Anniversary_Birthday";
   const isClosing = selll?.Subtype === "CLOSING";
   const isWelcome = selll?.Subtype === "WELCOME";
-  const isBonanza = selll?.type === "Bonanza";
+  const isBonanza = isBonanzaFlowType(selll?.type);
   const isAchv = selll?.type === "Achievements";
   const isRank = isRankPromotionType(selll?.type);
   const isTraining = selll?.type === "Training";

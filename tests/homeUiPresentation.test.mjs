@@ -18,6 +18,7 @@ const orderedTypes = [
   "Rank_Promotion",
   "Rank_Promotion_B",
   "Bonanza",
+  "Domestic_Trip",
   "Welcome_Closing",
   "Training",
   "Meeting",
@@ -52,6 +53,7 @@ test("Home template sections follow the product order and group related types", 
       "Motivational",
       "Rank Promotion",
       "Bonanza",
+      "Domestic Trip",
       "Welcome Closing",
       "Training",
       "Meeting",
@@ -97,6 +99,7 @@ test("group display names remain searchable", () => {
   assert.match(getHomeTemplateSearchText("Good_Morning"), /everyday moments/);
   assert.match(getHomeTemplateSearchText("ThankYou_Banner_B"), /thank you/);
   assert.match(getHomeTemplateSearchText("Rank_Promotion_B"), /rank promotion b/);
+  assert.match(getHomeTemplateSearchText("Domestic_Trip"), /domestic trip/);
 });
 
 test("Home keeps special layouts and applies the new default tile dimensions", () => {

@@ -15,6 +15,7 @@ import ListOfTemplates from "./components/ListOfTemplates";
 import AiRetouchModal from "./AiRetouchModal";
 import CaptionModal from "../../components/CaptionModal";
 import {
+  isBonanzaFlowType,
   isRankPromotionType,
   RANK_PROMOTION_TYPES,
 } from "../../utils/templateTypeConfig";
@@ -496,6 +497,7 @@ const FadeLeftFilter = (imageData) => {
 const NO_FOOTER_TYPES = new Set([
   ...RANK_PROMOTION_TYPES,
   "Bonanza",
+  "Domestic_Trip",
   "Welcome_Closing",
   "Achievements",
   "Anniversary_Birthday",
@@ -962,7 +964,7 @@ function GeneralEditPage({
     offsetY: 0,
   });
 
-  const isBonanza = Template_Type === "Bonanza";
+  const isBonanza = isBonanzaFlowType(Template_Type);
   const isThankyouRank = Template_Type === "ThankYou_Banner_B";
   const isTraining = Template_Type === "Training";
   const isWelcomeClosing = Template_Type === "Welcome_Closing";
@@ -3526,7 +3528,7 @@ function GeneralEditPage({
               {isSubGeneralType ||
               isSubGeneralType2 ||
               Template_Type === "Anniversary_Birthday" ||
-              Template_Type === "Bonanza" ||
+              isBonanza ||
               Template_Type === "Capping" ||
               isWelcome ||
               isMeeting ||

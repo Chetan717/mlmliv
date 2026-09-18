@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import captionsData from "../captions.json";
-import { isRankPromotionType } from "../utils/templateTypeConfig";
+import { isBonanzaFlowType, isRankPromotionType } from "../utils/templateTypeConfig";
 
 const categories = captionsData.categories;
 
@@ -19,8 +19,8 @@ export default function CaptionModal({
 
   const achieverLine = achieverInfo?.name
     ? [
-        achieverInfo?.selectType === "Bonanza"
-          ? `आइए हम सभी मिलकर बधाई देते हैं ${achieverInfo.name} from ${achieverInfo.city} जिन्होनें कंपनी का ${achieverInfo.rankname} BONANZA अचीव  किया है। \n\nBEST WISHES FROM \n${achieverInfo.fromwish}\n${achieverInfo.formdesignation}\n ${`MOB NO. : ${achieverInfo.formmobile}`}\n`
+        isBonanzaFlowType(achieverInfo?.selectType)
+          ? `आइए हम सभी मिलकर बधाई देते हैं ${achieverInfo.name} from ${achieverInfo.city} जिन्होनें कंपनी का ${achieverInfo.rankname} ${achieverInfo?.selectType === "Domestic_Trip" ? "DOMESTIC TRIP" : "BONANZA"} अचीव  किया है। \n\nBEST WISHES FROM \n${achieverInfo.fromwish}\n${achieverInfo.formdesignation}\n ${`MOB NO. : ${achieverInfo.formmobile}`}\n`
           : isRankPromotionType(achieverInfo?.selectType)
             ? `आइए हम सभी मिलकर बधाई देते हैं ${achieverInfo.name} from ${achieverInfo.city} जिन्होनें कंपनी का ${achieverInfo.rankname} RANK अचीव करके ${achieverInfo.amount} प्राप्त किया है। \n\nBEST WISHES FROM \n ${achieverInfo.fromwish}\n${achieverInfo.formdesignation}\n${`MOB NO. : ${achieverInfo.formmobile}`}\n`
             : null,

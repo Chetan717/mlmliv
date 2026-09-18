@@ -64,7 +64,10 @@ import { useNavigate } from "react-router";
 import IncomeForm from "./IncomeForm";
 import MeetingForm from "./MeetingForm";
 import { useSelectedCompany } from "../../../Context/SelectedCompanyContext";
-import { RANK_PROMOTION_TYPES } from "../../../utils/templateTypeConfig";
+import {
+  isBonanzaFlowType,
+  RANK_PROMOTION_TYPES,
+} from "../../../utils/templateTypeConfig";
 
 import Bike from "../formshow/BIKE.webp";
 import CarPurchase from "../formshow/CAR PURCHASE.webp";
@@ -362,7 +365,7 @@ export default function SalesExecutiveForm() {
   const isAnyversary = selll?.type === "Anniversary_Birthday";
   const isIncome = selll?.type === "Income";
   const isMeeting = selll?.type === "Meeting" || selll?.type === "General_Meeting";
-  const isBonanza = selll?.type === "Bonanza";
+  const isBonanza = isBonanzaFlowType(selll?.type);
   const rankPromotionFormImage = RANK_PROMOTION_FORM_IMAGES[selll?.type];
   const formImage =
     selll?.Subtype === "WELCOME"
@@ -385,7 +388,7 @@ export default function SalesExecutiveForm() {
                       ? Incomee
                       : selll?.type === "Meeting" || selll?.type === "General_Meeting"
                         ? MeetingImage
-                        : selll?.type === "Bonanza"
+                        : isBonanzaFlowType(selll?.type)
                           ? GiftOther
                           : rankPromotionFormImage || Rank;
   const formImageLabel = selll?.Subtype;
@@ -481,7 +484,7 @@ export default function SalesExecutiveForm() {
         if (!achiever.name?.trim()) newErrors.achieverName = "Name is required";
         if (!achiever.city?.trim()) newErrors.achieverCity = "City is required";
         if (
-          selectedType !== "Bonanza" &&
+          !isBonanzaFlowType(selectedType) &&
           isWelcome &&
           isAchievment &&
           !achiever.amount?.toString().trim()
@@ -1082,7 +1085,7 @@ export default function SalesExecutiveForm() {
             <div className="flex items-center gap-2">
               <div className="w-1 h-4 rounded-full bg-accent flex-shrink-0" />
               <p className="text-[13px] font-bold text-foreground">
-                Bonanza Details
+                {selll?.type === "Domestic_Trip" ? "Domestic Trip Details" : "Bonanza Details"}
               </p>
             </div>
 
