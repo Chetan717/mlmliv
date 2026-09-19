@@ -504,5 +504,33 @@
         "size": "square"
       }
     ]
-  }
+  },
+  {
+    "ID": "3ucjL6IQwoJktruoAcbl",
+    "name": "AUPL",
+    "logos": [
+      {
+        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789833068150_qyzqma.webp?alt=media&token=3a0ddf6b-5545-4934-bdbf-34c9d001d2db",
+        "size": "rectangle"
+      },
+      {
+        "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789833068150_qyzqma.webp?alt=media&token=3a0ddf6b-5545-4934-bdbf-34c9d001d2db",
+        "size": "rectangle"
+      }
+    ]
+  },
+   {
+     "ID": "iNjawihI2TZnUfsyspby",
+     "name": "GIRI HIMALAYA",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789833370361_6s64od.webp?alt=media&token=8b1ae389-7b82-4802-afcc-6f734afd4d6a",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789833370361_6s64od.webp?alt=media&token=8b1ae389-7b82-4802-afcc-6f734afd4d6a",
+         "size": "square"
+       }
+     ]
+   }
 ]
