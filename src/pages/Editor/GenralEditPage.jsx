@@ -2751,28 +2751,6 @@ function GeneralEditPage({
     }
   };
 
-  const [stageSize, setStageSize] = useState(320);
-
-  useLayoutEffect(() => {
-    const update = () => {
-      if (!stageContainerRef.current) return;
-
-      setStageSize(stageContainerRef.current.clientWidth);
-    };
-
-    update();
-
-    const ro = new ResizeObserver(update);
-    ro.observe(stageContainerRef.current);
-
-    window.addEventListener("resize", update);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
   const handleStageMouseDown = (e) => {
     if (e.target === e.target.getStage()) {
       setIsImageSelected(false);
@@ -2915,8 +2893,8 @@ function GeneralEditPage({
             // width={STAGE_WIDTH}
             // height={STAGE_HEIGHT}
             ref={stageRef}
-            width={stageSize}
-            height={stageSize}
+            width={STAGE_WIDTH}
+            height={STAGE_HEIGHT}
             className="bg-background border border-border shadow-lg"
             onMouseDown={handleStageMouseDown}
             onTouchStart={handleStageMouseDown}

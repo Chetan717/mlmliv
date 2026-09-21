@@ -76,13 +76,16 @@ export default function ProtectSelectComp({ children }) {
     user,
   ]);
 
-  if (loading || companyLoading) return null;
+  if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
 
-  // The context state update after deletion can land one React render after the
-  // route change. Let this explicit post-delete navigation render Select Company
-  // immediately instead of bouncing to Home and leaving its keep-alive page blank.
+  // Profile deletion already cleared the company/profile state before this
+  // navigation is issued. Do not let a stale company bootstrap/loading render
+  // hide Select Company during that transition, otherwise the route can appear
+  // completely blank until another navigation happens.
   if (isPostDeleteSelection) return children;
+
+  if (companyLoading) return null;
 
   if (isChangeRequest) {
     if (hasMlmProfile || changeAccess === "locked") {

@@ -45,3 +45,16 @@ test("Editor waits for the main background and a stable Konva frame before expor
   assert.match(imageExport, /getImageExportPixelRatio/);
   assert.match(imageExport, /isNativeWebView/);
 });
+
+
+test("responsive editor preview never shrinks the actual Konva export stage", () => {
+  const editor = read("src/pages/Editor/GenralEditPage.jsx");
+  const stageMarkup = editor.slice(
+    editor.indexOf("<Stage"),
+    editor.indexOf("</Stage>") + "</Stage>".length,
+  );
+
+  assert.match(stageMarkup, /width=\{STAGE_WIDTH\}/);
+  assert.match(stageMarkup, /height=\{STAGE_HEIGHT\}/);
+  assert.doesNotMatch(editor, /const \[stageSize, setStageSize\]/);
+});
