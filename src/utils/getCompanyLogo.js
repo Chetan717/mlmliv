@@ -29,10 +29,11 @@ export function getCompanyLogoUrl(company, preferredSize = "square") {
     company.logo,
   ].filter((item) => getLogoLink(item));
 
-  const preferred = candidates.find(
+  const preferred = candidates?.find(
     (item) =>
       typeof item === "object" &&
-      String(item?.size || "").toLowerCase() === preferredSize,
+      item?.index === 0,
+      
   );
 
   return getLogoLink(preferred || candidates[0]);
