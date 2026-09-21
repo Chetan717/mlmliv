@@ -532,5 +532,33 @@
          "size": "square"
        }
      ]
+   },
+   {
+     "ID": "l4MmqvH4FUyrHH0B2xyl",
+     "name": "SWARANG WELLNESS",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789899394127_9frlyl.webp?alt=media&token=08f15739-3ed9-47bf-97de-20e217fa93ef",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789899481871_nd9ghy.webp?alt=media&token=3cdccb75-c5f2-47b4-bf0b-07a3a14ddf84",
+         "size": "square"
+       }
+     ]
+   },
+   {
+     "ID": "EfuTMUQJIYWR3DKyIlsU",
+     "name": "SAMARTH SUCCESS",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789900789321_rhd8oo.webp?alt=media&token=fe5cab0c-f7e4-4edc-bfda-bd341243e48d",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1789900511113_rraa34.webp?alt=media&token=a34c0993-0f57-424d-8610-01168fa3d7fe",
+         "size": "rectangle"
+       }
+     ]
    }
 ]
