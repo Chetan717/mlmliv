@@ -560,5 +560,19 @@
          "size": "rectangle"
        }
      ]
+   },
+   {
+     "ID": "AftZSsU5XQ2mT05IzGaP",
+     "name": "AMARNATH SUCCESSDREAM",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790065338843_bno4d7.webp?alt=media&token=cdab0cf0-828e-4f82-9258-a76a1956d749",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790065338843_bno4d7.webp?alt=media&token=cdab0cf0-828e-4f82-9258-a76a1956d749",
+         "size": "square"
+       }
+     ]
    }
 ]
