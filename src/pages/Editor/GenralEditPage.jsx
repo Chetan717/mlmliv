@@ -1631,7 +1631,10 @@ function GeneralEditPage({
   );
 
   const [imgTraining] = useImage(selll?.ShowCaseForm || "", "anonymous");
-  const [imgMeeting] = useImage(selll?.meeting_badge_image || "", "anonymous");
+  const [imgMeeting] = useImage(
+    selected?.meeting_badge_image || "",
+    "anonymous",
+  );
   const [tankyoubadge] = useImage(savedDesignation?.profileimage, "anonymous");
   const [rankbadge] = useImage(`${selected?.rankNameImageUrl}`, "anonymous");
   const [tripbadge] = useImage(`${selected?.trip_batch_image}`, "anonymous");
