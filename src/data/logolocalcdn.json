@@ -574,5 +574,19 @@
          "size": "square"
        }
      ]
+   },
+   {
+     "ID": "ymmkvjhjAV8yiDsGsPV1",
+     "name": "AROGYVYM",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790150783120_8spxg6.webp?alt=media&token=917d39a2-f185-47c5-86c9-dd73987af393",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790150358885_nuy4xv.webp?alt=media&token=de412b1c-0a7b-4f3f-bc43-fa2ed440900d",
+         "size": "square"
+       }
+     ]
    }
 ]
