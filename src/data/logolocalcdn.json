@@ -588,5 +588,19 @@
          "size": "square"
        }
      ]
+   },
+    {
+     "ID": "NatmiIPPw88Gs2EiBtRl",
+     "name": "HERBALESSENCE",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790243722361_tszh14.webp?alt=media&token=a6d0335d-aba4-4119-9089-2b694c52e1e0",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790243722361_tszh14.webp?alt=media&token=a6d0335d-aba4-4119-9089-2b694c52e1e0",
+         "size": "square"
+       }
+     ]
    }
 ]
