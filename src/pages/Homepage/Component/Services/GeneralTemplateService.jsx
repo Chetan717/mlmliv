@@ -25,7 +25,7 @@ const TYPE_GROUPS = [
     "Welcome_Closing",
     "Training",
     "Meeting",
-    "General_Meeting",
+    // "General_Meeting",
     "Good_Morning",
     "Sport",
     "Daily_Life",
