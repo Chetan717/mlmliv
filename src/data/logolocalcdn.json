@@ -602,5 +602,33 @@
          "size": "square"
        }
      ]
+   },
+   {
+     "ID": "IrsuHw7v6VfiLwFWBaoq",
+     "name": "RUTWAY",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790334743014_xt5och.webp?alt=media&token=8f657108-b251-4840-ae2b-07e7c00f8731",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790334743014_xt5och.webp?alt=media&token=8f657108-b251-4840-ae2b-07e7c00f8731",
+         "size": "square"
+       }
+     ]
+   },
+   {
+     "ID": "e8cQSGnYEnuKqKlFbmHS",
+     "name": "SAMRUDH SUCCESS",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790403668551_6dpqyy.webp?alt=media&token=19ef71b4-b46f-48be-82bd-b3973ad5a102",
+         "size": "square"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790403681269_28pj9s.webp?alt=media&token=a93473ce-09db-451e-9c1c-344df466f96c",
+         "size": "square"
+       }
+     ]
    }
 ]
