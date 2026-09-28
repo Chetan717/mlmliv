@@ -20338,12 +20338,12 @@
         }
       ],
       "SelectType": "Bonanza",
-      "Active": false,
+      "Active": true,
       "Company": "",
       "createdAt": {
         "__time__": "2026-09-28T11:32:54.310Z"
       },
-      "Launched": false,
+      "Launched": true,
       "serial": 0,
       "updatedAt": {
         "__time__": "2026-09-28T14:34:14.356Z"
@@ -20355,6 +20355,7 @@
       "Date": "",
       "__collections__": {}
     },
+
     "Gt96exzLmjT7LYwEfqe4": {
       "Active": true,
       "Date": "",
