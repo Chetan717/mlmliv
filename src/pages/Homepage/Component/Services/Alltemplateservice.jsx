@@ -29,6 +29,9 @@ async function fetchLiveGeneralTemplates(selectedType) {
     query(
       collection(db, COLLECTIONS.MLMTEMPLATE),
       where("SelectType", "==", selectedType),
+      where("MainType", "==", "General"),
+      where("Active", "==", true),
+      where("Launched", "==", true),
     ),
   );
   return snapshot.docs

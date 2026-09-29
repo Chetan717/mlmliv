@@ -47,9 +47,10 @@ export function clearFestivalTemplateCache() {
   } catch {}
 }
 
-export const Festival_template = async (Selected_date) => {
+export const Festival_template = async (Selected_date, options = {}) => {
+  const { bypassEmptyCache = false, forceRefresh = false } = options;
   const hit = readCache(Selected_date);
-  if (hit) return hit;
+  if (!forceRefresh && hit !== null && (!bypassEmptyCache || hit.length > 0)) return hit;
 
   try {
     const q = query(
@@ -75,6 +76,7 @@ export const Festival_template = async (Selected_date) => {
         Subtype: data.Subtype || "",
         ShowCaseForm: data?.ShowCaseForm,
         serial: data?.serial,
+        GraphicsLink: Array.isArray(data?.GraphicsLink) ? data.GraphicsLink.filter(Boolean) : [],
       };
     });
 

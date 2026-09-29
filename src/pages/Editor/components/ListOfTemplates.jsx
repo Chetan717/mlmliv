@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@firebase-config";
 import { COLLECTIONS } from "../../../collections";
 import genaral_template_json from "../../Homepage/Component/Services/genaral_template_firestore_data.json";
@@ -501,13 +501,12 @@ export default function ListOfTemplates({
     }
 
     async function fetchTemplates() {
-      const mainTypeLower =
-        filterType === "Festival"
-          ? String(selType?.MainType).trim().toLowerCase()
-          :
-        String(selType?.MainType);
+      const mainTypeLower = String(selType?.MainType || "")
+        .trim()
+        .toLowerCase();
 
-      const isGeneralTemplate = mainTypeLower === "General";
+      const isGeneralTemplate =
+        mainTypeLower === "general" || mainTypeLower === "genaral";
       const fetchSubType = isEverydayMoments ? "" : filterSubType;
 
       const editorSeed = readEditorTemplateSeed({
@@ -549,12 +548,24 @@ export default function ListOfTemplates({
         setLoading(false);
       }
 
+      // Festival cards already carry the selected template's GraphicsLink from
+      // the six-day Home query. Do not query the whole Festival collection in
+      // the editor. This keeps the editor scoped to one festival card and
+      // avoids hundreds/thousands of unrelated graphics and Firestore reads.
+      if (filterType === "Festival" && seededItems.length > 0) {
+        const festivalCacheKey = `${filterType}__${filterSubType}__FestivalSelected__${filterCompanyId}__${meetingHostMode}__${closeFilter}__${selType?.id || ""}`;
+        _editorTemplateCache.set(festivalCacheKey, [...seededItems]);
+        finishRequestedRefresh();
+        return;
+      }
+
       const cacheSource = isEverydayMoments
         ? "EverydayAll"
         : isGeneralTemplate
           ? "General"
           : "MLM";
-      const cacheKey = `${filterType}__${fetchSubType}__${cacheSource}__${filterCompanyId}__${meetingHostMode}__${closeFilter}`;
+      const cacheSelectionId = filterType === "Festival" ? selType?.id || "" : "";
+      const cacheKey = `${filterType}__${fetchSubType}__${cacheSource}__${filterCompanyId}__${meetingHostMode}__${closeFilter}__${cacheSelectionId}`;
 
       if (_editorTemplateCache?.has(cacheKey)) {
         const cachedItems = _editorTemplateCache.get(cacheKey);
@@ -614,11 +625,45 @@ export default function ListOfTemplates({
             }));
           });
         } else if (isGeneralTemplate) {
-          if (filterType === "Domestic_Trip") {
+          if (filterType === "Festival") {
+            // Festival editor must show only the festival card the user tapped.
+            // Prefer bundled JSON (0 Firestore reads). If the app bundle is
+            // older than a newly-added festival, fall back to one document read
+            // by id instead of querying the complete Festival collection.
+            let template = selType?.id
+              ? genaral_template_json?.data?.[selType.id] || null
+              : null;
+
+            if (!template && selType?.id) {
+              const snap = await getDoc(
+                doc(db, COLLECTIONS.MLMTEMPLATE, String(selType.id)),
+              );
+              if (snap.exists()) {
+                template = { id: snap.id, ...snap.data() };
+              }
+            } else if (template) {
+              template = { id: selType.id, ...template };
+            }
+
+            if (
+              template &&
+              String(template.MainType || "").trim().toLowerCase() === "general" &&
+              template.SelectType === "Festival" &&
+              template.Active === true &&
+              template.Launched === true
+            ) {
+              (template.GraphicsLink || []).filter(Boolean).forEach((graphic) => {
+                items.push({ ...graphic, _template: template });
+              });
+            }
+          } else if (filterType === "Domestic_Trip") {
             const snap = await getDocs(
               query(
                 collection(db, COLLECTIONS.MLMTEMPLATE),
                 where("SelectType", "==", filterType),
+                where("MainType", "==", "General"),
+                where("Active", "==", true),
+                where("Launched", "==", true),
               ),
             );
             snap.forEach((docSnap) => {

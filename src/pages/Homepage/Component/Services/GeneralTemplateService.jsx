@@ -15,6 +15,10 @@ import {
 import { primeAllTemplateGraphicsCache } from "./Alltemplateservice";
 import { RANK_PROMOTION_TYPES } from "../../../../utils/templateTypeConfig";
 
+// Load Home progressively instead of issuing every template-category query
+// on the first paint. Home.jsx already supports multiple groups and requests the
+// next group when the user scrolls near the bottom, so the same sections remain
+// available without paying for sections the user never reaches.
 const TYPE_GROUPS = [
   [
     "Today_Trending",
@@ -26,19 +30,23 @@ const TYPE_GROUPS = [
     "Training",
     "Meeting",
     // "General_Meeting",
+  ],
+  [
+    "Achievements",
+    "Income",
+    "Anniversary_Birthday",
+    "ThankYou_Banner_B",
+    "ThankYou_Birthday_Anniversary",
+    "Capping",
+  ],
+  [
     "Good_Morning",
     "Sport",
     "Daily_Life",
     "Greeting_Wishes",
     "Health_Tips",
-    "Achievements",
-    "Anniversary_Birthday",
     "Devotional_Spiritual",
     "Leader_Quotes",
-    "Income",
-    "ThankYou_Banner_B",
-    "ThankYou_Birthday_Anniversary",
-    "Capping",
   ],
 ];
 export const TEMPLATE_GROUP_COUNT = TYPE_GROUPS.length;
@@ -107,7 +115,7 @@ const normalizeDoc = (doc) => ({
 });
 
 // Max templates to fetch per type on the home page
-const HOME_LIMIT = 20;
+const HOME_LIMIT = 10;
 
 export const fetchGeneralTemplates = async (groupIndex, company) => {
   const cacheKey = `${groupIndex}__${company || ""}`;
@@ -148,6 +156,10 @@ export const fetchGeneralTemplates = async (groupIndex, company) => {
                 query(
                   collection(db, COLLECTIONS.MLMTEMPLATE),
                   where("SelectType", "==", type),
+                  where("MainType", "==", "General"),
+                  where("Active", "==", true),
+                  where("Launched", "==", true),
+                  limit(HOME_LIMIT),
                 ),
               )
             : Promise.resolve({ docs: [] }),
