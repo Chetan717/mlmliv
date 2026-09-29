@@ -630,5 +630,19 @@
          "size": "square"
        }
      ]
+   },
+   {
+     "ID": "m0jl9gfbRcZWvfnIxChg",
+     "name": "DREAM LIFE",
+     "logos": [
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790664760286_2rpmsu.webp?alt=media&token=d88646af-3734-462f-83f9-0f5b969316e0",
+         "size": "rectangle"
+       },
+       {
+         "link": "https://firebasestorage.googleapis.com/v0/b/mlmbooster-a4887.firebasestorage.app/o/companies%2Flogos%2F1790664760286_2rpmsu.webp?alt=media&token=d88646af-3734-462f-83f9-0f5b969316e0",
+         "size": "rectangle"
+       }
+     ]
    }
 ]
