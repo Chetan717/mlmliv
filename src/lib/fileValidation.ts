@@ -1,6 +1,6 @@
-export const IMAGE_MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+export const IMAGE_MAX_SIZE_BYTES = 30 * 1024 * 1024; // 30 MB
 export const IMAGE_SIZE_LIMIT_MESSAGE =
-  "Image का size 20 MB से ज्यादा है। कृपया 20 MB से कम की image select करें।";
+  "Image का size 30 MB से ज्यादा है। कृपया 30 MB से कम की image select करें।";
 const AUDIO_MAX_SIZE = 15 * 1024 * 1024; // 15 MB
 
 const ALLOWED_IMAGE_MIMES = new Set([

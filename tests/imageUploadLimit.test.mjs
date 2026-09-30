@@ -29,11 +29,11 @@ const imageFile = (size) => ({
   size,
 });
 
-test("image uploads allow exactly 20 MB and reject anything larger", () => {
-  assert.equal(IMAGE_MAX_SIZE_BYTES, 20 * 1024 * 1024);
+test("image uploads allow exactly 30 MB and reject anything larger", () => {
+  assert.equal(IMAGE_MAX_SIZE_BYTES, 30 * 1024 * 1024);
   assert.equal(
     IMAGE_SIZE_LIMIT_MESSAGE,
-    "Image का size 20 MB से ज्यादा है। कृपया 20 MB से कम की image select करें।",
+    "Image का size 30 MB से ज्यादा है। कृपया 30 MB से कम की image select करें।",
   );
   assert.deepEqual(validateUploadFile(imageFile(IMAGE_MAX_SIZE_BYTES), "image"), {
     valid: true,
